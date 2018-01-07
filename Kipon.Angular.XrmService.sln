@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.8
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kipon.Angular.XrmService", "Kipon.Angular.XrmService\Kipon.Angular.XrmService.csproj", "{7B600564-768E-4A07-A60F-E856B3BE2804}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "Web\Web.csproj", "{5FCFBB83-4468-4310-9EDD-15B52403BDB7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7B600564-768E-4A07-A60F-E856B3BE2804}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7B600564-768E-4A07-A60F-E856B3BE2804}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7B600564-768E-4A07-A60F-E856B3BE2804}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7B600564-768E-4A07-A60F-E856B3BE2804}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FCFBB83-4468-4310-9EDD-15B52403BDB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FCFBB83-4468-4310-9EDD-15B52403BDB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FCFBB83-4468-4310-9EDD-15B52403BDB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FCFBB83-4468-4310-9EDD-15B52403BDB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
