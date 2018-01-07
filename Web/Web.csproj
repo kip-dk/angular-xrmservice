@@ -2,7 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
+    <TypeScriptToolsVersion>2.3</TypeScriptToolsVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="xrmservice\node_modules\**" />
+    <Content Remove="xrmservice\node_modules\**" />
+    <EmbeddedResource Remove="xrmservice\node_modules\**" />
+    <None Remove="xrmservice\node_modules\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="wwwroot\" />
