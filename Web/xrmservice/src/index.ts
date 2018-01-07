@@ -17,7 +17,7 @@ export class XrmServiceModule {
   static forRoot(): ModuleWithProviders {
     return {
         ngModule: XrmServiceModule,
-      providers: [XrmService]
+        providers: [ XrmService ]
     };
   }
 }

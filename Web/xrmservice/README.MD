@@ -8,9 +8,11 @@ To install this library, run:
 $ npm install kipon-xrmservice --save
 ```
 
-## Consuming your library
+## Consuming the XrmService
 
-Once you have published your library to npm, you can import your library in any Angular application by running:
+This project is work-in-progress, and not at all ready for reuse!!!.
+The vision is to create a reusable service to centralize integration with 
+dynamics 365 WebAPI.
 
 ```bash
 $ npm install kipon-xrmservice
@@ -25,7 +27,7 @@ import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 
 // Import your library
-import { XrmServiceModule } from 'kipon-xrmservice';
+import { XrmServiceModule, XrmService } from 'kipon-xrmservice';
 
 @NgModule({
   declarations: [
@@ -36,35 +38,12 @@ import { XrmServiceModule } from 'kipon-xrmservice';
 	XrmServiceModule,
     LibraryModule
   ],
-  providers: [],
+  providers: [ XrmService ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
 ```
 
-Once your library is imported, you can use its components, directives and pipes in your Angular application:
-
-```xml
-<!-- You can now use your library component in app.component.html -->
-<h1>
-  {{title}}
-</h1>
-<sampleComponent></sampleComponent>
-```
-
-## Development
-
-To generate all `*.js`, `*.d.ts` and `*.metadata.json` files:
-
-```bash
-$ npm run build
-```
-
-To lint all `*.ts` files:
-
-```bash
-$ npm run lint
-```
 
 ## License
 
