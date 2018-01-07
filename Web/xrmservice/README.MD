@@ -5,7 +5,7 @@
 To install this library, run:
 
 ```bash
-$ npm install xrmservice --save
+$ npm install kipon-xrmservice --save
 ```
 
 ## Consuming your library
@@ -13,7 +13,7 @@ $ npm install xrmservice --save
 Once you have published your library to npm, you can import your library in any Angular application by running:
 
 ```bash
-$ npm install xrmservice
+$ npm install kipon-xrmservice
 ```
 
 and then from your Angular `AppModule`:
@@ -25,7 +25,7 @@ import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 
 // Import your library
-import { SampleModule } from 'xrmservice';
+import { XrmServiceModule } from 'kipon-xrmservice';
 
 @NgModule({
   declarations: [
@@ -33,8 +33,7 @@ import { SampleModule } from 'xrmservice';
   ],
   imports: [
     BrowserModule,
-
-    // Specify your library as an import
+	XrmServiceModule,
     LibraryModule
   ],
   providers: [],

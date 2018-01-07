@@ -13,10 +13,10 @@ export * from './xrm.service';
   exports: [
   ]
 })
-export class SampleModule {
+export class XrmServiceModule {
   static forRoot(): ModuleWithProviders {
     return {
-      ngModule: SampleModule,
+        ngModule: XrmServiceModule,
       providers: [XrmService]
     };
   }
