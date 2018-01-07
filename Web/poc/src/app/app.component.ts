@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 
-import { XrmService } from 'kipon-xrmservice';
-
+import { XrmService, XrmContext } from 'kipon-xrmservice';
 
 @Component({
   selector: 'app-root',
@@ -9,9 +8,13 @@ import { XrmService } from 'kipon-xrmservice';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'app';
+    title = 'app'
+    ctx: XrmContext;
+    url: string;
 
-  constructor(private xrmService: XrmService) {
-      this.title = xrmService.hello();
+
+    constructor(private xrmService: XrmService) {
+        this.ctx = xrmService.getContext();
+        this.url = this.ctx.getClientUrl();
   }
 }

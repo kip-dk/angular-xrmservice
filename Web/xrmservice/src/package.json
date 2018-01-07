@@ -1,6 +1,6 @@
 {
   "name": "kipon-xrmservice",
-  "version": "0.1.1",
+  "version": "0.1.10",
   "repository": {
     "type": "git",
     "url": "https://github.com/kip-dk/angular-xrmservice.git"
@@ -10,7 +10,7 @@
     "email": "kip@kipon.dk"
   },
   "keywords": [
-    "angular"
+    "angular","Dynamics 365 Web API"
   ],
   "license": "MIT",
   "bugs": {

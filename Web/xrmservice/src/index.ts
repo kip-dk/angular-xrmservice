@@ -1,6 +1,7 @@
 import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { XrmService } from './xrm.service';
+
+import { XrmService, XrmContext } from './xrm.service';
 
 export * from './xrm.service';
 
