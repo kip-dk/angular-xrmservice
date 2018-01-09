@@ -98,6 +98,7 @@ export class XrmService {
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
         headers.append("OData-MaxVersion", "4.0");
         headers.append("OData-Version", "4.0");
+        headers.append("Content-Type", "application/json; charset=utf-8");
         headers.append("Prefer", "odata.include-annotations=*");
 
         let options = {
