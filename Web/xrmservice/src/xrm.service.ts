@@ -53,6 +53,6 @@ export class XrmService {
 
         let _id = id.replace("{", "").replace("}", "");
 
-        return this.http.get<T>(this.getContext().getClientUrl + this.apiUrl + entityTypes + "(" + _id + ")", options);
+        return this.http.get<T>(this.getContext().getClientUrl() + this.apiUrl + entityTypes + "(" + _id + ")", options);
     }
 }

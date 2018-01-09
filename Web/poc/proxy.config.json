@@ -1,0 +1,9 @@
+{
+  "/api/*": {
+    "target": "http://kipon-dev/kip",
+    "secure": false,
+     "changeOrigin": true,
+    "logLevel": "debug",
+    "auth": "kip:Kipon100Fdsamnbv" 
+  }
+} 
