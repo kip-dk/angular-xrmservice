@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { XrmService, XrmContext } from 'kipon-xrmservice';
+import { XrmService, XrmContext, XrmEntityKey } from 'kipon-xrmservice';
 
 
 export class Account {
@@ -20,6 +20,7 @@ export class AppComponent {
     ctx: XrmContext;
     url: string;
     account: Account;
+    key: XrmEntityKey;
 
 
     constructor(private xrmService: XrmService) {
@@ -27,9 +28,15 @@ export class AppComponent {
         this.url = this.ctx.getClientUrl();
     }
 
+    // "C54BEC0B-B543-E711-A962-000D3A27D441"
+
     ngOnInit() {
-        this.xrmService.get<Account>("accounts", "C54BEC0B-B543-E711-A962-000D3A27D441", "accountid,accountnumber,accountratingcode,name").subscribe(r => {
-            this.account = r;
+        this.xrmService.getCurrenKey().subscribe(r => {
+            if (r.id != null && r.entityType === 'account') {
+                this.xrmService.get<Account>("accounts", r.id, "accountid,accountnumber,accountratingcode,name").subscribe(r => {
+                    this.account = r;
+                });
+            }
         });
     }
 }
