@@ -1,5 +1,6 @@
 import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
 
 import { XrmService, XrmContext } from './xrm.service';
 
@@ -7,7 +8,8 @@ export * from './xrm.service';
 
 @NgModule({
   imports: [
-    CommonModule
+      CommonModule,
+      HttpClientModule
   ],
   declarations: [
   ],

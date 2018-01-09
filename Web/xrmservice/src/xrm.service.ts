@@ -1,13 +1,18 @@
 import { Injectable } from '@angular/core';
 
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs/Observable';
+
 export interface XrmContext {
     getClientUrl(): string;
 }
 
+
 @Injectable()
 export class XrmService {
+    private apiUrl = '/api/data/v8.2/';
 
-    constructor() {
+    constructor(private http: HttpClient) {
     }
 
     getContext(): XrmContext {
@@ -29,5 +34,25 @@ export class XrmService {
                 return "http://localhost:4200";
             }
         };
+    }
+
+    get<T>(entityTypes: string, id: string, fields: string): Observable<T> {
+        let headers = new HttpHeaders({ 'Accept': 'application/json' });
+        headers.append("OData-MaxVersion", "4.0");
+        headers.append("OData-Version", "4.0");
+        headers.append("Prefer", "odata.include-annotations=*");
+
+        let options = {
+            headers: headers
+        }
+
+        let addFields = '';
+        if (fields != null && fields != '') {
+            addFields = "?$select=" + fields;
+        }
+
+        let _id = id.replace("{", "").replace("}", "");
+
+        return this.http.get<T>(this.getContext().getClientUrl + this.apiUrl + entityTypes + "(" + _id + ")", options);
     }
 }
