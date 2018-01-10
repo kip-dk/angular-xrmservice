@@ -1,0 +1,28 @@
+{
+  "name": "kipon-xrmservice",
+  "version": "0.2.6",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kip-dk/angular-xrmservice"
+  },
+  "author": {
+    "name": "Kjeld Poulsen",
+    "email": "kip@kipon.dk"
+  },
+  "keywords": [
+    "angular"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kip-dk/angular-xrmservice/issues"
+  },
+  "main": "kipon-xrmservice.umd.js",
+  "module": "kipon-xrmservice.js",
+  "jsnext:main": "kipon-xrmservice.js",
+  "typings": "kipon-xrmservice.d.ts",
+  "peerDependencies": {
+    "@angular/core": "^4.0.0",
+    "rxjs": "^5.1.0",
+    "zone.js": "^0.8.4"
+  }
+}

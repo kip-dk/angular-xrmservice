@@ -21,8 +21,8 @@
     "annotateForClosureCompiler": true,
     "strictMetadataEmit": true,
     "skipTemplateCodegen": true,
-    "flatModuleOutFile": "xrmservice.js",
-    "flatModuleId": "xrmservice"
+    "flatModuleOutFile": "kipon-xrmservice.js",
+    "flatModuleId": "kipon-xrmservice"
   },
   "files": [
     "./index.ts"

@@ -7,20 +7,20 @@ import { XrmService, XrmContext } from './xrm.service';
 export * from './xrm.service';
 
 @NgModule({
-  imports: [
-      CommonModule,
-      HttpClientModule
-  ],
-  declarations: [
-  ],
-  exports: [
-  ]
+    imports: [
+        CommonModule,
+        HttpClientModule
+    ],
+    declarations: [
+    ],
+    exports: [
+    ]
 })
 export class XrmServiceModule {
-  static forRoot(): ModuleWithProviders {
-    return {
-        ngModule: XrmServiceModule,
-        providers: [ XrmService ]
-    };
-  }
+    static forRoot(): ModuleWithProviders {
+        return {
+            ngModule: XrmServiceModule,
+            providers: [XrmService]
+        };
+    }
 }

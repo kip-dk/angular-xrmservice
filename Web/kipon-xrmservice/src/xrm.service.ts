@@ -26,8 +26,7 @@ export class XrmService {
     }
 
     getContext(): XrmContext {
-        if (typeof window['GetGlobalContext'] != "undefined")
-        {
+        if (typeof window['GetGlobalContext'] != "undefined") {
             return window['GetGlobalContext']();
         }
 

@@ -6,24 +6,28 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="kipon-xrmservice\node_modules\**" />
     <Compile Remove="poc\dist\**" />
     <Compile Remove="poc\e2e\**" />
     <Compile Remove="poc\node_modules\**" />
     <Compile Remove="xrmservice\dist\**" />
     <Compile Remove="xrmservice\node_modules\**" />
     <Compile Remove="xrmservice\tools\**" />
+    <Content Remove="kipon-xrmservice\node_modules\**" />
     <Content Remove="poc\dist\**" />
     <Content Remove="poc\e2e\**" />
     <Content Remove="poc\node_modules\**" />
     <Content Remove="xrmservice\dist\**" />
     <Content Remove="xrmservice\node_modules\**" />
     <Content Remove="xrmservice\tools\**" />
+    <EmbeddedResource Remove="kipon-xrmservice\node_modules\**" />
     <EmbeddedResource Remove="poc\dist\**" />
     <EmbeddedResource Remove="poc\e2e\**" />
     <EmbeddedResource Remove="poc\node_modules\**" />
     <EmbeddedResource Remove="xrmservice\dist\**" />
     <EmbeddedResource Remove="xrmservice\node_modules\**" />
     <EmbeddedResource Remove="xrmservice\tools\**" />
+    <None Remove="kipon-xrmservice\node_modules\**" />
     <None Remove="poc\dist\**" />
     <None Remove="poc\e2e\**" />
     <None Remove="poc\node_modules\**" />
