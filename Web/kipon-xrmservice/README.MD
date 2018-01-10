@@ -1,4 +1,4 @@
-# kipon-xrmservice
+# xrmservice
 
 ## Installation
 
@@ -8,15 +8,19 @@ To install this library, run:
 $ npm install kipon-xrmservice --save
 ```
 
-## Consuming your library
+## Consuming the XrmService
 
-Once you have published your library to npm, you can import your library in any Angular application by running:
+This project is work-in-progress, and not at all ready for reuse!!!.
+The vision is to create a reusable service to centralize integration with 
+dynamics 365 WebAPI.
+
+Install the project in your angular project
 
 ```bash
 $ npm install kipon-xrmservice
 ```
 
-and then from your Angular `AppModule`:
+and then include the XrmServiceModule and XrmService in your `AppModule`:
 
 ```typescript
 import { BrowserModule } from '@angular/platform-browser';
@@ -25,7 +29,7 @@ import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 
 // Import your library
-import { SampleModule } from 'kipon-xrmservice';
+import { XrmServiceModule, XrmService } from 'kipon-xrmservice';
 
 @NgModule({
   declarations: [
@@ -33,40 +37,46 @@ import { SampleModule } from 'kipon-xrmservice';
   ],
   imports: [
     BrowserModule,
-
-    // Specify your library as an import
-    LibraryModule
+	XrmServiceModule
   ],
-  providers: [],
+  providers: [ XrmService ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
 ```
 
-Once your library is imported, you can use its components, directives and pipes in your Angular application:
+### XrmService API
+The XrmService is injectable, and is a angular HttpClient based map of relevant calles to Dynamics 365.
 
-```xml
-<!-- You can now use your library component in app.component.html -->
-<h1>
-  {{title}}
-</h1>
-<sampleComponent></sampleComponent>
+The following methods is supported.
+
+#### xrmService.setVersion(v: string)
+Use serVersion(v:string) to upgrade or downgrade the version to be used for calls to Dyanmics 365. Default i 8.2. Only parse the version number, ex xrmService.setVersion('8.0') 
+to use earlier version of the Web API.
+```typescript
+xrmService.setVersion(v: string)
 ```
 
-## Development
+#### xrmService.getContext()
+use getContext() to get an instance of the Xrm.Page.context.  The method will look for a global implementation, and if not found, look in current frame and parent frame to find an instance.
 
-To generate all `*.js`, `*.d.ts` and `*.metadata.json` files:
-
-```bash
-$ npm run build
+```typescript
+xrmService.getContext()
 ```
 
-To lint all `*.ts` files:
+#### getCurrenKey(): Observable<XrmEntityKey>
+The getCurrentKey() will try to find the primary key of current form by looking in the form url parameters ( id, typename ). If not found, it will try look in the window.parent form, and use the 
+Xrm.Page.ui.data.entity to get knowledge on what the parent object is.
 
-```bash
-$ npm run lint
+```typescript
+xrmService.getCurrentKey().subscribe(r => {
+	// r is an instance of XrmEntityKey ( { id: '', type: ''} )
+	// r.id will be null, if no key found
+});
 ```
+
+
 
 ## License
 
-MIT © [Kjeld Poulsen](mailto:kip@kipon.dk)
+MIT © [Kipon ApS, 2018](mailto:kip@kipon.dk)
