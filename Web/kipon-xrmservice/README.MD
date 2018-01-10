@@ -51,7 +51,7 @@ The XrmService is injectable, and is a angular HttpClient based map of relevant 
 The following methods is supported.
 
 #### xrmService.setVersion(v: string)
-Use serVersion(v:string) to upgrade or downgrade the version to be used for calls to Dyanmics 365. Default i 8.2. Only parse the version number, ex xrmService.setVersion('8.0') 
+Use setVersion(v:string) to upgrade or downgrade the version to be used for calls to Dyanmics 365. Default i 8.2. Only parse the version number, ex xrmService.setVersion('8.0') 
 to use earlier version of the Web API.
 ```typescript
 xrmService.setVersion(v: string)
