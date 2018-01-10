@@ -61,7 +61,6 @@ export class XrmService {
     }
 
     getCurrenKey(): Observable<XrmEntityKey> {
-        console.log('ver 0.2.8');
         let params = this.getContext().getQueryStringParameters();
         let result = new XrmEntityKey();
         result.id = params["id"];
