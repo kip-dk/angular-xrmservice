@@ -16,12 +16,12 @@ export class XrmEntityKey {
 
 @Injectable()
 export class XrmService {
-    private apiUrl = '/api/data/v8.2/';
+    private apiUrl: string = '/api/data/v8.2/';
 
     constructor(private http: HttpClient) {
     }
 
-    serVersion(v: string) {
+    setVersion(v: string): void {
         this.apiUrl = this.apiUrl.replace("8.2", v);
     }
 
@@ -112,6 +112,6 @@ export class XrmService {
 
         let _id = id.replace("{", "").replace("}", "");
 
-        return this.http.get<T>(this.getContext().getClientUrl() + this.apiUrl + entityTypes + "(" + _id + ")", options);
+        return this.http.get<T>(this.getContext().getClientUrl() + this.apiUrl + entityTypes + "(" + _id + ")" + addFields, options);
     }
 }

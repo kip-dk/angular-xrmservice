@@ -37,8 +37,7 @@ import { XrmServiceModule, XrmService } from 'kipon-xrmservice';
   ],
   imports: [
     BrowserModule,
-	XrmServiceModule,
-    LibraryModule
+	XrmServiceModule
   ],
   providers: [ XrmService ],
   bootstrap: [AppComponent]
