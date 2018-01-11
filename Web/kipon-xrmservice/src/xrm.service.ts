@@ -13,6 +13,12 @@ export class XrmEntityKey {
     entityType: string;
 }
 
+export interface XrmQueryResult<T> {
+    context: string;
+    value: T[];
+    next(): Observable<XrmQueryResult<T>>;
+}
+
 
 @Injectable()
 export class XrmService {
@@ -123,23 +129,78 @@ export class XrmService {
 
         let _id = id.replace("{", "").replace("}", "");
 
-        return this.http.get<T>(this.getContext().getClientUrl() + this.apiUrl + entityTypes + "(" + _id + ")" + addFields, options);
+
+        return this.http.get<T>(this.getContext().getClientUrl() + this.apiUrl + entityTypes + "(" + _id + ")" + addFields, options).map(response => response);
     }
 
-    query<T>(entityTypes: string, fields: string, filter: string): Observable<T[]>;
-    query<T>(entityTypes: string, fields: string, filter: string, orderBy: string): Observable<T[]>;
-    query<T>(entityTypes: string, fields: string, filter: string, orderBy: string, top: number): Observable<T[]>;
-    query<T>(entityTypes: string, fields: string, filter: string, orderBy: string = null, top: number = 250, page: number = 1): Observable<T[]> {
+    query<T>(entityTypes: string, fields: string, filter: string): Observable<XrmQueryResult<T>>;
+    query<T>(entityTypes: string, fields: string, filter: string, orderBy: string): Observable<XrmQueryResult<T>>;
+    query<T>(entityTypes: string, fields: string, filter: string, orderBy: string, top: number): Observable<XrmQueryResult<T>>;
+    query<T>(entityTypes: string, fields: string, filter: string, orderBy: string = null, top: number = 0): Observable<XrmQueryResult<T>> {
+        let me = this;
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
         headers.append("OData-MaxVersion", "4.0");
         headers.append("OData-Version", "4.0");
         headers.append("Content-Type", "application/json; charset=utf-8");
-        headers.append("Prefer", "odata.include-annotations=*");
+
+        if (top > 0) {
+            headers.append("Prefer", "odata.include-annotations=*,odata.maxpagesize=" + top.toString() );
+        } else {
+            headers.append("Prefer", "odata.include-annotations=*");
+        }
+
+        let options = {
+            headers: headers
+        }
 
         let url = this.getContext().getClientUrl() + this.apiUrl + entityTypes;
+        if ((fields != null && fields != '') || (filter != null && filter != '') || (orderBy != null && orderBy != '') || top > 0) {
+            url += "?";
+        }
+        let sep = '';
 
+        if (fields != null && fields != '') {
+            url += "$select=" + fields;
+            sep = "&";
+        }
 
-        return null;
+        if (filter != null && filter != '') {
+            url += sep + "$filter=" + filter;
+            sep = "&";
+        }
+
+        if (orderBy != null && orderBy != '') {
+            url += sep + "$orderby=" + orderBy;
+            sep = "&";
+        }
+
+        return this.http.get(url, options).map(response => {
+            let result = me.resolveQueryResult<T>(response);
+            return result;
+        });
+    }
+
+    private resolveQueryResult<T>(response: any): XrmQueryResult<T> {
+        let me = this;
+        let result = {
+            context: response["@odata.context"],
+            value: response["value"] as T[],
+            next: null
+        }
+        let nextLink = response["@odata.nextLink"];
+
+        if (nextLink != null && nextLink != '') {
+            result = {
+                context: result.context,
+                value: result.value,
+                next: (): Observable<XrmQueryResult<T>> => {
+                    return me.http.get(nextLink).map(r => {
+                        return me.resolveQueryResult<T>(r);
+                    })
+                }
+            }
+        }
+        return result;
     }
 
     private getQueryStringParameters(): any {

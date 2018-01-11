@@ -8,4 +8,8 @@
 <div *ngIf="account != null">
   <h3>We have an account from the get method</h3>
   <div>{{ account.name }}</div>
+
+  <ul *ngIf="contacts != null && contacts.length > 0">
+    <li *ngFor="let con of contacts">{{ con.fullname }}</li>
+  </ul>
 </div>
