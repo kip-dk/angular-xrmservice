@@ -64,7 +64,7 @@ use getContext() to get an instance of the Xrm.Page.context.  The method will lo
 xrmService.getContext()
 ```
 
-#### getCurrenKey(): Observable<XrmEntityKey>
+#### getCurrenKey(): Observable&lt;XrmEntityKey&gt;
 The getCurrentKey() will try to find the primary key of current form by looking in the form url parameters ( id, typename ). If not found, it will try look in the window.parent form, and use the 
 Xrm.Page.ui.data.entity to get knowledge on what the parent object is.
 
@@ -78,11 +78,29 @@ xrmService.getCurrentKey().subscribe(r => {
 #### xrm.get<T>(entityTypes: string, id: string, fields: string = null)
 The get method allow you to get a unique identified instance of a entity, ex. found via the getCurrentKey() method.
 
-entityTypes is the plural name to be used, ex 'accounts'  or 'contacts'.. etc
+entityTypes is the plural name og the entity to be used, ex 'accounts'  or 'contacts'.. etc
 the id is the Guid (string) value of the entity
 fields is optional, but should be parsed as best pratcise. All properties of the record will be returned otherwise, giving a performance penelty on your application.
 
 ```typescript
+import { Injectable } from '@angular/core';
+import { XrmService } from 'kipon-xrmservice';
+
+export class Account {
+    accountid: string;
+	name: string;
+	address1_line1: string;
+}
+
+@Injectable()
+export class AccountService {
+  constructor(private xrmService: XrmService) { }
+
+  get(id: string): Observable<Account> {
+	return this.xrmService.get<Account>('accounts', id, 'accountid,name,address1_line1');
+  }
+}
+
 
 ```
 ## License
