@@ -75,8 +75,16 @@ xrmService.getCurrentKey().subscribe(r => {
 });
 ```
 
+#### xrm.get<T>(entityTypes: string, id: string, fields: string = null)
+The get method allow you to get a unique identified instance of a entity, ex. found via the getCurrentKey() method.
 
+entityTypes is the plural name to be used, ex 'accounts'  or 'contacts'.. etc
+the id is the Guid (string) value of the entity
+fields is optional, but should be parsed as best pratcise. All properties of the record will be returned otherwise, giving a performance penelty on your application.
 
+```typescript
+
+```
 ## License
 
 MIT © [Kipon ApS, 2018](mailto:kip@kipon.dk)
