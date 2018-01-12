@@ -12,5 +12,5 @@ $ npm install kipon-xrmservice --save
 ### Documentation
 Follow the link to the npm package for a full documentation
 
-[a link](https://www.npmjs.com/package/kipon-xrmservice)
+[goto npm package view](https://www.npmjs.com/package/kipon-xrmservice)
 
