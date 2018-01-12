@@ -11,7 +11,11 @@ export class Account {
 }
 
 export class Contact {
+    contactid: string;
     fullname: string;
+    server_fullname: string;
+    firstname: string;
+    lastname: string;
     _parentcustomerid_value: string;
 }
 
@@ -27,6 +31,9 @@ export class AppComponent {
     url: string;
     account: Account;
     contacts: Contact[];
+    contact: Contact;
+
+    newContact: string;
 
     key: XrmEntityKey;
 
@@ -44,12 +51,68 @@ export class AppComponent {
             if (r.id != null && r.entityType === 'account') {
                 this.xrmService.get<Account>("accounts", r.id, "accountid,accountnumber,accountratingcode,name").subscribe(r => {
                     this.account = r;
-                });
-
-                this.xrmService.query<Contact>("contacts", "_accountid_value,fullname,_parentcustomerid_value", "_parentcustomerid_value eq " + r.id).subscribe(r => {
-                    me.contacts = r.value;
+                    me.getContacts();
                 });
             }
         });
+    }
+
+    createNew() {
+        let me = this;
+        if (this.newContact != null && this.newContact != '') {
+            let vals = this.newContact.split(' ');
+            if (vals.length == 2) {
+                let con = new Contact();
+                con.firstname = vals[0];
+                con.lastname = vals[1];
+                con["parentcustomerid_account@odata.bind"] = '/accounts(' + me.account.accountid + ')';
+
+                this.xrmService.create('contacts', con).subscribe(r => {
+                    me.newContact = null;
+                    me.getContacts();
+                });
+            }
+        }
+    }
+    update() {
+        let me = this;
+        if (this.contact != null && this.contact.fullname != null) {
+            let vals = this.contact.fullname.split(' ');
+            if (vals.length == 2) {
+                let con = new Contact();
+                con.firstname = vals[0];
+                con.lastname = vals[1];
+                this.xrmService.update('contacts', con, this.contact.contactid).subscribe(r => {
+                    this.contact = null;
+                    this.getContacts();
+                });
+            }
+        }
+    }
+
+    select(con: Contact) {
+        this.contact = con;
+    }
+
+    delete(con: Contact) {
+        let me = this;
+        this.xrmService.delete("contacts", con.contactid).subscribe(r => {
+            me.getContacts();
+            me.contact = null;
+        });
+    }
+
+    private getContacts() {
+        let me = this;
+        if (this.account != null) {
+            this.xrmService.query<Contact>("contacts", "contactid,_accountid_value,fullname,_parentcustomerid_value", "_parentcustomerid_value eq " + this.account.accountid).subscribe(r => {
+                me.contacts = r.value;
+                me.contacts.forEach(r => {
+                    r.server_fullname = r.fullname;
+                });
+            });
+        } else {
+            me.contacts = null;
+        }
     }
 }

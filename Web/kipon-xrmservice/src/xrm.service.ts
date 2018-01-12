@@ -180,6 +180,42 @@ export class XrmService {
         });
     }
 
+    create<T>(entityType: string, entity: T): Observable<T> {
+        let headers = new HttpHeaders({ 'Accept': 'application/json' });
+        headers.append("OData-MaxVersion", "4.0");
+        headers.append("OData-Version", "4.0");
+        headers.append("Content-Type", "application/json; charset=utf-8");
+        headers.append("Prefer", "odata.include-annotations=*");
+        let options = {
+            headers: headers
+        }
+        return this.http.post<T>(this.getContext().getClientUrl() + this.apiUrl + entityType, entity, options).map(response => response);
+    }
+
+    update<T>(entityType: string, entity: T, id: string): Observable<T> {
+        let headers = new HttpHeaders({ 'Accept': 'application/json' });
+        headers.append("OData-MaxVersion", "4.0");
+        headers.append("OData-Version", "4.0");
+        headers.append("Content-Type", "application/json; charset=utf-8");
+        headers.append("Prefer", "odata.include-annotations=*");
+        let options = {
+            headers: headers
+        }
+        return this.http.patch<T>(this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")", entity, options).map(response => response);
+    }
+
+    delete(entityType: string, id: string): Observable<null> {
+        let headers = new HttpHeaders({ 'Accept': 'application/json' });
+        headers.append("OData-MaxVersion", "4.0");
+        headers.append("OData-Version", "4.0");
+        headers.append("Content-Type", "application/json; charset=utf-8");
+        headers.append("Prefer", "odata.include-annotations=*");
+        let options = {
+            headers: headers
+        }
+        return this.http.delete(this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")").map(response => null);
+    }
+
     private resolveQueryResult<T>(response: any): XrmQueryResult<T> {
         let me = this;
         let result = {

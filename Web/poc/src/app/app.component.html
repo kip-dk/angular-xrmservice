@@ -10,6 +10,26 @@
   <div>{{ account.name }}</div>
 
   <ul *ngIf="contacts != null && contacts.length > 0">
-    <li *ngFor="let con of contacts">{{ con.fullname }}</li>
+    <li *ngFor="let con of contacts">
+      <a (click)="select(con)">{{ con.server_fullname }}&nbsp;</a>
+      <button (click)="delete(con)">Delete</button>
+    </li>
   </ul>
+</div>
+
+<br />
+<br />
+
+<div *ngIf="contact != null">
+  <input [(ngModel)]="contact.fullname" /><br />
+  <button (click)="update()">Update {{ contact.server_fullname }}</button>
+</div>
+
+<br />
+<br />
+
+<div>
+  Create new contact<br />
+  <input [(ngModel)]="newContact"  /><br />
+  <button (click)="createNew()">Create new</button>
 </div>
