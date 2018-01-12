@@ -23,6 +23,10 @@
 <div *ngIf="contact != null">
   <input [(ngModel)]="contact.fullname" /><br />
   <button (click)="update()">Update {{ contact.server_fullname }}</button>
+  <br />
+  <br />
+  <input [(ngModel)]="contact.address1_line1" />
+  <button (click)="updateAddress()">Update address</button>
 </div>
 
 <br />

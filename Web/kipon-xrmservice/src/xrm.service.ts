@@ -204,6 +204,21 @@ export class XrmService {
         return this.http.patch<T>(this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")", entity, options).map(response => response);
     }
 
+    put<T>(entityType: string, id: string, field: string, value: any): Observable<T> {
+        let headers = new HttpHeaders({ 'Accept': 'application/json' });
+        headers.append("OData-MaxVersion", "4.0");
+        headers.append("OData-Version", "4.0");
+        headers.append("Content-Type", "application/json; charset=utf-8");
+        headers.append("Prefer", "odata.include-annotations=*");
+        let options = {
+            headers: headers
+        }
+        let v = {
+            value: value
+        };
+        return this.http.put<T>(this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")/" + field, v, options).map(response => response);
+    }
+
     delete(entityType: string, id: string): Observable<null> {
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
         headers.append("OData-MaxVersion", "4.0");

@@ -16,6 +16,7 @@ export class Contact {
     server_fullname: string;
     firstname: string;
     lastname: string;
+    address1_line1: string;
     _parentcustomerid_value: string;
 }
 
@@ -90,6 +91,13 @@ export class AppComponent {
         }
     }
 
+    updateAddress() {
+        let me = this;
+        this.xrmService.put("contacts", this.contact.contactid, "address1_line1", this.contact.address1_line1).subscribe(r => {
+            me.getContacts();
+        });
+    }
+
     select(con: Contact) {
         this.contact = con;
     }
@@ -105,7 +113,7 @@ export class AppComponent {
     private getContacts() {
         let me = this;
         if (this.account != null) {
-            this.xrmService.query<Contact>("contacts", "contactid,_accountid_value,fullname,_parentcustomerid_value", "_parentcustomerid_value eq " + this.account.accountid).subscribe(r => {
+            this.xrmService.query<Contact>("contacts", "contactid,_accountid_value,fullname,_parentcustomerid_value,address1_line1", "_parentcustomerid_value eq " + this.account.accountid).subscribe(r => {
                 me.contacts = r.value;
                 me.contacts.forEach(r => {
                     r.server_fullname = r.fullname;
