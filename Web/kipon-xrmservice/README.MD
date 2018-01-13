@@ -1,5 +1,19 @@
 # xrmservice
 
+## What i kipon-xrmservice
+The XrmService is a very basic service you can use to build angular pages with Dynamics 365 as backend.
+
+It is based on the HttpClient implementation of angular 4.
+
+The purpose is to make it a bit easier to use the WebAPI of Dynamics 365, without overcomplicating things to much.
+
+The XrmService supports get (for single record fetch), query(...) to fetch a list of records, create/update/delete to perform
+such operation and put, to update a single attribute on an entity.
+
+You can use XrmService directly in your components, but to keep a good solid separation of service
+concerns and components concerns, I recommend that you only inject the XrmService into other services.
+These services can then use the XrmService to perform the actual http(s) calls to the Dynamics 365 platform.
+
 ## Installation
 
 To install this library, run:
@@ -8,21 +22,6 @@ To install this library, run:
 $ npm install kipon-xrmservice --save
 ```
 
-## Consuming the XrmService
-
-This project is work-in-progress, but does support the very basic CRUD method of the Dynamics 365 WebAPI.
-For a demo of its usage, see the poc sub project in the GIT repository.
-
-The XrmService is a very basic service you can use to build specific services for specific entities.
-You can use XrmService directly in your components, but to keep a good solid separation of service
-concerns and components concerns, I recommend that you only inject the XrmService into other services.
-These services can then use the XrmService to perform the actual http(s) calls to the Dynamics 365 platform.
-
-Install the project in your angular project
-
-```bash
-$ npm install kipon-xrmservice
-```
 
 and then include the XrmServiceModule and XrmService in your `AppModule`:
 

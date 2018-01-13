@@ -178,12 +178,6 @@ export class XrmService {
             sep = '&';
         }
 
-        /*
-        if (top > 0) {
-            url += sep + '$top=' + top.toString();
-        }
-        */
-
         if (count) {
             url += sep + '$count=true';
             sep = '&';
