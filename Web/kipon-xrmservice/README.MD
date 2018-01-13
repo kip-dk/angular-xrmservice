@@ -145,7 +145,7 @@ export class AccountService {
 }
 ```
 
-###create&lt;T&gt;(entityType: string, t: T): Observable&lt;T&gt; 
+### create&lt;T&gt;(entityType: string, t: T): Observable&lt;T&gt; 
 Create a new instance of T, and return the created instance. 
 
 ```typescript
@@ -171,7 +171,7 @@ export class AccountService {
 }
 ```
 
-###update&lt;T&gt;(entityType: string, t: T): Observable&lt;T&gt; 
+### update&lt;T&gt;(entityType: string, t: T): Observable&lt;T&gt; 
 Update an instance of T, and return the updated instance. 
 
 ```typescript
@@ -196,7 +196,7 @@ export class AccountService {
 }
 ```
 
-###put&lt;T&gt;(entityType: string, id: string, field: string, value: any): Observable&lt;T&gt; 
+### put&lt;T&gt;(entityType: string, id: string, field: string, value: any): Observable&lt;T&gt; 
 Update a single field on the entity with a new value
 
 ```typescript
@@ -213,7 +213,7 @@ export class AccountService {
 }
 ```
 
-###delete(entityType: string, t: T): Observable&lt;null&gt; 
+### delete(entityType: string, t: T): Observable&lt;null&gt; 
 Delete a record. 
 
 ```typescript
