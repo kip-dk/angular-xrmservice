@@ -14,8 +14,12 @@ export class XrmEntityKey {
 }
 
 export interface XrmQueryResult<T> {
+    pages: string[];
+    pageIndex: number;
     context: string;
+    count: number;
     value: T[];
+    prev(): Observable<XrmQueryResult<T>>;
     next(): Observable<XrmQueryResult<T>>;
 }
 
@@ -113,10 +117,10 @@ export class XrmService {
 
     get<T>(entityTypes: string, id: string, fields: string): Observable<T> {
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
-        headers.append("OData-MaxVersion", "4.0");
-        headers.append("OData-Version", "4.0");
-        headers.append("Content-Type", "application/json; charset=utf-8");
-        headers.append("Prefer", "odata.include-annotations=*");
+        headers = headers.append("OData-MaxVersion", "4.0");
+        headers = headers.append("OData-Version", "4.0");
+        headers = headers.append("Content-Type", "application/json; charset=utf-8");
+        headers = headers.append("Prefer", "odata.include-annotations=*");
 
         let options = {
             headers: headers
@@ -136,17 +140,17 @@ export class XrmService {
     query<T>(entityTypes: string, fields: string, filter: string): Observable<XrmQueryResult<T>>;
     query<T>(entityTypes: string, fields: string, filter: string, orderBy: string): Observable<XrmQueryResult<T>>;
     query<T>(entityTypes: string, fields: string, filter: string, orderBy: string, top: number): Observable<XrmQueryResult<T>>;
-    query<T>(entityTypes: string, fields: string, filter: string, orderBy: string = null, top: number = 0): Observable<XrmQueryResult<T>> {
+    query<T>(entityTypes: string, fields: string, filter: string, orderBy: string, top: number, count: boolean): Observable<XrmQueryResult<T>>;
+    query<T>(entityTypes: string, fields: string, filter: string, orderBy: string = null, top: number = 0, count: boolean = false): Observable<XrmQueryResult<T>> {
         let me = this;
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
-        headers.append("OData-MaxVersion", "4.0");
-        headers.append("OData-Version", "4.0");
-        headers.append("Content-Type", "application/json; charset=utf-8");
-
+        headers = headers.append("OData-MaxVersion", "4.0");
+        headers = headers.append("OData-Version", "4.0");
+        headers = headers.append("Content-Type", "application/json; charset=utf-8");
         if (top > 0) {
-            headers.append("Prefer", "odata.include-annotations=*,odata.maxpagesize=" + top.toString() );
+            headers = headers.append("Prefer", "odata.include-annotations=\"*\",odata.maxpagesize=" + top.toString());
         } else {
-            headers.append("Prefer", "odata.include-annotations=*");
+            headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
         }
 
         let options = {
@@ -160,32 +164,43 @@ export class XrmService {
         let sep = '';
 
         if (fields != null && fields != '') {
-            url += "$select=" + fields;
-            sep = "&";
+            url += '$select=' + fields;
+            sep = '&';
         }
 
         if (filter != null && filter != '') {
-            url += sep + "$filter=" + filter;
-            sep = "&";
+            url += sep + '$filter=' + filter;
+            sep = '&';
         }
 
         if (orderBy != null && orderBy != '') {
-            url += sep + "$orderby=" + orderBy;
-            sep = "&";
+            url += sep + '$orderby=' + orderBy;
+            sep = '&';
+        }
+
+        /*
+        if (top > 0) {
+            url += sep + '$top=' + top.toString();
+        }
+        */
+
+        if (count) {
+            url += sep + '$count=true';
+            sep = '&';
         }
 
         return this.http.get(url, options).map(response => {
-            let result = me.resolveQueryResult<T>(response);
+            let result = me.resolveQueryResult<T>(response, top, [url], 0);
             return result;
         });
     }
 
     create<T>(entityType: string, entity: T): Observable<T> {
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
-        headers.append("OData-MaxVersion", "4.0");
-        headers.append("OData-Version", "4.0");
-        headers.append("Content-Type", "application/json; charset=utf-8");
-        headers.append("Prefer", "odata.include-annotations=*");
+        headers = headers.append("OData-MaxVersion", "4.0");
+        headers = headers.append("OData-Version", "4.0");
+        headers = headers.append("Content-Type", "application/json; charset=utf-8");
+        headers = headers.append("Prefer", "odata.include-annotations=*");
         let options = {
             headers: headers
         }
@@ -194,10 +209,10 @@ export class XrmService {
 
     update<T>(entityType: string, entity: T, id: string): Observable<T> {
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
-        headers.append("OData-MaxVersion", "4.0");
-        headers.append("OData-Version", "4.0");
-        headers.append("Content-Type", "application/json; charset=utf-8");
-        headers.append("Prefer", "odata.include-annotations=*");
+        headers = headers.append("OData-MaxVersion", "4.0");
+        headers = headers.append("OData-Version", "4.0");
+        headers = headers.append("Content-Type", "application/json; charset=utf-8");
+        headers = headers.append("Prefer", "odata.include-annotations=*");
         let options = {
             headers: headers
         }
@@ -206,10 +221,10 @@ export class XrmService {
 
     put<T>(entityType: string, id: string, field: string, value: any): Observable<T> {
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
-        headers.append("OData-MaxVersion", "4.0");
-        headers.append("OData-Version", "4.0");
-        headers.append("Content-Type", "application/json; charset=utf-8");
-        headers.append("Prefer", "odata.include-annotations=*");
+        headers = headers.append("OData-MaxVersion", "4.0");
+        headers = headers.append("OData-Version", "4.0");
+        headers = headers.append("Content-Type", "application/json; charset=utf-8");
+        headers = headers.append("Prefer", "odata.include-annotations=*");
         let options = {
             headers: headers
         }
@@ -221,34 +236,83 @@ export class XrmService {
 
     delete(entityType: string, id: string): Observable<null> {
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
-        headers.append("OData-MaxVersion", "4.0");
-        headers.append("OData-Version", "4.0");
-        headers.append("Content-Type", "application/json; charset=utf-8");
-        headers.append("Prefer", "odata.include-annotations=*");
+        headers = headers.append("OData-MaxVersion", "4.0");
+        headers = headers.append("OData-Version", "4.0");
+        headers = headers.append("Content-Type", "application/json; charset=utf-8");
+        headers = headers.append("Prefer", "odata.include-annotations=*");
         let options = {
             headers: headers
         }
         return this.http.delete(this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")").map(response => null);
     }
 
-    private resolveQueryResult<T>(response: any): XrmQueryResult<T> {
+    private resolveQueryResult<T>(response: any, top: number, pages: string[], pageIndex: number): XrmQueryResult<T> {
         let me = this;
         let result = {
             context: response["@odata.context"],
+            count: response["@odata.count"],
             value: response["value"] as T[],
-            next: null
+            pages: pages,
+            prev: null,
+            next: null,
+            pageIndex: pageIndex
         }
-        let nextLink = response["@odata.nextLink"];
+
+        let nextLink = response["@odata.nextLink"] as string;
 
         if (nextLink != null && nextLink != '') {
+            let start = nextLink.indexOf('/api');
+            nextLink = me.getContext().getClientUrl() + nextLink.substring(start);
             result = {
                 context: result.context,
+                count: response["@odata.count"],
                 value: result.value,
+                pages: pages,
+                pageIndex: pageIndex,
+                prev: null,
                 next: (): Observable<XrmQueryResult<T>> => {
-                    return me.http.get(nextLink).map(r => {
-                        return me.resolveQueryResult<T>(r);
+                    let headers = new HttpHeaders({ 'Accept': 'application/json' });
+                    headers = headers.append("OData-MaxVersion", "4.0");
+                    headers = headers.append("OData-Version", "4.0");
+                    headers = headers.append("Content-Type", "application/json; charset=utf-8");
+                    if (top > 0) {
+                        headers = headers.append("Prefer", "odata.include-annotations=\"*\",odata.maxpagesize=" + top.toString());
+                    } else {
+                        headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
+                    }
+
+                    let options = {
+                        headers: headers
+                    }
+                    return me.http.get(nextLink, options).map(r => {
+                        pages.push(nextLink);
+                        return me.resolveQueryResult<T>(r, top, pages, pageIndex + 1);
                     })
                 }
+            }
+        }
+
+        if (result.pageIndex >= 1) {
+            result.prev = (): Observable<XrmQueryResult<T>> => {
+                let headers = new HttpHeaders({ 'Accept': 'application/json' });
+                headers = headers.append("OData-MaxVersion", "4.0");
+                headers = headers.append("OData-Version", "4.0");
+                headers = headers.append("Content-Type", "application/json; charset=utf-8");
+                if (top > 0) {
+                    headers = headers.append("Prefer", "odata.include-annotations=\"*\",odata.maxpagesize=" + top.toString());
+                } else {
+                    headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
+                }
+
+                let options = {
+                    headers: headers
+                }
+
+                let lastPage = result.pages[result.pageIndex - 1];
+                return me.http.get(lastPage, options).map(r => {
+                    result.pages.splice(result.pages.length - 1, 1);
+                    return me.resolveQueryResult<T>(r, top, result.pages, result.pageIndex -1);
+                })
             }
         }
         return result;

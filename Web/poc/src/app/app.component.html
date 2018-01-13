@@ -9,6 +9,8 @@
   <h3>We have an account from the get method</h3>
   <div>{{ account.name }}</div>
 
+
+  <h5>Contacts {{ countContacts }}</h5>
   <ul *ngIf="contacts != null && contacts.length > 0">
     <li *ngFor="let con of contacts">
       <a (click)="select(con)">{{ con.server_fullname }}&nbsp;</a>
@@ -17,6 +19,11 @@
   </ul>
 </div>
 
+<div *ngIf="lastContactResult != null">
+  <button (click)="prev()" [disabled]="lastContactResult.prev == null">Prev</button>
+  {{ lastContactResult.pageIndex + 1 }}
+  <button (click)="next()" [disabled]="lastContactResult.next == null">Next</button>
+</div>
 <br />
 <br />
 

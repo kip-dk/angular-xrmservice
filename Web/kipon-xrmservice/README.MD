@@ -122,9 +122,9 @@ export class AccountService {
 
 #### xrmService.query&lt;T&gt;(entityTypes: string, fields: string, filter: string, order: string = null, top: number = 0)
 The query methods allow you to get a list of records for a entity type, matching the parsed filter, sort and page size.
-The subscribe(r => r is is an XrmQueryResult) will parse on an XrmQueryResult. The class has a property for the context, an array called value, containing the
-matching instances, fetched from the Dynamics 365 service, and finally a next() method that can be used as shortcut to fetch next page.
-The later will be null, if we know for sure that it is last page we are looking at.
+The subscribe(r => r,  where r is an XrmQueryResult) will parse on an XrmQueryResult. The class has a property for the context, an array called value, containing the
+matching instances, fetched from the Dynamics 365 service, and finally a prev() and a next() method that can be used as shortcut to fetch prev or next page.
+If you are on page one, prev will be null. If you are on last page, next will be null.
 
 ```typescript
 import { Injectable } from '@angular/core';

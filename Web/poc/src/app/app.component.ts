@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { XrmService, XrmContext, XrmEntityKey } from 'kipon-xrmservice';
+import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult } from 'kipon-xrmservice';
 
 
 export class Account {
@@ -33,6 +33,8 @@ export class AppComponent {
     account: Account;
     contacts: Contact[];
     contact: Contact;
+    countContacts: number;
+    lastContactResult: XrmQueryResult<Contact>;
 
     newContact: string;
 
@@ -110,11 +112,48 @@ export class AppComponent {
         });
     }
 
+    prev() {
+        let me = this;
+        if (this.lastContactResult != null && this.lastContactResult.prev != null) {
+            this.lastContactResult.prev().subscribe(r => {
+                me.lastContactResult = r;
+                me.contacts = r.value;
+                me.countContacts = r.count;
+                me.contacts.forEach(r => {
+                    r.server_fullname = r.fullname;
+                });
+            });
+        }
+    }
+
+
+    next() {
+        let me = this;
+        if (this.lastContactResult != null && this.lastContactResult.next != null) {
+            this.lastContactResult.next().subscribe(r => {
+                me.lastContactResult = r;
+                me.contacts = r.value;
+                me.countContacts = r.count;
+                me.contacts.forEach(r => {
+                    r.server_fullname = r.fullname;
+                });
+            });
+        }
+    }
+
     private getContacts() {
         let me = this;
         if (this.account != null) {
-            this.xrmService.query<Contact>("contacts", "contactid,_accountid_value,fullname,_parentcustomerid_value,address1_line1", "_parentcustomerid_value eq " + this.account.accountid).subscribe(r => {
+            this.xrmService.query<Contact>(
+                "contacts",
+                "contactid,_accountid_value,fullname,_parentcustomerid_value,address1_line1", "_parentcustomerid_value eq " + this.account.accountid,
+                "fullname",
+                2,
+                true
+            ).subscribe(r => {
+                me.lastContactResult = r;
                 me.contacts = r.value;
+                me.countContacts = r.count;
                 me.contacts.forEach(r => {
                     r.server_fullname = r.fullname;
                 });
