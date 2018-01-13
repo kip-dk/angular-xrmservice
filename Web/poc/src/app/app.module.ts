@@ -4,7 +4,7 @@ import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
 
-import { XrmServiceModule, XrmService } from 'kipon-xrmservice';
+import { XrmServiceModule, XrmService, XrmContextService } from 'kipon-xrmservice';
 
 
 @NgModule({
@@ -16,7 +16,7 @@ import { XrmServiceModule, XrmService } from 'kipon-xrmservice';
       FormsModule,
       XrmServiceModule
   ],
-  providers: [XrmService],
+  providers: [XrmService, XrmContextService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

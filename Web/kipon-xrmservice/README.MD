@@ -229,6 +229,12 @@ export class AccountService {
   }
 }
 ```
+### XrmContextService
+The xrm context service is 100% work in progress. While XrmService is a very simple map of the CRUD operations needed to do angular based custom UI on top of Dynamics 365
+the XrmContextService will provide a more future rich service, including query definition by prototype, change management of object properties and more.
+
+The XrmContextService is NOT ready to be used at all.
+
 
 
 ## License

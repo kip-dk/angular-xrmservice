@@ -4,8 +4,10 @@ import { HttpClientModule } from '@angular/common/http';
 import 'rxjs/Rx';
 
 import { XrmService, XrmContext } from './xrm.service';
+import { XrmContextService } from './xrmcontext.service';
 
 export * from './xrm.service';
+export * from './xrmcontext.service';
 
 @NgModule({
     imports: [
@@ -21,7 +23,7 @@ export class XrmServiceModule {
     static forRoot(): ModuleWithProviders {
         return {
             ngModule: XrmServiceModule,
-            providers: [XrmService]
+            providers: [XrmService, XrmContextService]
         };
     }
 }

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult } from 'kipon-xrmservice';
+import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult, XrmContextService } from 'kipon-xrmservice';
 
 
 export class Account {
@@ -40,10 +40,13 @@ export class AppComponent {
 
     key: XrmEntityKey;
 
+    hello: string;
 
-    constructor(private xrmService: XrmService) {
+
+    constructor(private xrmService: XrmService, private contextService: XrmContextService) {
         this.ctx = xrmService.getContext();
         this.url = this.ctx.getClientUrl();
+        this.hello = contextService.hello();
     }
 
     // "C54BEC0B-B543-E711-A962-000D3A27D441"
