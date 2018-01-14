@@ -17,6 +17,13 @@ export class Entity {
 }
 
 export class EntityReference {
+
+    constructor();
+    constructor(id: string);
+    constructor(id: string = null) {
+        this.id = id;
+    }
+
     id: string;
     name: string;
     logicalname: string;
@@ -46,12 +53,17 @@ export enum Comparator {
     NotEquals
 }
 
+export class ColumnBuilder {
+    columns: string = null;
+    hasEntityReference: boolean = false;
+}
+
 export class Filter {
     field: string;
     operator: Comparator;
     value: any;
 
-    toString(): string {
+    toQueryString(): string {
         let result = '';
 
         if (this.value instanceof EntityReference) {
@@ -82,14 +94,41 @@ export class Condition {
     operator: Operator = Operator.And;
     filter: Filter[];
     children: Condition[];
+    parent: Condition;
 
-    toString(): string {
+    constructor();
+    constructor(operator: Operator);
+    constructor(operator: Operator = Operator.And) {
+        this.operator = operator;
+        this.filter = [];
+        this.children = [];
+    }
+
+    where(field: string, opr: Comparator);
+    where(field: string, opr: Comparator, value: any);
+    where(field: string, opr: Comparator, value: any = null): Condition {
+        let f = new Filter();
+        f.field = field;
+        f.value = value;
+        f.operator = opr;
+        this.filter.push(f);
+        return this;
+    }
+
+    group(opr: Operator): Condition {
+        let result: Condition = new Condition(opr);
+        result.parent = this;
+        this.children.push(result);
+        return result;
+    }
+
+    toQueryString(): string {
         let me = this;
         let result = '';
         let opr = '';
         if (this.filter != null && this.filter.length > 0) {
             this.filter.forEach(r => {
-                result += opr + r.toString();
+                result += opr + r.toQueryString();
                 if (me.operator == Operator.And) {
                     opr = ' and ';
                 } else {
@@ -101,7 +140,7 @@ export class Condition {
 
         if (this.children != null && this.children.length > 0) {
             this.children.forEach(c => {
-                result += opr + "(" + c.toString() + ")";
+                result += opr + "(" + c.toQueryString() + ")";
                 if (me.operator == Operator.And) {
                     opr = ' and ';
                 } else {
@@ -113,27 +152,10 @@ export class Condition {
     }
 }
 
-
-class ColumnBuilder {
-    columns: string = null;
-    hasEntityReference: boolean = false;
-}
-
 @Injectable()
 export class XrmContextService {
     context: any = {};
     cm: any = {};
-
-    c: Condition = {
-        operator: Operator.And,
-        filter: [
-            {
-                field: 'parentcustomerid', operator: Comparator.Equals, value: ''
-            }
-        ],
-        children: null
-    }
-
 
     constructor(private xrmService: XrmService) { }
 
@@ -165,7 +187,7 @@ export class XrmContextService {
     query<T extends Entity>(prototype: T, condition: Condition, orderBy: string = null, top: number = 0, count: boolean = false): Observable<XrmQueryResult<T>> {
         let me = this;
         let fields = this.columnBuilder(prototype);
-        let filter = condition.toString();
+        let filter = condition.toQueryString();
 
         return this.xrmService.query<T>(prototype._pluralName, fields.columns, filter, orderBy, top, count).map(r => {
             let values = r.value;

@@ -2,5 +2,20 @@
 
 <div *ngIf="account != null">
   {{ account.name }}<br />
-  Ignore me virtual property: {{ account.ignoreMe }}
+  Ignore me virtual property: {{ account.ignoreMe }}<br />
+
+  <div *ngIf="contactResult != null">
+    <br />
+    <br />
+    Contacts: {{ contactResult.count }}<br />
+    <ul>
+      <li *ngFor="let con of contacts">{{ con.server_fullname }} : {{ con.views }}</li>
+    </ul>
+
+    <br />
+    <button (click)="prev()" [disabled]="contactResult.prev == null">Prev</button>
+    {{ contactResult.pageIndex + 1 }}
+    <button (click)="next()" [disabled]="contactResult.next == null">Next</button>
+  </div>
+
 </div>
