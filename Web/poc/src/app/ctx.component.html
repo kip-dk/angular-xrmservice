@@ -18,4 +18,10 @@
     <button (click)="next()" [disabled]="contactResult.next == null">Next</button>
   </div>
 
+  <div>
+    <br /><br />
+    Create new contact<br />
+    <input [(ngModel)]="newContact" />&nbsp;<button (click)="create()">Create</button>
+  </div>
+
 </div>

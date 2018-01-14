@@ -19,7 +19,6 @@ export class Entity {
 }
 
 export class EntityReference {
-
     constructor();
     constructor(id: string);
     constructor(id: string = null) {
@@ -30,6 +29,13 @@ export class EntityReference {
     name: string;
     logicalname: string;
     associatednavigationproperty: string;
+    pluralName: string;
+
+    meta(pluralName: string, associatednavigationproperty: string): EntityReference {
+        this.pluralName = pluralName;
+        this.associatednavigationproperty = associatednavigationproperty;
+        return this;
+    }
 
     clone(): EntityReference {
         let result = new EntityReference();
@@ -44,6 +50,7 @@ export class EntityReference {
         return this.id == ref.id && this.logicalname == ref.logicalname;
     }
 }
+
 
 export enum Operator {
     And,
@@ -237,6 +244,33 @@ export class XrmContextService {
         });
     }
 
+    create<T extends Entity>(prototype: T, instance: T): Observable<T> {
+        let newr = {
+        };
+
+        for (let prop in prototype) {
+            if (prototype.hasOwnProperty(prop) && typeof prototype[prop] !== 'function') {
+                if (this.ignoreColumn(prop)) continue;
+
+                let value = instance[prop];
+                if (value !== 'undefined' && value !== null) {
+                    if (prototype[prop] instanceof EntityReference) {
+                        let ref = instance[prop] as EntityReference;
+                        if (ref.id != null) {
+                            newr[prototype[prop]['associatednavigationproperty']] = '/' + prototype[prop]['pluralName'] + '(' + ref.id + ')';
+                        }
+                        continue;
+                    }
+                }
+                newr[prop.toString()] = instance[prop];
+            }
+        }
+
+        return this.xrmService.create<T>(prototype._pluralName, newr as T).map(response => {
+            return this.resolve(prototype, instance, true);
+        });
+    }
+
     delete<T extends Entity>(t: T): Observable<null> {
         let me = this;
         return this.xrmService.delete(t._pluralName, t.id).map(r => {
@@ -247,6 +281,7 @@ export class XrmContextService {
             return null;
         });
     }
+
 
     private resolveQueryResult<T extends Entity>(prototype:T, response: any, top: number, pages: string[], pageIndex: number): XrmQueryResult<T> {
         let me = this;
@@ -350,6 +385,8 @@ export class XrmContextService {
             change = {};
             this.cm[key] = change;
         }
+
+        result['_updateable'] = updateable;
 
         for (let prop in prototype) {
             if (this.ignoreColumn(prop)) continue;

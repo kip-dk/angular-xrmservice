@@ -27,7 +27,7 @@ export class CtxContact extends Entity {
     firstname: string = null;
     lastname: string = null;
     address1_line1: string = null;
-    parentcustomerid: EntityReference = new EntityReference();
+    parentcustomerid: EntityReference = new EntityReference().meta("accounts","parentcustomerid_account@odata.bind");
 
     server_fullname: string;
     views: number;
@@ -42,9 +42,6 @@ export class CtxContact extends Entity {
     }
 }
 
-
-
-
 @Component({
     selector: 'ctx',
     templateUrl: './ctx.component.html'
@@ -55,7 +52,8 @@ export class CtxComponent {
 
     account: CtxAccount;
     contacts: CtxContact[];
-    contactResult: XrmQueryResult<CtxContact>; 
+    contactResult: XrmQueryResult<CtxContact>;
+    newContact: string;
 
     constructor(private xrmContextService: XrmContextService) {
     }
@@ -97,6 +95,24 @@ export class CtxComponent {
         this.xrmContextService.delete(con).subscribe(r => {
             me.getContacts();
         });
+    }
+
+    create(): void {
+        let me = this;
+        if (this.newContact != null && this.newContact != '') {
+            let spl = this.newContact.split(' ');
+            if (spl.length == 2) {
+                let con = new CtxContact();
+                con.firstname = spl[0];
+                con.lastname = spl[1];
+                con.parentcustomerid = new EntityReference(this.account.id);
+
+                this.xrmContextService.create<CtxContact>(this.contactPrototype, con).subscribe(r => {
+                    me.getContacts();
+                    me.newContact = null;
+                });
+            }
+        }
     }
 
     private getContacts() {
