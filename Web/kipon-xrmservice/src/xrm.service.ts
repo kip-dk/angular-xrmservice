@@ -21,6 +21,7 @@ export interface XrmQueryResult<T> {
     value: T[];
     prev(): Observable<XrmQueryResult<T>>;
     next(): Observable<XrmQueryResult<T>>;
+    map(result: XrmQueryResult<T>): XrmQueryResult<T>;
 }
 
 
@@ -249,7 +250,8 @@ export class XrmService {
             pages: pages,
             prev: null,
             next: null,
-            pageIndex: pageIndex
+            pageIndex: pageIndex,
+            map: null
         }
 
         let nextLink = response["@odata.nextLink"] as string;
@@ -264,6 +266,7 @@ export class XrmService {
                 pages: pages,
                 pageIndex: pageIndex,
                 prev: null,
+                map: null,
                 next: (): Observable<XrmQueryResult<T>> => {
                     let headers = new HttpHeaders({ 'Accept': 'application/json' });
                     headers = headers.append("OData-MaxVersion", "4.0");
@@ -280,7 +283,11 @@ export class XrmService {
                     }
                     return me.http.get(nextLink, options).map(r => {
                         pages.push(nextLink);
-                        return me.resolveQueryResult<T>(r, top, pages, pageIndex + 1);
+                        let pr = me.resolveQueryResult<T>(r, top, pages, pageIndex + 1);
+                        if (result.map != null) {
+                            return result.map(pr);
+                        }
+                        return pr;
                     })
                 }
             }
@@ -305,7 +312,11 @@ export class XrmService {
                 let lastPage = result.pages[result.pageIndex - 1];
                 return me.http.get(lastPage, options).map(r => {
                     result.pages.splice(result.pages.length - 1, 1);
-                    return me.resolveQueryResult<T>(r, top, result.pages, result.pageIndex -1);
+                    let pr = me.resolveQueryResult<T>(r, top, result.pages, result.pageIndex - 1);
+                    if (result.map != null) {
+                        return result.map(pr);
+                    }
+                    return pr;
                 })
             }
         }

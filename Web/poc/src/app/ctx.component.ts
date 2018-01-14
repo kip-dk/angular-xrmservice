@@ -18,6 +18,25 @@ export class CtxAccount extends Entity {
     }
 }
 
+export class CtxContact extends Entity {
+    constructor() {
+        super("contacts", "contactid");
+    }
+
+    fullname: string = null;
+    firstname: string = null;
+    lastname: string = null;
+    address1_line1: string = null;
+    parentcustomerid: EntityReference = new EntityReference();
+
+    server_fullname: string;
+
+    onFetch(): void {
+        this.server_fullname = this.fullname;
+    }
+}
+
+
 
 
 @Component({
@@ -35,7 +54,7 @@ export class CtxComponent {
         let me = this;
         this.xrmContextService.getCurrentKey().subscribe(r => {
             if (r.id != null && r.id != '') {
-                me.xrmContextService.get<CtxAccount>(me.accountPrototype, r.id, false).subscribe(a => {
+                me.xrmContextService.get<CtxAccount>(me.accountPrototype, r.id).subscribe(a => {
                     console.log(a);
                     me.account = a;
                 });
