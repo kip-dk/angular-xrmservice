@@ -16,18 +16,19 @@ export class XrmEntityKey {
 export interface XrmQueryResult<T> {
     pages: string[];
     pageIndex: number;
+    top: number;
+    nextLink: string;
     context: string;
     count: number;
     value: T[];
     prev(): Observable<XrmQueryResult<T>>;
     next(): Observable<XrmQueryResult<T>>;
-    map(result: XrmQueryResult<T>): XrmQueryResult<T>;
 }
 
 
 @Injectable()
 export class XrmService {
-    private apiUrl: string = '/api/data/v8.2/';
+    apiUrl: string = '/api/data/v8.2/';
 
     constructor(private http: HttpClient) {
     }
@@ -251,7 +252,8 @@ export class XrmService {
             prev: null,
             next: null,
             pageIndex: pageIndex,
-            map: null
+            top: top,
+            nextLink: null
         }
 
         let nextLink = response["@odata.nextLink"] as string;
@@ -266,7 +268,8 @@ export class XrmService {
                 pages: pages,
                 pageIndex: pageIndex,
                 prev: null,
-                map: null,
+                top: top,
+                nextLink: nextLink,
                 next: (): Observable<XrmQueryResult<T>> => {
                     let headers = new HttpHeaders({ 'Accept': 'application/json' });
                     headers = headers.append("OData-MaxVersion", "4.0");
@@ -284,9 +287,6 @@ export class XrmService {
                     return me.http.get(nextLink, options).map(r => {
                         pages.push(nextLink);
                         let pr = me.resolveQueryResult<T>(r, top, pages, pageIndex + 1);
-                        if (result.map != null) {
-                            return result.map(pr);
-                        }
                         return pr;
                     })
                 }
@@ -313,9 +313,6 @@ export class XrmService {
                 return me.http.get(lastPage, options).map(r => {
                     result.pages.splice(result.pages.length - 1, 1);
                     let pr = me.resolveQueryResult<T>(r, top, result.pages, result.pageIndex - 1);
-                    if (result.map != null) {
-                        return result.map(pr);
-                    }
                     return pr;
                 })
             }

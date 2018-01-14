@@ -1,5 +1,7 @@
 ﻿import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
+
 import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult } from './xrm.service';
 
 export class Entity {
@@ -157,7 +159,7 @@ export class XrmContextService {
     context: any = {};
     cm: any = {};
 
-    constructor(private xrmService: XrmService) { }
+    constructor(private http: HttpClient, private xrmService: XrmService) { }
 
     setVersion(v: string) {
         this.xrmService.setVersion(v);
@@ -186,38 +188,147 @@ export class XrmContextService {
     query<T extends Entity>(prototype: T, condition: Condition, orderBy: string, top: number, count: boolean): Observable<XrmQueryResult<T>>;
     query<T extends Entity>(prototype: T, condition: Condition, orderBy: string = null, top: number = 0, count: boolean = false): Observable<XrmQueryResult<T>> {
         let me = this;
-        let fields = this.columnBuilder(prototype);
+        let fields = this.columnBuilder(prototype).columns;
         let filter = condition.toQueryString();
 
-        return this.xrmService.query<T>(prototype._pluralName, fields.columns, filter, orderBy, top, count).map(r => {
-            let values = r.value;
-            r.value = [];
-            values.forEach(v => {
-                r.value.push(me.resolve(prototype, v, prototype._updateable));
-            });
+        let headers = new HttpHeaders({ 'Accept': 'application/json' });
+        headers = headers.append("OData-MaxVersion", "4.0");
+        headers = headers.append("OData-Version", "4.0");
+        headers = headers.append("Content-Type", "application/json; charset=utf-8");
+        if (top > 0) {
+            headers = headers.append("Prefer", "odata.include-annotations=\"*\",odata.maxpagesize=" + top.toString());
+        } else {
+            headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
+        }
 
-            if (r.prev != null || r.next != null) {
-                r.map = (v: XrmQueryResult<T>): XrmQueryResult<T> => {
-                    let nvs = v.value;
-                    v.value = [];
-                    nvs.forEach(nn => {
-                        v.value.push(me.resolve(prototype, nn, prototype._updateable));
-                    });
-                    return v;
+        let options = {
+            headers: headers
+        }
+
+        let url = this.getContext().getClientUrl() + this.xrmService.apiUrl + prototype._pluralName;
+        if ((fields != null && fields != '') || (filter != null && filter != '') || (orderBy != null && orderBy != '') || top > 0) {
+            url += "?";
+        }
+        let sep = '';
+
+        if (fields != null && fields != '') {
+            url += '$select=' + fields;
+            sep = '&';
+        }
+
+        if (filter != null && filter != '') {
+            url += sep + '$filter=' + filter;
+            sep = '&';
+        }
+
+        if (orderBy != null && orderBy != '') {
+            url += sep + '$orderby=' + orderBy;
+            sep = '&';
+        }
+
+        if (count) {
+            url += sep + '$count=true';
+            sep = '&';
+        }
+
+        return this.http.get(url, options).map(response => {
+            let result = me.resolveQueryResult<T>(prototype, response, top, [url], 0);
+            return result;
+        });
+    }
+
+    private resolveQueryResult<T extends Entity>(prototype:T, response: any, top: number, pages: string[], pageIndex: number): XrmQueryResult<T> {
+        let me = this;
+        let result = {
+            context: response["@odata.context"],
+            count: response["@odata.count"],
+            value: [],
+            pages: pages,
+            pageIndex: pageIndex,
+            top: top,
+            nextLink: null,
+            prev: null,
+            next: null
+        }
+
+        let vals = response["value"] as T[];
+        vals.forEach(r => {
+            result.value.push(me.resolve(prototype, r, prototype._updateable));
+        });
+
+        let nextLink = response["@odata.nextLink"] as string;
+
+        if (nextLink != null && nextLink != '') {
+            let start = nextLink.indexOf('/api');
+            nextLink = me.getContext().getClientUrl() + nextLink.substring(start);
+            result = {
+                context: result.context,
+                count: result.count,
+                value: result.value,
+                pages: pages,
+                pageIndex: pageIndex,
+                top: top,
+                nextLink: nextLink,
+                prev: null,
+                next: (): Observable<XrmQueryResult<T>> => {
+                    let headers = new HttpHeaders({ 'Accept': 'application/json' });
+                    headers = headers.append("OData-MaxVersion", "4.0");
+                    headers = headers.append("OData-Version", "4.0");
+                    headers = headers.append("Content-Type", "application/json; charset=utf-8");
+                    if (top > 0) {
+                        headers = headers.append("Prefer", "odata.include-annotations=\"*\",odata.maxpagesize=" + top.toString());
+                    } else {
+                        headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
+                    }
+
+                    let options = {
+                        headers: headers
+                    }
+                    return me.http.get(nextLink, options).map(r => {
+                        pages.push(nextLink);
+                        let pr = me.resolveQueryResult<T>(prototype, r, top, pages, pageIndex + 1);
+                        return pr;
+                    })
                 }
             }
-            return r;
-        });
+        }
+
+        if (result.pageIndex >= 1) {
+            result.prev = (): Observable<XrmQueryResult<T>> => {
+                let headers = new HttpHeaders({ 'Accept': 'application/json' });
+                headers = headers.append("OData-MaxVersion", "4.0");
+                headers = headers.append("OData-Version", "4.0");
+                headers = headers.append("Content-Type", "application/json; charset=utf-8");
+                if (top > 0) {
+                    headers = headers.append("Prefer", "odata.include-annotations=\"*\",odata.maxpagesize=" + top.toString());
+                } else {
+                    headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
+                }
+
+                let options = {
+                    headers: headers
+                }
+
+                let lastPage = result.pages[result.pageIndex - 1];
+                return me.http.get(lastPage, options).map(r => {
+                    result.pages.splice(result.pages.length - 1, 1);
+                    let pr = me.resolveQueryResult<T>(prototype, r, top, result.pages, result.pageIndex - 1);
+                    return pr;
+                })
+            }
+        }
+        return result;
     }
 
     private resolve<T extends Entity>(prototype: T, instance: any, updateable: boolean): T {
         let key = prototype._pluralName + ':' + instance[prototype._keyName];
         let result = instance;
         let change = null;
+
         if (this.context.hasOwnProperty(key)) {
             result = this.context[key];
         } else {
-            this.context[key] = instance;
+            this.context[key] = result;
             result["id"] = instance[prototype._keyName];
             result["_pluralName"] = prototype._pluralName;
             result["_keyName"] = prototype._keyName;
