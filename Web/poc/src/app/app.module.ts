@@ -3,13 +3,15 @@ import { FormsModule } from '@angular/forms';
 import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
+import { CtxComponent } from './ctx.component';
 
 import { XrmServiceModule, XrmService, XrmContextService } from 'kipon-xrmservice';
 
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    CtxComponent
   ],
   imports: [
       BrowserModule,
