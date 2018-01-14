@@ -237,6 +237,17 @@ export class XrmContextService {
         });
     }
 
+    delete<T extends Entity>(t: T): Observable<null> {
+        let me = this;
+        return this.xrmService.delete(t._pluralName, t.id).map(r => {
+            let key = t._pluralName + ":" + t.id;
+            if (me.context.hasOwnProperty(key)) {
+                delete me.context[key];
+            }
+            return null;
+        });
+    }
+
     private resolveQueryResult<T extends Entity>(prototype:T, response: any, top: number, pages: string[], pageIndex: number): XrmQueryResult<T> {
         let me = this;
         let result = {

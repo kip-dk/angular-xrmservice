@@ -92,6 +92,12 @@ export class CtxComponent {
         }
     }
 
+    delete(con: CtxContact): void {
+        let me = this;
+        this.xrmContextService.delete(con).subscribe(r => {
+            me.getContacts();
+        });
+    }
 
     private getContacts() {
         let me = this;
