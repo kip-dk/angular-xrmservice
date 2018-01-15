@@ -4,12 +4,14 @@ import { XrmContext, XrmEntityKey, XrmQueryResult, XrmContextService, Entity, En
 
 export class CtxAccount extends Entity {
     constructor() {
-        super("accounts", "accountid", false);
+        super("accounts", "accountid", true);
     }
 
     accountnumber: string = null;
     accountratingcode: string = null;
     name: string = null;
+    lastonholdtime: Date = new Date();
+    donotemail: boolean = null;
 
     ignoreMe: string;
 

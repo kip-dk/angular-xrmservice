@@ -50,7 +50,7 @@ export class EntityReference {
         return this.id == ref.id && this.logicalname == ref.logicalname;
     }
 
-    same(ref1: EntityReference, ref2: EntityReference): boolean {
+    static same(ref1: EntityReference, ref2: EntityReference): boolean {
         if (ref1 == null && ref2 == null) {
             return true;
         }
@@ -272,8 +272,15 @@ export class XrmContextService {
                         }
                         continue;
                     }
+
+                    if (prototype[prop] instanceof Date) {
+                        let d = value as Date;
+                        newr[prop.toString()] = d.toISOString();
+                        continue;
+                    }
+
+                    newr[prop.toString()] = instance[prop];
                 }
-                newr[prop.toString()] = instance[prop];
             }
         }
 
@@ -300,13 +307,26 @@ export class XrmContextService {
                 let newValue = instance[prop];
 
                 if ((prevValue === 'undefined' || prevValue === null) && (newValue === 'undefined' || newValue === null)) continue;
+
                 if (prototype[prop] instanceof EntityReference) {
                     let r = prototype[prop] as EntityReference;
-                    if (!r.same(prevValue, newValue)) {
+                    if (!EntityReference.same(prevValue, newValue)) {
                         if (newValue != null && newValue["id"] != null && newValue["id"] != '') {
                             upd[prototype[prop]['associatednavigationproperty']] = '/' + prototype[prop]['pluralName'] + '(' + newValue['id'] + ')';
                         } else {
                             upd[prototype[prop]['associatednavigationproperty']] = null;
+                        }
+                    }
+                    continue;
+                }
+
+                if (prototype[prop] instanceof Date) {
+                    if (prevValue != newValue) {
+                        if (newValue == null) {
+                            upd[prop.toString()] = null;
+                        } else {
+                            let d = newValue as Date;
+                            upd[prop.toString()] = d.toISOString();
                         }
                     }
                     continue;
@@ -445,6 +465,7 @@ export class XrmContextService {
             if (this.ignoreColumn(prop)) continue;
 
             if (prototype.hasOwnProperty(prop) && typeof prototype[prop] != 'function') {
+                let done = false;
                 if (prototype[prop] instanceof EntityReference) {
                     let ref = new EntityReference();
                     let id = instance["_" + prop + "_value"];
@@ -465,11 +486,29 @@ export class XrmContextService {
                     if (change != null) {
                         change[prop.toString()] = ref.clone();
                     }
-                } else {
+                    done = true;
+                }
+
+                if (!done && prototype[prop] instanceof Date) {
+                    let v = instance[prop];
+                    if (v != null && v != '') {
+                        result[prop] = new Date(Date.parse(v));
+                    } else {
+                        result[prop] = null;
+                    }
+
+                    if (change != null) {
+                        change[prop.toString()] = result[prop];
+                    }
+                    done = true;
+                }
+
+                if (!done) {
                     result[prop] = instance[prop];
                     if (change != null) {
-                        change[prop.toString()] = instance[prop];
+                        change[prop.toString()] = result[prop];
                     }
+                    done = true;
                 }
             }
 

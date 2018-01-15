@@ -1,6 +1,6 @@
 {
   "name": "kipon-xrmservice",
-  "version": "1.0.29",
+  "version": "1.0.31",
   "scripts": {
     "build": "gulp build",
     "build:watch": "gulp",
@@ -23,7 +23,7 @@
     "email": "kip@kipon.dk"
   },
   "keywords": [
-    "angular","Dynamics 365"
+    "angular","Dynamics 365","Web API"
   ],
   "license": "MIT",
   "bugs": {

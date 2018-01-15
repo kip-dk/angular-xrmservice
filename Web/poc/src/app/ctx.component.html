@@ -1,7 +1,10 @@
 <h2>Demo of XrmContextService</h2>
 
 <div *ngIf="account != null">
-  {{ account.name }}<br />
+  Name: {{ account.name }}<br />
+  Last on hold: {{ account.lastonholdtime  }}<br />
+  Do not email: {{ account.donotemail }}<br />
+  <br />
   Ignore me virtual property: {{ account.ignoreMe }}<br />
 
   <div *ngIf="contactResult != null">
