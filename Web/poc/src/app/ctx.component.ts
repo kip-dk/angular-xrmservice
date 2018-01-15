@@ -52,6 +52,9 @@ export class CtxComponent {
 
     account: CtxAccount;
     contacts: CtxContact[];
+    currentContact: CtxContact;
+    editCurrentName: string;
+
     contactResult: XrmQueryResult<CtxContact>;
     newContact: string;
 
@@ -97,6 +100,11 @@ export class CtxComponent {
         });
     }
 
+    click(con: CtxContact) {
+        this.currentContact = con;
+        this.editCurrentName = con.fullname;
+    }
+
     create(): void {
         let me = this;
         if (this.newContact != null && this.newContact != '') {
@@ -114,6 +122,21 @@ export class CtxComponent {
             }
         }
     }
+
+    update() {
+        let me = this;
+        if (this.currentContact != null && this.editCurrentName != null && this.editCurrentName != '') {
+            let spl = this.editCurrentName.split(' ');
+            if (spl.length == 2) {
+                this.currentContact.firstname = spl[0];
+                this.currentContact.lastname = spl[1];
+                this.xrmContextService.update<CtxContact>(this.contactPrototype, this.currentContact).subscribe(r => {
+                    me.getContacts();
+                });
+            }
+        }
+    }
+
 
     private getContacts() {
         let me = this;

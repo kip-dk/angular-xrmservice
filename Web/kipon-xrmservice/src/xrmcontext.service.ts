@@ -49,6 +49,18 @@ export class EntityReference {
     equals(ref: EntityReference): boolean {
         return this.id == ref.id && this.logicalname == ref.logicalname;
     }
+
+    same(ref1: EntityReference, ref2: EntityReference): boolean {
+        if (ref1 == null && ref2 == null) {
+            return true;
+        }
+
+        let id1: string = null;
+        let id2: string = null;
+        if (ref1 != null) id1 = ref1.id;
+        if (ref2 != null) id2 = ref2.id;
+        return id1 == id2;
+     }
 }
 
 
@@ -164,7 +176,7 @@ export class Condition {
 @Injectable()
 export class XrmContextService {
     context: any = {};
-    cm: any = {};
+    changemanager: any = {};
 
     constructor(private http: HttpClient, private xrmService: XrmService) { }
 
@@ -202,11 +214,10 @@ export class XrmContextService {
         headers = headers.append("OData-MaxVersion", "4.0");
         headers = headers.append("OData-Version", "4.0");
         headers = headers.append("Content-Type", "application/json; charset=utf-8");
+        headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
         if (top > 0) {
-            headers = headers.append("Prefer", "odata.include-annotations=\"*\",odata.maxpagesize=" + top.toString());
-        } else {
-            headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
-        }
+            headers = headers.append("Prefer", "odata.maxpagesize=" + top.toString());
+        } 
 
         let options = {
             headers: headers
@@ -271,6 +282,49 @@ export class XrmContextService {
         });
     }
 
+    update<T extends Entity>(prototype: T, instance: T): Observable<T> {
+        let me = this;
+        let upd = {
+        }
+
+        let key = instance._pluralName + ':' + instance.id;
+        let cm = this.changemanager[key];
+        if (cm === 'undefined' || cm === null) {
+            throw 'the object is not under change control and cannot be updated within this context';
+        }
+
+        for (let prop in prototype) {
+            if (prototype.hasOwnProperty(prop) && typeof prototype[prop] != 'function') {
+                if (this.ignoreColumn(prop)) continue;
+                let prevValue = cm[prop];
+                let newValue = instance[prop];
+
+                if ((prevValue === 'undefined' || prevValue === null) && (newValue === 'undefined' || newValue === null)) continue;
+                if (prototype[prop] instanceof EntityReference) {
+                    let r = prototype[prop] as EntityReference;
+                    if (!r.same(prevValue, newValue)) {
+                        if (newValue != null && newValue["id"] != null && newValue["id"] != '') {
+                            upd[prototype[prop]['associatednavigationproperty']] = '/' + prototype[prop]['pluralName'] + '(' + newValue['id'] + ')';
+                        } else {
+                            upd[prototype[prop]['associatednavigationproperty']] = null;
+                        }
+                    }
+                    continue;
+                }
+
+                if (prevValue != newValue) {
+                    upd[prop.toString()] = instance[prop];
+                }
+            }
+        }
+
+        let fields = this.columnBuilder(prototype).columns;
+
+        return this.xrmService.update<T>(prototype._pluralName, upd as T, instance.id, fields).map(response => {
+            return me.resolve(prototype, response, true);
+        });
+    }
+
     delete<T extends Entity>(t: T): Observable<null> {
         let me = this;
         return this.xrmService.delete(t._pluralName, t.id).map(r => {
@@ -281,7 +335,6 @@ export class XrmContextService {
             return null;
         });
     }
-
 
     private resolveQueryResult<T extends Entity>(prototype:T, response: any, top: number, pages: string[], pageIndex: number): XrmQueryResult<T> {
         let me = this;
@@ -345,10 +398,10 @@ export class XrmContextService {
                 headers = headers.append("OData-MaxVersion", "4.0");
                 headers = headers.append("OData-Version", "4.0");
                 headers = headers.append("Content-Type", "application/json; charset=utf-8");
+                headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
                 if (top > 0) {
-                    headers = headers.append("Prefer", "odata.include-annotations=\"*\",odata.maxpagesize=" + top.toString());
+                    headers = headers.append("Prefer", "odata.maxpagesize=" + top.toString());
                 } else {
-                    headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
                 }
 
                 let options = {
@@ -383,7 +436,7 @@ export class XrmContextService {
 
         if (updateable) {
             change = {};
-            this.cm[key] = change;
+            this.changemanager[key] = change;
         }
 
         result['_updateable'] = updateable;
@@ -410,12 +463,12 @@ export class XrmContextService {
                     }
                     result[prop] = ref;
                     if (change != null) {
-                        change[prop] = ref.clone();
+                        change[prop.toString()] = ref.clone();
                     }
                 } else {
                     result[prop] = instance[prop];
                     if (change != null) {
-                        change[prop] = instance[prop];
+                        change[prop.toString()] = instance[prop];
                     }
                 }
             }

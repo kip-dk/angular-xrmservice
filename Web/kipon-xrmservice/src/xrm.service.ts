@@ -149,10 +149,10 @@ export class XrmService {
         headers = headers.append("OData-MaxVersion", "4.0");
         headers = headers.append("OData-Version", "4.0");
         headers = headers.append("Content-Type", "application/json; charset=utf-8");
+        headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
         if (top > 0) {
-            headers = headers.append("Prefer", "odata.include-annotations=\"*\",odata.maxpagesize=" + top.toString());
+            headers = headers.append("Prefer", "odata.maxpagesize=" + top.toString());
         } else {
-            headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
         }
 
         let options = {
@@ -203,16 +203,27 @@ export class XrmService {
         return this.http.post<T>(this.getContext().getClientUrl() + this.apiUrl + entityType, entity, options).map(response => response);
     }
 
-    update<T>(entityType: string, entity: T, id: string): Observable<T> {
+    update<T>(entityType: string, entity: T, id: string): Observable<T>;
+    update<T>(entityType: string, entity: T, id: string, fields: string): Observable<T>;
+    update<T>(entityType: string, entity: T, id: string, fields: string = null): Observable<T> {
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
         headers = headers.append("OData-MaxVersion", "4.0");
         headers = headers.append("OData-Version", "4.0");
         headers = headers.append("Content-Type", "application/json; charset=utf-8");
         headers = headers.append("Prefer", "odata.include-annotations=*");
+        if (fields != null) {
+            headers = headers.append("Prefer", "return=representation");
+        } 
+
         let options = {
             headers: headers
         }
-        return this.http.patch<T>(this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")", entity, options).map(response => response);
+
+        let _f = '';
+        if (fields != null) {
+            _f = '?$select=' + fields;
+        }
+        return this.http.patch<T>(this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")" + _f, entity, options).map(response => response);
     }
 
     put<T>(entityType: string, id: string, field: string, value: any): Observable<T> {
@@ -227,7 +238,11 @@ export class XrmService {
         let v = {
             value: value
         };
-        return this.http.put<T>(this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")/" + field, v, options).map(response => response);
+
+        let url = this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")" + field;
+        console.log(url);
+
+        return this.http.put<T>(url, v, options).map(response => response);
     }
 
     delete(entityType: string, id: string): Observable<null> {
@@ -275,11 +290,10 @@ export class XrmService {
                     headers = headers.append("OData-MaxVersion", "4.0");
                     headers = headers.append("OData-Version", "4.0");
                     headers = headers.append("Content-Type", "application/json; charset=utf-8");
+                    headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
                     if (top > 0) {
-                        headers = headers.append("Prefer", "odata.include-annotations=\"*\",odata.maxpagesize=" + top.toString());
-                    } else {
-                        headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
-                    }
+                        headers = headers.append("Prefer", "odata.maxpagesize=" + top.toString());
+                    } 
 
                     let options = {
                         headers: headers
@@ -299,10 +313,10 @@ export class XrmService {
                 headers = headers.append("OData-MaxVersion", "4.0");
                 headers = headers.append("OData-Version", "4.0");
                 headers = headers.append("Content-Type", "application/json; charset=utf-8");
+                headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
                 if (top > 0) {
-                    headers = headers.append("Prefer", "odata.include-annotations=\"*\",odata.maxpagesize=" + top.toString());
+                    headers = headers.append("Prefer", "odata.maxpagesize=" + top.toString());
                 } else {
-                    headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
                 }
 
                 let options = {
