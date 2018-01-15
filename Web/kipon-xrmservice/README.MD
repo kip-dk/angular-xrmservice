@@ -139,8 +139,8 @@ export class Account {
 export class AccountService {
   constructor(private xrmService: XrmService) { }
 
-  query<Account>(fields: string, filter: string, orderby: string, top: number = 0): Observable<XrmQueryResult<Account>> {
-	return this.xrmService.query<Account>('accounts', fields, filter, orderby, top );
+  query<Account>(filter: string, orderby: string, top: number = 0): Observable<XrmQueryResult<Account>> {
+	return this.xrmService.query<Account>('accounts', 'accountid,name,address1_line1', filter, orderby, top );
   }
 }
 ```
@@ -171,8 +171,11 @@ export class AccountService {
 }
 ```
 
-#### update&lt;T&gt;(entityType: string, t: T): Observable&lt;T&gt; 
+#### update&lt;T&gt;(entityType: string, t: T, fields: string): Observable&lt;T&gt; 
 Update an instance of T, and return the updated instance. 
+
+If you parse null or blank string in fields, null will be returned from the subscribe method. If you add fields as a comma separated
+string of fields to be returned, you will get an object with these properties for the record updated.
 
 ```typescript
 import { Injectable } from '@angular/core';
@@ -188,10 +191,10 @@ export class Account {
 export class AccountService {
   constructor(private xrmService: XrmService) { }
 
-  update(accountid: string, name: string): Observable<Account> {
+  update(accountid: string, name: string,fields: string): Observable<Account> {
 	let acc = new Account();
 	acc.name = name;
-	return this.xrmService.update<Account>('accounts', acc, accountid );
+	return this.xrmService.update<Account>('accounts', acc, accountid, fields );
   }
 }
 ```
