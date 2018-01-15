@@ -197,7 +197,7 @@ export class XrmContextService {
         let columnDef = this.columnBuilder(prototype);
 
         return this.xrmService.get<T>(prototype._pluralName, id, columnDef.columns).map(r => {
-            return me.resolve<T>(prototype, r, r._updateable);
+            return me.resolve<T>(prototype, r, prototype._updateable);
         });
     }
 
@@ -296,7 +296,7 @@ export class XrmContextService {
 
         let key = instance._pluralName + ':' + instance.id;
         let cm = this.changemanager[key];
-        if (cm === 'undefined' || cm === null) {
+        if (typeof cm === 'undefined' || cm === null) {
             throw 'the object is not under change control and cannot be updated within this context';
         }
 

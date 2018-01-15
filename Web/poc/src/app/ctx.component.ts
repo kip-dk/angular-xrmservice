@@ -60,6 +60,8 @@ export class CtxComponent {
     contactResult: XrmQueryResult<CtxContact>;
     newContact: string;
 
+    newDate: string;
+
     constructor(private xrmContextService: XrmContextService) {
     }
 
@@ -133,10 +135,22 @@ export class CtxComponent {
                 this.currentContact.firstname = spl[0];
                 this.currentContact.lastname = spl[1];
                 this.xrmContextService.update<CtxContact>(this.contactPrototype, this.currentContact).subscribe(r => {
-                    me.getContacts();
                 });
             }
         }
+    }
+
+    updateDate() {
+        if (this.newDate != null && this.newDate != '') {
+            this.account.lastonholdtime = new Date(Date.parse(this.newDate));
+            this.updateAccount();
+        }
+    }
+
+    updateAccount() {
+        this.xrmContextService.update<CtxAccount>(this.accountPrototype, this.account).subscribe(r => {
+            this.newDate = null;
+        });
     }
 
 
