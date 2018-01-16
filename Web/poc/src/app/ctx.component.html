@@ -7,6 +7,16 @@
   Do not email: {{ account.donotemail }}
   <input type="checkbox" [(ngModel)]="account.donotemail" (ngModelChange)="updateAccount()" />
   <br /><br />
+  Industry: {{ account.industrycode.name }}
+  <br />
+  <ul>
+    <li *ngFor="let id of industries" style="cursor: pointer" (click)="setIndustry(id)">
+      <span *ngIf="id.value == account.industrycode.value" style="font-weight: bold; color: green">{{ id.name }}</span>
+      <span *ngIf="id.value != account.industrycode.value">{{ id.name }}</span>
+    </li>
+  </ul>
+
+  <br /><br />
   Ignore me virtual property: {{ account.ignoreMe }}<br /><br />
 
   <div *ngIf="contactResult != null">

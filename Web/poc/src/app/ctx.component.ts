@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { XrmContext, XrmEntityKey, XrmQueryResult, XrmContextService, Entity, EntityReference, Condition, Operator, Comparator } from 'kipon-xrmservice';
+import { XrmContext, XrmEntityKey, XrmQueryResult, XrmContextService, Entity, EntityReference, OptionSetValue, Condition, Operator, Comparator } from 'kipon-xrmservice';
 
 export class CtxAccount extends Entity {
     constructor() {
@@ -12,6 +12,9 @@ export class CtxAccount extends Entity {
     name: string = null;
     lastonholdtime: Date = new Date();
     donotemail: boolean = null;
+    creditlimit: number = null;
+    transactioncurrencyid: EntityReference = new EntityReference().meta("transactioncurrencies", "transactioncurrencyid@odata.bind");
+    industrycode: OptionSetValue = new OptionSetValue();
 
     ignoreMe: string;
 
@@ -44,6 +47,16 @@ export class CtxContact extends Entity {
     }
 }
 
+class industry {
+    constructor(value: number, name: string) {
+        this.value = value;
+        this.name = name;
+    }
+
+    value: number;
+    name: string;
+}
+
 @Component({
     selector: 'ctx',
     templateUrl: './ctx.component.html'
@@ -62,6 +75,14 @@ export class CtxComponent {
 
     newDate: string;
 
+    industries: industry[] = [
+        new industry(1, "Accounting"),
+        new industry(2, "Agriculture and Non-petrol Natural Resource Extraction"),
+        new industry(3, "Broadcasting Printing and Publishing"),
+        new industry(4, "Brokers"),
+        new industry(5, "Building Supply Retail")
+    ];
+
     constructor(private xrmContextService: XrmContextService) {
     }
 
@@ -70,6 +91,7 @@ export class CtxComponent {
         this.xrmContextService.getCurrentKey().subscribe(r => {
             if (r.id != null && r.id != '') {
                 me.xrmContextService.get<CtxAccount>(me.accountPrototype, r.id).subscribe(a => {
+                    console.log(a);
                     me.account = a;
                     me.getContacts();
                 });
@@ -145,6 +167,11 @@ export class CtxComponent {
             this.account.lastonholdtime = new Date(Date.parse(this.newDate));
             this.updateAccount();
         }
+    }
+
+    setIndustry(id: industry) {
+        this.account.industrycode = new OptionSetValue(id.value);
+        this.updateAccount();
     }
 
     updateAccount() {

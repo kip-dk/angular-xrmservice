@@ -63,6 +63,33 @@ export class EntityReference {
      }
 }
 
+export class OptionSetValue {
+    constructor();
+    constructor(value: number);
+    constructor(value: number, name: string);
+    constructor(value: number = null, name: string = null) {
+        this.value = value;
+        this.name = name;
+    }
+
+    value: number;
+    name: string;
+
+    equals(o: OptionSetValue): boolean {
+        if (this.value == null && (o == null || o.value == null)) return true;
+        return this.value == o.value;
+    }
+
+    static same(o1: OptionSetValue, o2: OptionSetValue): boolean {
+        if (o1 == null && o2 == null) return true;
+        let v1: number = null;
+        let v2: number = null;
+        if (o1 != null) v1 = o1.value;
+        if (o2 != null) v2 = o2.value;
+        return v1 == v2;
+    }
+}
+
 
 export enum Operator {
     And,
@@ -273,6 +300,14 @@ export class XrmContextService {
                         continue;
                     }
 
+                    if (prototype[prop] instanceof OptionSetValue) {
+                        let o = instance[prop] as OptionSetValue;
+                        if (o.value != null) {
+                            newr[prop.toString()] = o.value; 
+                        }
+                        continue;
+                    }
+
                     if (prototype[prop] instanceof Date) {
                         let d = value as Date;
                         newr[prop.toString()] = d.toISOString();
@@ -315,6 +350,18 @@ export class XrmContextService {
                             upd[prototype[prop]['associatednavigationproperty']] = '/' + prototype[prop]['pluralName'] + '(' + newValue['id'] + ')';
                         } else {
                             upd[prototype[prop]['associatednavigationproperty']] = null;
+                        }
+                    }
+                    continue;
+                }
+
+                if (prototype[prop] instanceof OptionSetValue) {
+                    if (!OptionSetValue.same(prevValue, newValue)) {
+                        let o = newValue as OptionSetValue;
+                        if (o == null || o.value == null) {
+                            upd[prop.toString()] = null;
+                        } else {
+                            upd[prop.toString()] = o.value;
                         }
                     }
                     continue;
@@ -486,6 +533,18 @@ export class XrmContextService {
                     if (change != null) {
                         change[prop.toString()] = ref.clone();
                     }
+                    done = true;
+                }
+
+                if (!done && prototype[prop] instanceof OptionSetValue) {
+                    let opt = new OptionSetValue();
+                    opt.value = instance[prop];
+                    opt.name = instance[prop + '@OData.Community.Display.V1.FormattedValue'];
+                    result[prop] = opt;
+                    if (change != null) {
+                        change[prop.toString()] = new OptionSetValue(opt.value);
+                    }
+
                     done = true;
                 }
 
