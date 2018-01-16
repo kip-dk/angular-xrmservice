@@ -1,2 +1,33 @@
-
-{{ entities | json }}
+<ko-main *ngIf="entities != null">
+  <ko-horizontal-split height="44px">
+    <ko-vertical-split width="300px" top>
+      <ko-view left>
+        <div class="input-group">
+          <input type="text" class="form-control" placeholder="Search for entity" [(ngModel)]="entitySearch" (ngModelChange)="searchEntity($event)"/>
+          <span class="input-group-addon"><span class="fa fa-search"></span></span>
+        </div>
+      </ko-view>
+      <ko-vertical-split width="300px" right>
+        <ko-view left>
+          <div class="input-group" *ngIf="current != null">
+            <input type="text" class="form-control" placeholder="Search for attribute" />
+            <span class="input-group-addon"><span class="fa fa-search"></span></span>
+          </div>
+        </ko-view>
+      </ko-vertical-split>
+    </ko-vertical-split>
+    <ko-vertical-split width="300px" bottom>
+      <ko-view left>
+        <nav class="nav nav-pills flex-column">
+          <a class="nav-link" *ngFor="let ent of entities" (click)="selectEntity(ent)" href="javascript:void(0)" [ngClass]="{ active: ent == current }">
+            {{ ent.LogicalName }}
+          </a>
+        </nav>
+      </ko-view>
+      <ko-vertical-split width="300px" right>
+        <div left>the left side again</div>
+        <div right>The right side</div>
+      </ko-vertical-split>
+    </ko-vertical-split>
+  </ko-horizontal-split>
+</ko-main>

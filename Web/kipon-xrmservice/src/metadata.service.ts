@@ -42,11 +42,19 @@ export class MetadataService {
             .where("LogicalCollectionName", Comparator.ContainsData)
             .where("LogicalName", Comparator.ContainsData);
 
-        if (name != null && name != '') {
-            con.where("LogicalName", Comparator.Contains, name);
-        }
-
         return this.xrmService.query<EntityMeta>(this.entityMetaPrototype, con).map(r => {
+            if (name != null && name != '') {
+                let _s = name.toLowerCase();
+                let ma = [];
+                // Metadata api does not support contains - therefore client site filter
+                r.value.forEach(e => {
+                    if (e.LogicalName.toLowerCase().indexOf(_s) >= 0) {
+                        ma.push(e);
+                    }
+                });
+                r.value = ma;
+            }
+
             r.value = r.value.sort((a, b) => a.LogicalName.toLowerCase().localeCompare(b.LogicalName.toLowerCase()))
             return r;
         });

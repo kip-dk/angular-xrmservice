@@ -143,7 +143,7 @@ export class Filter {
                return _f + ' ne ' + _v;
             }
             case Comparator.Contains: {
-                return "contains(" + _f + ", _"+ _v + ")"; 
+                return "contains(" + _f + ","+ _v + ")"; 
            }
             case Comparator.ContainsData: {
                return _f + ' ne null';
