@@ -5,6 +5,7 @@ import 'rxjs/Rx';
 
 import { XrmService, XrmContext } from './xrm.service';
 import { XrmContextService } from './xrmcontext.service';
+import { MetadataService } from './metadata.service';
 
 export * from './xrm.service';
 export * from './xrmcontext.service';
@@ -23,7 +24,7 @@ export class XrmServiceModule {
     static forRoot(): ModuleWithProviders {
         return {
             ngModule: XrmServiceModule,
-            providers: [XrmService, XrmContextService]
+            providers: [XrmService, XrmContextService, MetadataService]
         };
     }
 }

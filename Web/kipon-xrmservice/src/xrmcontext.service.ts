@@ -109,7 +109,8 @@ export enum Operator {
 
 export enum Comparator {
     Equals,
-    NotEquals
+    NotEquals,
+    Contains
 }
 
 export class ColumnBuilder {
@@ -122,28 +123,26 @@ export class Filter {
     operator: Comparator;
     value: any;
 
-    toQueryString(): string {
+    toQueryString(prototype: Entity): string {
         let result = '';
+        let _f = this.field;
+        let _v = "'" + this.value + "'";
 
-        if (this.value instanceof EntityReference) {
-            result = '_' + this.field + '_value';
-        } else {
-            result = this.field;
+        if (prototype[this.field] instanceof EntityReference) {
+            _f = "_" + this.field + "_value";
+            _v = this.value;
         }
 
-        switch (this.operator) {
-            case Comparator.Equals: {
-                result += ' eq '; break;
+       switch (this.operator) {
+           case Comparator.Equals: {
+               return _f + ' eq ' + _v;
             }
-            case Comparator.NotEquals: {
-                result += ' ne '; break;
+           case Comparator.NotEquals: {
+               return _f + ' ne ' + _v;
             }
-        }
-
-        if (this.value instanceof EntityReference) {
-            result += this.value.id;
-        } else {
-            result += "'" + this.value + "'";
+            case Comparator.Contains: {
+                return "contains(" + _f + ", _"+ _v + ")"; 
+            }
         }
         return result;
     }
@@ -181,13 +180,17 @@ export class Condition {
         return result;
     }
 
-    toQueryString(): string {
+    toQueryString(prototype: Entity): string {
+        if ((this.children == null || this.children.length == 0) && (this.filter == null || this.filter.length == 0)) {
+            return null;
+        }
+
         let me = this;
         let result = '';
         let opr = '';
         if (this.filter != null && this.filter.length > 0) {
             this.filter.forEach(r => {
-                result += opr + r.toQueryString();
+                result += opr + r.toQueryString(prototype);
                 if (me.operator == Operator.And) {
                     opr = ' and ';
                 } else {
@@ -199,7 +202,7 @@ export class Condition {
 
         if (this.children != null && this.children.length > 0) {
             this.children.forEach(c => {
-                result += opr + "(" + c.toQueryString() + ")";
+                result += opr + "(" + c.toQueryString(prototype) + ")";
                 if (me.operator == Operator.And) {
                     opr = ' and ';
                 } else {
@@ -250,7 +253,7 @@ export class XrmContextService {
         let con = condition;
         while (con.parent != null) con = con.parent;
 
-        let filter = con.toQueryString();
+        let filter = con.toQueryString(prototype);
 
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
         headers = headers.append("OData-MaxVersion", "4.0");
