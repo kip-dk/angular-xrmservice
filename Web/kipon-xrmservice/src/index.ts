@@ -9,6 +9,7 @@ import { MetadataService } from './metadata.service';
 
 export * from './xrm.service';
 export * from './xrmcontext.service';
+export * from './metadata.service';
 
 @NgModule({
     imports: [

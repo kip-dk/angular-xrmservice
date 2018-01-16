@@ -10,6 +10,8 @@
     <Compile Remove="poc\dist\**" />
     <Compile Remove="poc\e2e\**" />
     <Compile Remove="poc\node_modules\**" />
+    <Compile Remove="service-generator\e2e\**" />
+    <Compile Remove="service-generator\node_modules\**" />
     <Compile Remove="xrmservice\dist\**" />
     <Compile Remove="xrmservice\node_modules\**" />
     <Compile Remove="xrmservice\tools\**" />
@@ -17,6 +19,8 @@
     <Content Remove="poc\dist\**" />
     <Content Remove="poc\e2e\**" />
     <Content Remove="poc\node_modules\**" />
+    <Content Remove="service-generator\e2e\**" />
+    <Content Remove="service-generator\node_modules\**" />
     <Content Remove="xrmservice\dist\**" />
     <Content Remove="xrmservice\node_modules\**" />
     <Content Remove="xrmservice\tools\**" />
@@ -24,6 +28,8 @@
     <EmbeddedResource Remove="poc\dist\**" />
     <EmbeddedResource Remove="poc\e2e\**" />
     <EmbeddedResource Remove="poc\node_modules\**" />
+    <EmbeddedResource Remove="service-generator\e2e\**" />
+    <EmbeddedResource Remove="service-generator\node_modules\**" />
     <EmbeddedResource Remove="xrmservice\dist\**" />
     <EmbeddedResource Remove="xrmservice\node_modules\**" />
     <EmbeddedResource Remove="xrmservice\tools\**" />
@@ -31,17 +37,21 @@
     <None Remove="poc\dist\**" />
     <None Remove="poc\e2e\**" />
     <None Remove="poc\node_modules\**" />
+    <None Remove="service-generator\e2e\**" />
+    <None Remove="service-generator\node_modules\**" />
     <None Remove="xrmservice\dist\**" />
     <None Remove="xrmservice\node_modules\**" />
     <None Remove="xrmservice\tools\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="service-generator\.angular-cli.json" />
     <Content Remove="xrmservice\bs-config.json" />
     <Content Remove="xrmservice\tslint.json" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="service-generator\.editorconfig" />
     <None Remove="xrmservice\.travis.yml" />
     <None Remove="xrmservice\gulpfile.js" />
   </ItemGroup>

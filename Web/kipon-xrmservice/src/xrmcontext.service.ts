@@ -110,7 +110,9 @@ export enum Operator {
 export enum Comparator {
     Equals,
     NotEquals,
-    Contains
+    Contains,
+    DoesNotContainsData,
+    ContainsData
 }
 
 export class ColumnBuilder {
@@ -142,6 +144,12 @@ export class Filter {
             }
             case Comparator.Contains: {
                 return "contains(" + _f + ", _"+ _v + ")"; 
+           }
+            case Comparator.ContainsData: {
+               return _f + ' ne null';
+            }
+            case Comparator.DoesNotContainsData: {
+                return _f + ' eq null';
             }
         }
         return result;
