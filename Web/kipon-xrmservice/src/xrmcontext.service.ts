@@ -46,6 +46,17 @@ export class EntityReference {
         return result;
     }
 
+    associatednavigationpropertyname(): string {
+        if (this.associatednavigationproperty == null || this.associatednavigationproperty == '') {
+            throw 'navigation property has not been set for this EntityReference instance';
+        }
+
+        if (this.associatednavigationproperty.endsWith('@odata.bind')) {
+            return this.associatednavigationproperty;
+        }
+        return this.associatednavigationproperty + '@odata.bind';
+    }
+
     equals(ref: EntityReference): boolean {
         return this.id == ref.id && this.logicalname == ref.logicalname;
     }
@@ -235,7 +246,11 @@ export class XrmContextService {
     query<T extends Entity>(prototype: T, condition: Condition, orderBy: string = null, top: number = 0, count: boolean = false): Observable<XrmQueryResult<T>> {
         let me = this;
         let fields = this.columnBuilder(prototype).columns;
-        let filter = condition.toQueryString();
+
+        let con = condition;
+        while (con.parent != null) con = con.parent;
+
+        let filter = con.toQueryString();
 
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
         headers = headers.append("OData-MaxVersion", "4.0");
@@ -295,7 +310,7 @@ export class XrmContextService {
                     if (prototype[prop] instanceof EntityReference) {
                         let ref = instance[prop] as EntityReference;
                         if (ref.id != null) {
-                            newr[prototype[prop]['associatednavigationproperty']] = '/' + prototype[prop]['pluralName'] + '(' + ref.id + ')';
+                            newr[prototype[prop]['associatednavigationpropertyname']()] = '/' + prototype[prop]['pluralName'] + '(' + ref.id + ')';
                         }
                         continue;
                     }
@@ -347,9 +362,9 @@ export class XrmContextService {
                     let r = prototype[prop] as EntityReference;
                     if (!EntityReference.same(prevValue, newValue)) {
                         if (newValue != null && newValue["id"] != null && newValue["id"] != '') {
-                            upd[prototype[prop]['associatednavigationproperty']] = '/' + prototype[prop]['pluralName'] + '(' + newValue['id'] + ')';
+                            upd[prototype[prop]['associatednavigationpropertyname']()] = '/' + prototype[prop]['pluralName'] + '(' + newValue['id'] + ')';
                         } else {
-                            upd[prototype[prop]['associatednavigationproperty']] = null;
+                            upd[prototype[prop]['associatednavigationpropertyname']()] = null;
                         }
                     }
                     continue;
