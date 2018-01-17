@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
 import { XrmQueryResult } from './xrm.service';
-import { XrmContextService, Entity, Condition, Comparator } from './xrmcontext.service';
+import { XrmContextService, Entity, OptionSetValue, Condition, Comparator } from './xrmcontext.service';
 
 export class LabelMeta {
     Label: string;
@@ -28,12 +28,30 @@ export class EntityMeta extends Entity {
     ObjectTypeCode: number = null;
     SchemaName: string = null;
     LogicalCollectionName: string = null;
+    $expand: AttributeMeta[] = null;
+
+    meta(): EntityMeta {
+        this.$expand = [new AttributeMeta()];
+        return this;
+    }
+}
+
+export class AttributeMeta extends Entity {
+    constructor() {
+        super("Attributes", "MetadataId")
+    }
+    AttributeType: OptionSetValue = new OptionSetValue();
+    DisplayName: LabelMeta = null;
+    LogicalName: string = null;
+    Description: string = null;
+    SchemaName: string = null;
 }
 
 
 @Injectable()
 export class MetadataService {
-    private entityMetaPrototype = new EntityMeta();
+    private searchEntityMetaPrototype = new EntityMeta();
+    private getEntityMetaPrototype = new EntityMeta().meta();
 
     constructor(private xrmService: XrmContextService) { }
 
@@ -42,7 +60,7 @@ export class MetadataService {
             .where("LogicalCollectionName", Comparator.ContainsData)
             .where("LogicalName", Comparator.ContainsData);
 
-        return this.xrmService.query<EntityMeta>(this.entityMetaPrototype, con).map(r => {
+        return this.xrmService.query<EntityMeta>(this.searchEntityMetaPrototype, con).map(r => {
             if (name != null && name != '') {
                 let _s = name.toLowerCase();
                 let ma = [];
@@ -58,5 +76,9 @@ export class MetadataService {
             r.value = r.value.sort((a, b) => a.LogicalName.toLowerCase().localeCompare(b.LogicalName.toLowerCase()))
             return r;
         });
+    }
+
+    get(id: string): Observable<EntityMeta> {
+        return this.xrmService.get(this.getEntityMetaPrototype, id);
     }
 }

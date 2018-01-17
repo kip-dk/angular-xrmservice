@@ -15,6 +15,7 @@ export class CtxAccount extends Entity {
     creditlimit: number = null;
     transactioncurrencyid: EntityReference = new EntityReference().meta("transactioncurrencies", "transactioncurrencyid@odata.bind");
     industrycode: OptionSetValue = new OptionSetValue();
+    primarycontactid: CtxContact = new CtxContact();
 
     ignoreMe: string;
 

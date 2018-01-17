@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult, XrmContextService } from 'kipon-xrmservice';
+import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult, XrmContextService, Expand } from 'kipon-xrmservice';
 
 
 export class Account {
@@ -8,6 +8,7 @@ export class Account {
     accountnumber: string;
     accountratingcode: string;
     name: string;
+    primarycontactid: Contact;
 }
 
 export class Contact {
@@ -53,7 +54,10 @@ export class AppComponent {
         let me = this;
         this.xrmService.getCurrenKey().subscribe(r => {
             if (r.id != null && r.entityType === 'account') {
-                this.xrmService.get<Account>("accounts", r.id, "accountid,accountnumber,accountratingcode,name").subscribe(r => {
+                let expand = new Expand();
+                expand.name = "primarycontactid";
+                expand.select = "fullname,firstname,lastname,address1_line1"
+                this.xrmService.get<Account>("accounts", r.id, "accountid,accountnumber,accountratingcode,name", expand).subscribe(r => {
                     this.account = r;
                     me.getContacts();
                 });

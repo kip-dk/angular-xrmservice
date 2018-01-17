@@ -2,7 +2,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
-import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult } from './xrm.service';
+import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult, Expand } from './xrm.service';
 
 export class Entity {
     _pluralName: string;
@@ -132,7 +132,7 @@ export class Filter {
 
         if (prototype[this.field] instanceof EntityReference) {
             _f = "_" + this.field + "_value";
-            _v = this.value;
+            _v = this.value.id;
         }
 
        switch (this.operator) {
@@ -222,6 +222,12 @@ export class Condition {
     }
 }
 
+class ExpandProperty {
+    name: string;
+    entity: Entity;
+    isArray: boolean;
+}
+
 @Injectable()
 export class XrmContextService {
     context: any = {};
@@ -245,7 +251,14 @@ export class XrmContextService {
         let me = this;
         let columnDef = this.columnBuilder(prototype);
 
-        return this.xrmService.get<T>(prototype._pluralName, id, columnDef.columns).map(r => {
+        let expand: Expand = null;
+
+        let ep = this.getExpandProperty(prototype);
+        if (ep != null) {
+            expand = this.$expandToExpand(ep);
+        }
+
+        return this.xrmService.get<T>(prototype._pluralName, id, columnDef.columns, expand).map(r => {
             return me.resolve<T>(prototype, r, prototype._updateable);
         });
     }
@@ -429,6 +442,16 @@ export class XrmContextService {
         });
     }
 
+    private $expandToExpand(prop: ExpandProperty): Expand {
+        if (prop != null) {
+            let result = new Expand();
+            result.name = prop.name;
+            result.select = this.columnBuilder(prop.entity).columns;
+            return result;
+        }
+        return null;
+    }
+
     private resolveQueryResult<T extends Entity>(prototype:T, response: any, top: number, pages: string[], pageIndex: number): XrmQueryResult<T> {
         let me = this;
         let result = {
@@ -602,6 +625,38 @@ export class XrmContextService {
             }
         }
 
+        let ep = this.getExpandProperty(prototype);
+        if (ep != null) {
+            if (ep.isArray) {
+                console.log('to do resolve expanded array');
+            } else {
+                let _v = instance[ep.name];
+                if (_v != null) {
+                    result[ep.name] = this.resolve(ep.entity, _v, false);
+                    result[ep.name]['_keyName'] = ep.entity._keyName;
+                    result[ep.name]['_pluralName'] = ep.entity._pluralName;
+                }
+            }
+        }
+
+        if (prototype.hasOwnProperty('$expand')) {
+            let _eMeta = prototype['$expand'];
+            if (typeof _eMeta !== 'undefined' &&_eMeta != null) {
+                if (Array.isArray(_eMeta)) {
+                    console.log('resolve expand result list -- to-do');
+                } else {
+                    let _ee = _eMeta as Entity;
+                    let _v = instance[_ee._keyName];
+                    if (typeof _v !== 'undefined' && _v != null) {
+                        result['$expand'] = this.resolve(_ee, _v, false);
+                    } else {
+                        result['$expand'] = null;
+                    }
+                    delete result[_ee._keyName];
+                }
+            }
+        }
+
         if (result['onFetch'] !== 'undefined' && result["onFetch"] != null  && typeof result["onFetch"] === 'function') {
             result['onFetch']();
         }
@@ -615,6 +670,16 @@ export class XrmContextService {
         for (var prop in entity) {
             if (prop == entity._keyName) continue;
             if (this.ignoreColumn(prop)) continue;
+
+            let v = entity[prop];
+            if (typeof v !== 'undefined' && v != null) {
+                if (Array.isArray(v)) {
+                    continue;
+                }
+                if (v instanceof Entity) {
+                    continue;
+                }
+            }
 
             if (entity.hasOwnProperty(prop) && typeof (entity[prop] != 'function')) {
                 if (entity[prop] instanceof EntityReference) {
@@ -631,8 +696,36 @@ export class XrmContextService {
         return result;
     }
 
+    private getExpandProperty(entity: Entity): ExpandProperty {
+        for (var prop in entity) {
+            if (prop == entity._keyName) continue;
+            if (this.ignoreColumn(prop)) continue;
+
+            let _v = entity[prop];
+            if (Array.isArray(_v)) {
+                if (_v.length > 0) {
+                    let pt = _v[0] as Entity;
+                    return {
+                        name: pt._pluralName,
+                        entity: pt,
+                        isArray: true
+                    }
+                }
+            } else {
+                if (_v instanceof Entity) {
+                    return {
+                        name: prop,
+                        entity: _v,
+                        isArray: false
+                    }
+                }
+            }
+        }
+        return null;    
+    }
+
     private ignoreColumn(prop: string): boolean {
-        if (prop == "_pluralName" || prop == "_keyName" || prop == "id" || prop == '_updateable') {
+        if (prop == "_pluralName" || prop == "_keyName" || prop == "id" || prop == '_updateable' || prop == '$expand') {
             return true;
         }
         return false;

@@ -25,6 +25,12 @@ export interface XrmQueryResult<T> {
     next(): Observable<XrmQueryResult<T>>;
 }
 
+export class Expand {
+    name: string;
+    select: string;
+    filter: string;
+}
+
 
 @Injectable()
 export class XrmService {
@@ -116,8 +122,9 @@ export class XrmService {
             return new Observable<XrmEntityKey>(obs => obs.next(result));
         }
     }
-
-    get<T>(entityTypes: string, id: string, fields: string): Observable<T> {
+    get<T>(entityTypes: string, id: string, fields: string): Observable<T>;
+    get<T>(entityTypes: string, id: string, fields: string, expand: Expand): Observable<T>;
+    get<T>(entityTypes: string, id: string, fields: string, expand: Expand = null): Observable<T> {
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
         headers = headers.append("OData-MaxVersion", "4.0");
         headers = headers.append("OData-Version", "4.0");
@@ -129,14 +136,18 @@ export class XrmService {
         }
 
         let addFields = '';
+        let sep = '?';
+
         if (fields != null && fields != '') {
-            addFields = "?$select=" + fields;
+            addFields = sep + "$select=" + fields;
+            sep = '&';
         }
+
+        let _ex = this.expandString(expand, sep);
 
         let _id = id.replace("{", "").replace("}", "");
 
-
-        return this.http.get<T>(this.getContext().getClientUrl() + this.apiUrl + entityTypes + "(" + _id + ")" + addFields, options).map(response => response);
+        return this.http.get<T>(this.getContext().getClientUrl() + this.apiUrl + entityTypes + "(" + _id + ")" + addFields + _ex, options).map(response => response);
     }
 
     query<T>(entityTypes: string, fields: string, filter: string): Observable<XrmQueryResult<T>>;
@@ -255,6 +266,26 @@ export class XrmService {
             headers: headers
         }
         return this.http.delete(this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")").map(response => null);
+    }
+
+    private expandString(expand: Expand, sep: string): string {
+        if (expand == null || expand.name == null || expand.name == '') return '';
+
+        let _ex = sep + '$expand=' + expand.name;
+        if (expand.select != null || expand.filter != null) {
+            _ex += '(';
+            let semi = '';
+            if (expand.select != null) {
+                _ex += '$select=' + expand.select;
+                semi = ';'
+            }
+            if (expand.filter != null) {
+                _ex += semi + '$filter=' + expand.filter;
+            }
+
+            _ex += ')';
+        }
+        return _ex;
     }
 
     private resolveQueryResult<T>(response: any, top: number, pages: string[], pageIndex: number): XrmQueryResult<T> {
