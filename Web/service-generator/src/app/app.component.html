@@ -10,7 +10,7 @@
       <ko-vertical-split width="300px" right>
         <ko-view left>
           <div class="input-group" *ngIf="current != null">
-            <input type="text" class="form-control" placeholder="Search for attribute" />
+            <input type="text" class="form-control" [(ngModel)]="attrSearch" placeholder="Search for attribute" (ngModelChange)="searchAttr($event)" />
             <span class="input-group-addon"><span class="fa fa-search"></span></span>
           </div>
         </ko-view>
@@ -25,8 +25,20 @@
         </nav>
       </ko-view>
       <ko-vertical-split width="300px" right>
-        <div left>the left side again</div>
-        <div right>The right side</div>
+        <ko-view left>
+          <div class="alert alert-warning" *ngIf="current == null">
+            <span class="fa fa fa-hand-o-left"></span>
+            &nbsp;Please select an entity from the list
+          </div>
+          <nav class="nav nav-pills flex-column" *ngIf="current != null && attributes != null">
+            <a class="nav-link" *ngFor="let att of attributes" (click)="selectAttribute(att)" href="javascript:void(0)" [ngClass]="{ active: att.selected == true }">
+              {{ att.LogicalName }}
+            </a>
+          </nav>
+        </ko-view>
+        <ko-view right>
+          <textarea [(ngModel)]="code" *ngIf="current != null" style="width: 99%; height: 99 %"></textarea>
+        </ko-view>
       </ko-vertical-split>
     </ko-vertical-split>
   </ko-horizontal-split>

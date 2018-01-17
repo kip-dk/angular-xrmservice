@@ -536,6 +536,7 @@ export class XrmContextService {
     }
 
     private resolve<T extends Entity>(prototype: T, instance: any, updateable: boolean): T {
+        let me = this;
         let key = prototype._pluralName + ':' + instance[prototype._keyName];
         let result = instance;
         let change = null;
@@ -628,31 +629,20 @@ export class XrmContextService {
         let ep = this.getExpandProperty(prototype);
         if (ep != null) {
             if (ep.isArray) {
-                console.log('to do resolve expanded array');
+                let _v = instance[ep.name];
+                if (_v != null && Array.isArray(_v)) {
+                    let _tmp = [];
+                    _v.forEach(_r => {
+                        _tmp.push(me.resolve(ep.entity, _r, false));
+                    });
+                    result[ep.name] = _tmp;
+                }
             } else {
                 let _v = instance[ep.name];
                 if (_v != null) {
                     result[ep.name] = this.resolve(ep.entity, _v, false);
                     result[ep.name]['_keyName'] = ep.entity._keyName;
                     result[ep.name]['_pluralName'] = ep.entity._pluralName;
-                }
-            }
-        }
-
-        if (prototype.hasOwnProperty('$expand')) {
-            let _eMeta = prototype['$expand'];
-            if (typeof _eMeta !== 'undefined' &&_eMeta != null) {
-                if (Array.isArray(_eMeta)) {
-                    console.log('resolve expand result list -- to-do');
-                } else {
-                    let _ee = _eMeta as Entity;
-                    let _v = instance[_ee._keyName];
-                    if (typeof _v !== 'undefined' && _v != null) {
-                        result['$expand'] = this.resolve(_ee, _v, false);
-                    } else {
-                        result['$expand'] = null;
-                    }
-                    delete result[_ee._keyName];
                 }
             }
         }

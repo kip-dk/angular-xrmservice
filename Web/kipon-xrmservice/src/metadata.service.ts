@@ -28,10 +28,10 @@ export class EntityMeta extends Entity {
     ObjectTypeCode: number = null;
     SchemaName: string = null;
     LogicalCollectionName: string = null;
-    $expand: AttributeMeta[] = null;
+    Attributes: AttributeMeta[] = null;
 
     meta(): EntityMeta {
-        this.$expand = [new AttributeMeta()];
+        this.Attributes = [new AttributeMeta()];
         return this;
     }
 }
@@ -43,8 +43,15 @@ export class AttributeMeta extends Entity {
     AttributeType: OptionSetValue = new OptionSetValue();
     DisplayName: LabelMeta = null;
     LogicalName: string = null;
-    Description: string = null;
+    Description: LabelMeta = null;
     SchemaName: string = null;
+
+    // virtual properties for ui purpose
+    selected: boolean;
+
+    onFetch() {
+        this.selected = false;
+    }
 }
 
 
@@ -79,6 +86,16 @@ export class MetadataService {
     }
 
     get(id: string): Observable<EntityMeta> {
-        return this.xrmService.get(this.getEntityMetaPrototype, id);
+        return this.xrmService.get(this.getEntityMetaPrototype, id).map(r => {
+            if (r.Attributes != null && r.Attributes.length > 0) {
+                r.Attributes = r.Attributes.sort((a, b) => {
+                    if (a.LogicalName == null && b.LogicalName != null) return 1;
+                    if (a.LogicalName != null && b.LogicalName == null) return -1;
+                    if (a.LogicalName == null && b.LogicalName == null) return 0;
+                    return a.LogicalName.toLowerCase().localeCompare(b.LogicalName.toLowerCase())
+                })
+            }
+            return r;
+        });
     }
 }
