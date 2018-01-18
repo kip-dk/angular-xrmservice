@@ -247,6 +247,10 @@ export class XrmContextService {
         return this.xrmService.getCurrenKey();
     }
 
+    getServiceUrl(): string {
+        return this.getContext().getClientUrl() + this.xrmService.apiUrl;
+    }
+
     get<T extends Entity>(prototype: T, id: string): Observable<T> {
         let me = this;
         let columnDef = this.columnBuilder(prototype);

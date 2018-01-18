@@ -32,6 +32,7 @@ export class Expand {
 }
 
 
+
 @Injectable()
 export class XrmService {
     apiUrl: string = '/api/data/v8.2/';

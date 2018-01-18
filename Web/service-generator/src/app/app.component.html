@@ -14,6 +14,15 @@
             <span class="input-group-addon"><span class="fa fa-search"></span></span>
           </div>
         </ko-view>
+        <ko-view right *ngIf="current != null">
+          <div class="btn-group">
+            <button class="btn" [ngClass]="{'btn-success' : support.get, 'btn-default' : !support.get }" (click)="toggleSupport('get')">Get</button>
+            <button class="btn" [ngClass]="{'btn-success' : support.query, 'btn-default' : !support.query }" (click)="toggleSupport('query')">Query</button>
+            <button class="btn" [ngClass]="{'btn-success' : support.create, 'btn-default' : !support.create }" (click)="toggleSupport('create')">Create</button>
+            <button class="btn" [ngClass]="{'btn-success' : support.update, 'btn-default' : !support.update }" (click)="toggleSupport('update')">Update</button>
+            <button class="btn" [ngClass]="{'btn-success' : support.delete, 'btn-default' : !support.delete }" (click)="toggleSupport('delete')">Delete</button>
+          </div>
+        </ko-view>
       </ko-vertical-split>
     </ko-vertical-split>
     <ko-vertical-split width="300px" bottom>
@@ -37,7 +46,7 @@
           </nav>
         </ko-view>
         <ko-view right>
-          <textarea [(ngModel)]="code" *ngIf="current != null" style="width: 99%; height: 99 %"></textarea>
+          <textarea [(ngModel)]="code" *ngIf="current != null" style="width: 99%; height: 99%"></textarea>
         </ko-view>
       </ko-vertical-split>
     </ko-vertical-split>
