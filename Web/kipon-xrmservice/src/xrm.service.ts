@@ -6,6 +6,7 @@ import { Observable } from 'rxjs/Observable';
 export interface XrmContext {
     getClientUrl(): string;
     getQueryStringParameters(): any;
+    getVersion(): string;
 }
 
 export class XrmEntityKey {
@@ -38,6 +39,8 @@ export class XrmService {
     apiUrl: string = '/api/data/v8.2/';
 
     constructor(private http: HttpClient) {
+        let v = this.getContext().getVersion().split('.');
+        this.setVersion(v[0] + "." + v[1]);
     }
 
     setVersion(v: string): void {
@@ -46,12 +49,19 @@ export class XrmService {
 
     getContext(): XrmContext {
         if (typeof window['GetGlobalContext'] != "undefined") {
-            return window['GetGlobalContext']();
+            let x = window['GetGlobalContext']();
+            if (x.getVersion == undefined) {
+                x.getVersion = (): string => "8.0.0.0"
+            }
+            return x;
         }
 
         if (window['Xrm'] != null) {
             var x = window["Xrm"]["Page"]["context"] as XrmContext;
             if (x != null) {
+                if (x.getVersion == undefined) {
+                    x.getVersion = (): string => "8.0.0.0"
+                }
                 return x;
             }
         }
@@ -59,6 +69,9 @@ export class XrmService {
         if (window.parent != null && window.parent['Xrm'] != null) {
             var x = window.parent["Xrm"]["Page"]["context"] as XrmContext;
             if (x != null) {
+                if (x.getVersion == undefined) {
+                    x.getVersion = (): string => "8.0.0.0"
+                }
                 return x;
             }
         }
@@ -75,6 +88,9 @@ export class XrmService {
                     params[key] = decodeURIComponent(val)
                 })
                 return params;
+            },
+            getVersion(): string {
+                return "8.0.0.0";
             }
         };
     }
