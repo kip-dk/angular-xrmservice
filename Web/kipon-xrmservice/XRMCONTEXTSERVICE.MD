@@ -119,6 +119,11 @@ export class AccountService {
 The above example service show a full running service with support for all CRUD operations. 
 The query is defined by the class Account, that extends Entity.
 
+As you can see from the Account prototype, the accountid field is not included as a property on the class, but instead parsed to the constructor super method.
+This is because the XrmContextService is simplifying unique key management, by always naming the unique key of an object "id", and id is a property on the Entity
+class. Any opeation, get, query and create, will assign the id of the returned instance, according to the key name, and it will explcitly remove the original key field
+from the instance. This is because it is so much easier to create generic code for CRUD operation when you always know the name of field representing the unique key.
+
 The constructor is overridden, and must parse the plural name and the entity key name, and finally an optional boolean, indicating if update
 operations is needed. Default is false, but then the XrmContextService will throw an exception if you try of perform an update operation
 on the entity. The reason you need to decided this, is that all objects will be changed managed by the XrmContextService, and if this is not 
@@ -128,15 +133,15 @@ operations, returning an object instance from the server.
 The property names must correspond 100% to the logical attribute name, and properties that should be included in any operation (get, query, update, create) must be set
 with an initial value in the prototype. For string and numbers, null is sufficient, but if you wish to work with stronly typed objects supported in the model, such
 property must be assigned a strong type value. This value will NOT serve as a default when data is fetched by get or query method, but it will help the XrmContextService
-to build the needed web API urls, and secondly automatically convert the returned values from the server to strongly typed properties.
+to build the needed web API urls, and secondly automatically convert the returned values from the server to strongly typed properties in the result object.
 
 
 ### The folloing strong types are supported
 
 #### string = single line text, or memo
 #### number = whole number, decimal and money
-#### Date = standard javascript Date object.
 #### boolean = two option field
+#### Date = standard javascript Date object.
 #### OptionSetValue = { value: number, name: string }, representing a Picklist value from Dynamics 365
 #### EntityReference 
 A reference to a related entity on the form { id: string, name: string }
@@ -222,7 +227,7 @@ export class Account extends Entity {
 ```
 
 In above example, a "selected" property has been added to the prototype, but it has not been assigned any value. It can be used in the UI to mange if an instance
-of an account ex. in a list has been selected. The UI can manipulate with this setting, without impacting any update statement, and if an object is fetch several times,
+of an account ex. in a list has been selected. The UI can manipulate this setting, without impacting any update statement, and if an object is fetch several times,
 these values will be retained due to the caching nature of the XrmContextService.
 
 You can add any number of virtual properties to your prototype as long as you do not assign an initial value to the property.
@@ -258,7 +263,7 @@ The constructor of your entity will NOT be called for instance commeing from the
 the raw json object returned from these calles, however the XrmContextService will manipulate the returned object, but in terms of converting properties to
 correct property type defined by the prototype, but also in terms of adding any methods, defined same place.
 
-If you define a method in the prototype called "onFetch", this method will automatically be called by the XrmContextService before the result is based back to you.
+If you define a method in the prototype called "onFetch", this method will automatically be called by the XrmContextService before the result is parsed back to you.
 This allow you to do automatically initializtion of you object.
 
 ```typescript
@@ -276,6 +281,44 @@ export class Account extends Entity {
 }
 ```
 
+
+### expand
+Document how to define and expand property for get method.
+
+
+
+## Inject your EntityService into a component and use it
+Until now we have just defined a service that can perform CRUD operations against Dynamics 365. In this section we will explore around using the service in a component.
+
+```typescript
+import { Component } from '@angular/core';
+import {XrmContextService } 'kipon-xrmservice';
+import { AccountService, Account } from './account.service'; // assumed the service and this component is hosted in same folder
+
+@Component({
+    selector: 'my-component',
+    templateUrl: './my-component.component.html'
+})
+export class MyComponent {
+	account: Account;
+	constructor(private xrmServce: XrmContextService, private accountService: AccountService) {}
+
+	ngOnInit() {
+		let me = this;
+		xrmService.getCurrentId().subscribe(id => {
+			this.accountService.get(id.id).subscribe( a => {
+				me.account = a;
+			});
+		});
+	}
+}
+```
+
+The above component assumes that we can get an account id from the context, and then fetch that account from our AccountService, and
+finally assign the local account property of the component to the value returned from the get method of accountService.
+
+Be aware that any of the methods defined in the Account services, returns Observables so nothing will happen until you subscribe. The above
+code example shows how that is done.
 
 
 
