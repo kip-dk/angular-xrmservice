@@ -3,7 +3,7 @@
 ## What i kipon-xrmservice
 The XrmService is a very basic service you can use to build angular pages with Dynamics 365 as backend.
 
-It is based on the HttpClient implementation of angular 4.
+It is based on the HttpClient implementation of angular 4/5.
 
 The purpose is to make it a bit easier to use the WebAPI of Dynamics 365, without overcomplicating things to much.
 
@@ -13,6 +13,11 @@ such operation and put, to update a single attribute on an entity.
 You can use XrmService directly in your components, but to keep a good solid separation of service
 concerns and components concerns, I recommend that you only inject the XrmService into other services.
 These services can then use the XrmService to perform the actual http(s) calls to the Dynamics 365 platform.
+
+If you are looking for a more powerfull programming model, it might make sense to take a look at the XrmContextService
+documentation page, found here:
+
+[Go to XrmContextService documentation page](XRMCONTEXTSERVICE.MD)
 
 ## Installation
 
@@ -71,6 +76,10 @@ The following methods is supported.
 #### xrmService.setVersion(v: string)
 Use setVersion(v:string) to upgrade or downgrade the version to be used for calls to Dynamics 365. Default is version 8.2. Only parse the version number, ex. xrmService.setVersion('8.0') 
 to use earlier version of the Web API.  Inject the XrmService into you root component and call the setVersion method from there if needed.
+
+If you are using dynamics 365 version 8.2 or later, you do not need to call setVersion to get the correct version. It will be called automatically by the XrmService constructor, using the
+setVersion method on Xrm.pge.context, introduced with Dynamics 365 version 8.2. Earlier version will assume version 8.0, but even if you use 8.1, you are all set with this version, because
+the API version for version 8.x i accumulative, and it is your installation and not the version number that determin what is supported and what is not.
 ```typescript
 xrmService.setVersion(v: string)
 ```
@@ -140,7 +149,7 @@ export class AccountService {
   constructor(private xrmService: XrmService) { }
 
   query<Account>(filter: string, orderby: string, top: number = 0): Observable<XrmQueryResult<Account>> {
-	return this.xrmService.query<Account>('accounts', 'accountid,name,address1_line1', filter, orderby, top );
+	return this.xrmService.query<Observable<XrmQueryResult<Account>>('accounts', 'accountid,name,address1_line1', filter, orderby, top );
   }
 }
 ```
@@ -233,11 +242,16 @@ export class AccountService {
 }
 ```
 ### XrmContextService
-The xrm context service is 100% work in progress. While XrmService is a very simple map of the CRUD operations needed to do angular based custom UI on top of Dynamics 365
-the XrmContextService will provide a more future rich service, including query definition by prototype, change management of object properties and more.
+The xrm context service is  work in progress. The services i still experimental and subject to api changes, however the basic idea is
+taken form.
 
-The XrmContextService is NOT ready to be used at all.
+While XrmService is a simple map of strings to correct url and methods against the Dynamics 365 service, the XrmContextService is more a
+programming model where queries is defined by TS prototype objects, objects are cached within the context, field level 
+change management is supported, allowing  you to call a simple update(objectinstance) method to push your changes to the api and more.
 
+For a more complete documentation of the XrmContextContext service:
+
+[Go to the XrmCContextService documentation page](XRMCONTEXTSERVICE.MD)
 
 
 ## License
