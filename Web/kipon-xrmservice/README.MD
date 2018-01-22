@@ -17,7 +17,7 @@ These services can then use the XrmService to perform the actual http(s) calls t
 If you are looking for a more powerfull programming model, it might make sense to take a look at the XrmContextService
 documentation page, found here:
 
-[Go to XrmContextService documentation page](XRMCONTEXTSERVICE.MD)
+[Go to XrmContextService documentation page](https://github.com/kip-dk/angular-xrmservice/blob/master/Web/kipon-xrmservice/XRMCONTEXTSERVICE.MD)
 
 ## Installation
 
@@ -251,7 +251,7 @@ change management is supported, allowing  you to call a simple update(objectinst
 
 For a more complete documentation of the XrmContextContext service:
 
-[Go to the XrmCContextService documentation page](XRMCONTEXTSERVICE.MD)
+[Go to the XrmCContextService documentation page](https://github.com/kip-dk/angular-xrmservice/blob/master/Web/kipon-xrmservice/XRMCONTEXTSERVICE.MD)
 
 
 ## License

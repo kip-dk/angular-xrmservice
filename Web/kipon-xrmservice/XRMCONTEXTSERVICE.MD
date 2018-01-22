@@ -1,12 +1,13 @@
 ﻿# XrmContextService
 
-The XrmContextService is build on top of the XrmService, but allow a more simple programming model, where you define your queries
+The XrmContextService is build on top of the XrmService, but allow a simple yet powerfull programming model, where you define your queries
 by defining object prototypes that reflects the properties of the corresponding Dynamics 365 entities. 
 
-XrmContextService also behave as a context for the Dynamics 365, chaching the objects fetched by get or query within the context, and ensure that you 
-always get the same object instance back from a server, if it is fetch several times. As an example, lets say you fetch an account, and is primary contact
-in one query, and in next query, you fetch all child contacts of the same account. Now, if the primary contact of the account has this account as
-parent account, you will actually get two different objects back from the server representing the primary contact. 
+XrmContextService also behave as a context for the Dynamics 365, caching the objects fetched by get or query within the context, and ensure that you 
+always get the same object instance back from a server, if it has already been fetch by another query. 
+As an example, lets say you fetch an account, and is primary contact in one query, and in next query, you fetch all child contacts of the same account. 
+Now, if the primary contact of the account has this account as parent account, you will actually get two different objects back from the server representing 
+the primary contact. 
 The XrmServiceContext ensure that these two instance are merged into a simgle instance on the client, so you only have one instance of the object, 
 even though it has been fetch twise by two difference api calls.
 
@@ -24,7 +25,7 @@ To install this library, run:
 $ npm install kipon-xrmservice --save
 ```
 
-The XrmContextService is part of the same module as xrmservice, but you need to include it explicitly in your module.
+The XrmContextService is part of the same module as xrmservice, but you need to include it explicitly in your angular module.
 Because XrmContextService is using XrmService under the hood, you need to import both services in you application.
 
 Include the XrmServiceModule, XrmService and XrmContextService in your `AppModule`:
@@ -55,19 +56,18 @@ export class AppModule { }
 ## Methods inherited from XrmService
 
 Look in the api for XrmService for the following methods. There are in the XrmContextService for your convinience only, so you only need to inject
-the XrmContextService into your custom services:
+the XrmContextService into your custom services:<br /><br />
 
-xrmContextService.setVersion(v:string)
-xrmContextService.getContext()
-xrmService.getCurrenKey(): Observable&lt;XrmEntityKey&gt;
+xrmContextService.setVersion(v:string)<br />
+xrmContextService.getContext()<br />
+xrmService.getCurrenKey(): Observable&lt;XrmEntityKey&gt;<br />
 
 
 ## The XrmContextService programming model
 The XrmContextService is based on prototyping your Dynamics 365 object model. This means that, instead of parsing a comma separated list of strings, representing
-fields names of an entity, you simply parse and instance of a prototype, and the XrmContextService will use that object to build the corresponding Web API call.
-
-Take a look at below service implementation, using the XrmContextService:
-
+fields names of an entity, you simply parse and instance of a prototype, and the XrmContextService will use that object to build the corresponding Web API call.<br />
+<br />
+Take a look at below service implementation, using the XrmContextService:<br />
 
 ```typescript
 import { Injectable } from '@angular/core';
@@ -146,6 +146,136 @@ working with the @odata properties representing a lookup field in the Web API.
 An EntityReference must be defined in the prototype with needed metadata settings to allow the XrmContextService to resolve Web API correctly.
 In above example, we state that the primarycontactid is referencing contacts, and the schema name for the navigation property is primarycontactid.
 
+### Building a service based on XrmContextService
+
+```typescript
+@Injectable()
+export class AccountService {
+	private localPrototype: Account = new Account();
+	constructor(private xrmContext: XrmContextService) { }
+}
+```
+Above code shows the basic signature of a new service (from Dynamics 365 account entity). The first line in the code
+defines a "localPrototype" instance of account. That instance will be used to parse to all CRUD operations for the service. That way, you do not
+need to parse strings telling the service what to fetch from the server. It can be derived from that prototype. You need to define all properties that
+must be included in any get or fetch query, and you need to add all properties that can be subject to changes in you code.
+<br />
+Remember that all properties MUST have a value to be part of a query. The reason for this is explained later when we go into advanced use-cases for the entity 
+prototype.
+
 ## CRUD operations
+
+```typescript
+	get(id:string): Observable<Account> {
+		return this.xrmService.get<Account>(this.localPrototype, id);
+	}
+
+	query(search:string): Observable<XrmQueryResult<Account[]>>) {
+		let condition: Condition = new Condition().where('name', Comparator.Contains, search);
+		return this.xrmService.query<XrmQueryResult<Account[]>>(this.localPrototype, condition);
+	}
+
+	create(instance: Account): Observable<Account> {
+		return this.xrmService.create<Account>(this.localPrototype, instance);
+	}
+
+	update(instance: Account): Observable<Account> {
+		return this.xrmService.update<Account>(this.localPrototype, instance);
+	}
+
+	delete(instance: Account): Observable<null> {
+		return this.xrmService.delete(instance);
+	}
+```
+
+As you can see, each method in the service parses the localProperty instance to the corresponding method in the XrmContextService. By defining
+a specific entity service, you hide these dirty details from all other part of your code, and your AccountService (or what ever entity you need to work on) 
+becomes very simple and natural in its nature.
+
+
+## Advanced usecases in your prototype object.
+As stated, the prototype you defined is telling the XrmContextService what to fetch on get and query, and what to update on update, and what to parse to
+new object create to the Dynamics 365 web api. Any property in prototype that has an assigned value (null is ok for string, boolean and number) will be considered
+an Dynamics 365 property, and the XrmContextService will add the property to get and query method, and it will perform change management on the property for update purpose,
+and for create, a value assigned to a property on a real instance of the entity will be considered part of a potential create of the record.
+
+### virtual properties
+This pattern allow you to add virtual properties to the prototype that automatically will be excluded in any get, query, update, create statement.<br />
+<br />
+Lets look at an exampl:<br />
+```typescript
+export class Account extends Entity {
+	constructor() {
+		super('accounts','accountid', true);
+	}
+	accountnumber: string = null;
+	address1_city: string = null;
+	creditlimit: number = null;
+	creditonhold: boolean = null;
+	industrycode: OptionSetValue = new OptionSetValue();
+	lastonholdtime: Date = new Date();
+	name: string = null;
+	primarycontactid: EntityReference = new EntityReference("contacts","primarycontactid");
+
+	selected: boolean;
+}
+```
+
+In above example, a "selected" property has been added to the prototype, but it has not been assigned any value. It can be used in the UI to mange if an instance
+of an account ex. in a list has been selected. The UI can manipulate with this setting, without impacting any update statement, and if an object is fetch several times,
+these values will be retained due to the caching nature of the XrmContextService.
+
+You can add any number of virtual properties to your prototype as long as you do not assign an initial value to the property.
+
+
+### Instance methods
+Because the prototype serves as a prototype for all methods getting data from Dynamics 365, you can also use the prototype to define methods for the object.
+
+```typescript
+export class Account extends Entity {
+	constructor() {
+		super('accounts','accountid', true);
+	}
+	...
+
+	selected: boolean;
+
+	creditColor(): string {
+	   if (this.creditlimit > 0) return 'green';
+	   if (this.creditlimit < 0) return 'red';
+	   return 'yellow';
+	}
+}
+```
+
+In above example we define a function "creditColor" that will return a string value depeding on the creditlimit returned from the Dynamics 365 service.
+Any function defined on the prototype will be added to each object, fetched from the server, regardles if the instance is fetch through get,query or create.
+Since the update method of the XrmContextService only works for instances that was fetch through get,query or create, these instance will always have these methods
+from the original method call.
+
+### onFetch()
+The constructor of your entity will NOT be called for instance commeing from the server as response to get or query. Any object put in the context, is initially the
+the raw json object returned from these calles, however the XrmContextService will manipulate the returned object, but in terms of converting properties to
+correct property type defined by the prototype, but also in terms of adding any methods, defined same place.
+
+If you define a method in the prototype called "onFetch", this method will automatically be called by the XrmContextService before the result is based back to you.
+This allow you to do automatically initializtion of you object.
+
+```typescript
+export class Account extends Entity {
+	constructor() {
+		super('accounts','accountid', true);
+	}
+	...
+
+	selected: boolean;
+
+	onfetch(): string {
+		if (this.selected == null) this.selected = false;
+	}
+}
+```
+
+
 
 
