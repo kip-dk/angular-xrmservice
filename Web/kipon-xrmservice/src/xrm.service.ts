@@ -36,6 +36,7 @@ export class Expand {
 
 @Injectable()
 export class XrmService {
+    private defaultApiUrl: string = "/api/data/v8.2/";
     apiUrl: string = '/api/data/v8.2/';
 
     constructor(private http: HttpClient) {
@@ -44,7 +45,7 @@ export class XrmService {
     }
 
     setVersion(v: string): void {
-        this.apiUrl = this.apiUrl.replace("8.2", v);
+        this.apiUrl = this.defaultApiUrl.replace("8.2", v);
     }
 
     getContext(): XrmContext {
