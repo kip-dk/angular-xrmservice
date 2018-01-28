@@ -36,8 +36,11 @@ with angular. Take a look at that guide here:
 [go to the angular dynamics 365 web resource guide](https://github.com/kip-dk/angular-xrm-webresource)
 
 ### Web > service-generator
-This source contains an angular 5 application that can generate a basic entity service, based on the XrmContextService. I will soon provide a solution you can download
-and install locally on your Dynamics 365 sandbox environment. Then you can use this simple application to generate the initial entity services according  to your need.
+This source contains an angular 5 application that can generate a basic entity service, based on the XrmContextService. Below you find link to download a version 8.0 or 8.2
+managed solution, containing the generator. Import the solution to your sandbox environment, and open the configuration page in the solution to start generate a service:<br />
+
+[Dynamics 365 8.0 XrmService genereator](https://github.com/kip-dk/angular-xrmservice/blob/master/Web/kipon-xrmservice/XrmContextServiceGenerator_target_CRM_8.0_managed.zip) <br />
+[Dynamics 365 8.2 XrmService genereator](https://github.com/kip-dk/angular-xrmservice/blob/master/Web/kipon-xrmservice/XrmContextServiceGenerator_managed.zip) <br />
 
 
 ## License
