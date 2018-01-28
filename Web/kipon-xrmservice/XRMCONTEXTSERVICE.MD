@@ -337,8 +337,8 @@ try to find time to implement them asap.
 To make it easy to create a new service, i have created a simple solution, where you can pick your entity and related needed properties, and the solution will generate an initial
 service for you that you can copy/paste into your angular projects
 
-[Dynamics 365 8.0 solution](XrmContextServiceGenerator_1_0_0_1_target_CRM_8.0_managed.zip) <br />
-[Dynamics 365 8.2 solution](XrmContextServiceGenerator_1_0_0_1_managed.zip) <br />
+[Dynamics 365 8.0 solution](XrmContextServiceGenerator_target_CRM_8.0_managed.zip) <br />
+[Dynamics 365 8.2 solution](XrmContextServiceGenerator_managed.zip) <br />
 
 
 ## License
