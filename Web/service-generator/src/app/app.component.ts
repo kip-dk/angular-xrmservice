@@ -191,7 +191,7 @@ export class AppComponent {
                                         me.metadataService.getOneToManyRelationships(re).subscribe(r => me.renderCode() );
                                     } else {
                                         let ref = re.OneToManyRelations.find(r => r.ReferencingAttribute == a.LogicalName && r.ReferencingEntity == me.current.LogicalName && r.ReferencedEntity == a.Lookup.Targets[0]);
-                                        this.code += ' EntityReference = new EntityReference("' + re.LogicalCollectionName + '","' + ref.ReferencingEntityNavigationPropertyName + '");';
+                                        this.code += ' EntityReference = new EntityReference().meta("' + re.LogicalCollectionName + '","' + ref.ReferencingEntityNavigationPropertyName + '");';
                                     }
                                 }
                                 break;
@@ -214,7 +214,7 @@ export class AppComponent {
             this.code += "@Injectable()\n";
             this.code += "export class " + this.current.SchemaName + "Service {\n";
             this.code += "\tlocalPrototype: " + this.current.SchemaName + " = new " + this.current.SchemaName + "();\n";
-            this.code += "\tconstructor(private xrmContext: XrmContextService) { }\n";
+            this.code += "\tconstructor(private xrmService: XrmContextService) { }\n";
 
             if (this.support.get) {
                 this.code += "\n";
@@ -225,9 +225,9 @@ export class AppComponent {
 
             if (this.support.query) {
                 this.code += "\n";
-                this.code += "\tquery(search:string): Observable<XrmQueryResult<" + this.current.SchemaName + "[]>>) {\n";
+                this.code += "\tquery(search:string): Observable<XrmQueryResult<" + this.current.SchemaName + ">> {\n";
                 this.code += "\t\tlet condition: Condition = new Condition().where('<search field>', Comparator.Contains, search);\n";
-                this.code += "\t\treturn this.xrmService.query<XrmQueryResult<" + this.current.SchemaName + "[]>>(this.localPrototype, condition);\n";
+                this.code += "\t\treturn this.xrmService.query<" + this.current.SchemaName + ">(this.localPrototype, condition);\n";
                 this.code += "\t}\n";
             }
 
