@@ -132,7 +132,11 @@ export class Filter {
 
         if (prototype[this.field] instanceof EntityReference) {
             _f = "_" + this.field + "_value";
-            _v = this.value.id;
+            if (typeof this.value == 'string') {
+                _v = this.value;
+            } else {
+                _v = this.value.id;
+            }
         }
 
        switch (this.operator) {
