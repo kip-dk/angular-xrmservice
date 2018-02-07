@@ -172,6 +172,8 @@ export class AppComponent {
                             }
                             case 'Memo': this.code += ' string = null;'; break;
                             case 'String': this.code += ' string = null;'; break;
+                            case 'State': this.code += ' OptionSetValue = new OptionSetValue();'; break;
+                            case 'Status': this.code += ' OptionSetValue = new OptionSetValue();'; break;
                             case 'Picklist': this.code += ' OptionSetValue = new OptionSetValue();'; break;
                             case 'DateTime': this.code += ' Date = new Date();'; break;
                             case 'Owner': {

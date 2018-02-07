@@ -192,6 +192,14 @@ export class Condition {
         return result;
     }
 
+    isActive(): Condition {
+        return this.where("statecode", Comparator.Equals, 0);
+    }
+
+    isInactive(): Condition {
+        return this.where("statecode", Comparator.Equals, 1);
+    }
+
     toQueryString(prototype: Entity): string {
         if ((this.children == null || this.children.length == 0) && (this.filter == null || this.filter.length == 0)) {
             return null;
