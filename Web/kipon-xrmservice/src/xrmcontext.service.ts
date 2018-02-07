@@ -130,6 +130,21 @@ export class Filter {
         let _f = this.field;
         let _v = "'" + this.value + "'";
 
+        if (typeof this.value == 'number') {
+            _v = this.value.toString();
+        }
+
+        if (typeof this.value == 'boolean') {
+            _v = this.value.valueOf() ? 'true' : 'false';
+        }
+
+        if (prototype[this.field] instanceof OptionSetValue)
+        {
+            if (this.value != null && this.value.hasOwnProperty('value')) {
+                _v = this.value.value;
+            }
+        }
+
         if (prototype[this.field] instanceof EntityReference) {
             _f = "_" + this.field + "_value";
             if (typeof this.value == 'string') {
