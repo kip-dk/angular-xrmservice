@@ -111,8 +111,13 @@ export enum Comparator {
     Equals,
     NotEquals,
     Contains,
+    NotContains,
     DoesNotContainsData,
-    ContainsData
+    ContainsData,
+    StartsWith,
+    NotStartsWith,
+    EndsWith,
+    NotEndsWith
 }
 
 export class ColumnBuilder {
@@ -164,6 +169,21 @@ export class Filter {
             case Comparator.Contains: {
                 return "contains(" + _f + ","+ _v + ")"; 
            }
+            case Comparator.NotContains: {
+               return "not contains(" + _f + "," + _v + ")"; 
+            }
+            case Comparator.StartsWith: {
+               return "startswith(" + _f + "," + _v + ")"; 
+            }
+            case Comparator.NotStartsWith: {
+               return "not startswith(" + _f + "," + _v + ")"; 
+            }
+            case Comparator.EndsWith: {
+               return "endswith(" + _f + "," + _v + ")";
+            }
+            case Comparator.NotEndsWith: {
+               return "not endswith(" + _f + "," + _v + ")";
+            }
             case Comparator.ContainsData: {
                return _f + ' ne null';
             }

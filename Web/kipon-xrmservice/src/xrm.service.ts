@@ -7,6 +7,8 @@ export interface XrmContext {
     getClientUrl(): string;
     getQueryStringParameters(): any;
     getVersion(): string;
+    getUserName(): string;
+    getUserId(): string;
 }
 
 export class XrmEntityKey {
@@ -37,6 +39,7 @@ export class Expand {
 @Injectable()
 export class XrmService {
     private defaultApiUrl: string = "/api/data/v8.2/";
+    private contextFallback: XrmContext = null;
     apiUrl: string = '/api/data/v8.2/';
 
     constructor(private http: HttpClient) {
@@ -49,6 +52,10 @@ export class XrmService {
     }
 
     getContext(): XrmContext {
+        if (this.contextFallback != null) {
+            return this.contextFallback;
+        }
+
         if (typeof window['GetGlobalContext'] != "undefined") {
             let x = window['GetGlobalContext']();
             if (x.getVersion == undefined) {
@@ -76,7 +83,8 @@ export class XrmService {
                 return x;
             }
         }
-        return {
+
+        this.contextFallback = {
             getClientUrl(): string {
                 return "http://localhost:4200";
             },
@@ -92,8 +100,22 @@ export class XrmService {
             },
             getVersion(): string {
                 return "8.0.0.0";
+            },
+            getUserId(): string {
+                return this["userid"];
+            },
+            getUserName(): string {
+                return this["username"];
             }
         };
+
+        this.http.get("http://localhost:4200/api/data/v8.0/WhoAmI()").map(response => response).subscribe(r => {
+            console.log(r);
+            this.contextFallback["userid"] = r["UserId"];
+            this.contextFallback["username"] = "Dev. fallback from whoami";
+        });
+
+        return this.contextFallback;
     }
 
     getCurrenKey(): Observable<XrmEntityKey> {
