@@ -1,3 +1,12 @@
+### 1.0.89 - 2018-02-09
+
+Handling 8.0 not able to return object on create, will return { id : 'newid', $$keyonly = true } instead. This allow the client to fetch the line in such situation
+Crm 8.0 does not support return=representation for create message :-((.
+
+XrmContextService resolved wrong record on create
+add         headers = headers.append("Prefer", "return=representation") to xrmService.create
+
+
 ### 1.0.78 - 2018-02-09
 
 Owner generated wrong syntax in service-generator

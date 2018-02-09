@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
 export interface XrmContext {
@@ -187,7 +187,12 @@ export class XrmService {
 
         let _id = id.replace("{", "").replace("}", "");
 
-        return this.http.get<T>(this.getContext().getClientUrl() + this.apiUrl + entityTypes + "(" + _id + ")" + addFields + _ex, options).map(response => response);
+        let url = this.getContext().getClientUrl() + this.apiUrl + entityTypes + "(" + _id + ")" + addFields + _ex;
+        if (this.debug) {
+            console.log(url);
+        }
+
+        return this.http.get<T>(url, options).map(response => response);
     }
 
     query<T>(entityTypes: string, fields: string, filter: string): Observable<XrmQueryResult<T>>;
@@ -248,10 +253,26 @@ export class XrmService {
         headers = headers.append("OData-Version", "4.0");
         headers = headers.append("Content-Type", "application/json; charset=utf-8");
         headers = headers.append("Prefer", "odata.include-annotations=*");
-        let options = {
-            headers: headers
+
+        if (!this.getContext().getVersion().startsWith("8.0")) {
+            headers = headers.append("Prefer", "return=representation");
         }
-        return this.http.post<T>(this.getContext().getClientUrl() + this.apiUrl + entityType, entity, options).map(response => response);
+
+        let options = {
+            headers: headers,
+        }
+
+        return this.http.post(this.getContext().getClientUrl() + this.apiUrl + entityType, entity, { headers: headers, observe: "response" }).map(
+            (res: HttpResponse<any>) => {
+                if (res.body == null) {
+                    let entityId = res.headers.get('OData-EntityId') as string;
+                    let result = { id: entityId.split('(')[1].replace(')',''), $keyonly: true };
+                    return result;
+                } else {
+                    return res.body;
+                }
+            }
+        );
     }
 
     update<T>(entityType: string, entity: T, id: string): Observable<T>;

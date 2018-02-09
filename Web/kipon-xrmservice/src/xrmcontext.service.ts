@@ -385,6 +385,7 @@ export class XrmContextService {
 
                 let value = instance[prop];
                 if (value !== 'undefined' && value !== null) {
+
                     if (prototype[prop] instanceof EntityReference) {
                         let ref = instance[prop] as EntityReference;
                         if (ref.id != null) {
@@ -412,8 +413,44 @@ export class XrmContextService {
             }
         }
 
+        if (this.xrmService.debug) {
+            console.log(newr);
+        }
+
         return this.xrmService.create<T>(prototype._pluralName, newr as T).map(response => {
-            return this.resolve(prototype, instance, true);
+            if (this.xrmService.debug) {
+                console.log(response);
+            }
+
+            if (response != null) {
+                if (response.hasOwnProperty('$keyonly')) {
+                    response._pluralName = prototype._pluralName;
+                    response._keyName = prototype._keyName;
+                    response._updateable = false;
+
+                    let key = response._pluralName + ':' + response.id;
+                    for (let prop in prototype) {
+                        if (typeof prototype[prop] === 'function') {
+                            response[prop] = prototype[prop];
+                            continue;
+                        }
+
+                        if (prototype.hasOwnProperty(prop)) {
+                            if (this.ignoreColumn(prop)) continue;
+
+                            let value = instance[prop];
+                            if (value !== 'undefined' && value !== null) {
+                                response[prop] = value;
+                            }
+                        }
+                    }
+                    this.context[key] = response;
+                    return response;
+                } else {
+                    return this.resolve(prototype, response, true);
+                }
+            }
+            return null;
         });
     }
 
@@ -495,6 +532,28 @@ export class XrmContextService {
             return null;
         });
     }
+
+    log(type: string): void {
+        if (type == 'context') {
+            console.log(this.context);
+            return;
+        }
+
+        if (type == 'xrmcontext') {
+            console.log(this.getContext());
+            return;
+        }
+
+        if (type == 'url') {
+            console.log(this.getContext().getClientUrl());
+        }
+
+        if (type == 'version') {
+            console.log(this.getContext().getVersion());
+        }
+
+        console.log('xrmContextService supported the current log types: context, xrmcontext, url, version');
+    } 
 
     private $expandToExpand(prop: ExpandProperty): Expand {
         if (prop != null) {
