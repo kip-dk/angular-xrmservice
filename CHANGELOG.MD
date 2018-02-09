@@ -1,4 +1,10 @@
-### 1.0.76 2018-02-08
+### 1.0.78 - 2018-02-09
+
+Owner generated wrong syntax in service-generator
+
+xrmService.debug = true, will write generated url to console, both for XrmService instance and XrmContextService instance
+
+### 1.0.76 - 2018-02-08
 
 XrmContext.getUserName() and XrmContext.getUserId() made visible in the XrmContext interface.
 
@@ -10,11 +16,11 @@ can give a slight delay in regards to when getUserId() is available in the devel
 XrmContextService - Comparator
 Comparator.StartsWith, Comparator.EndsWith,  and NotNNN. for Container, Startwith and EndsWith implemented.
 
-### 1.0.73 2018-02-07 14:35 GMT+1
+### 1.0.73 - 2018-02-07 14:35 GMT+1
 
 Fix XrmContextService Condition filter on number and boolean fields
 
-### 1.0.72 2018-02-07 14:00 GMT+1
+### 1.0.72 - 2018-02-07 14:00 GMT+1
 
 Added isActive and isInactive as shortcut method on Condition
 

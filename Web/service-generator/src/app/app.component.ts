@@ -177,7 +177,7 @@ export class AppComponent {
                             case 'Picklist': this.code += ' OptionSetValue = new OptionSetValue();'; break;
                             case 'DateTime': this.code += ' Date = new Date();'; break;
                             case 'Owner': {
-                                this.code += ' EntityReference = new EntityReference("systemusers","ownerid");';
+                                this.code += ' EntityReference = new EntityReference().meta("systemusers","ownerid");';
                                 break;
                             }
                             case 'Customer':

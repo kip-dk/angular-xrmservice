@@ -41,6 +41,7 @@ export class XrmService {
     private defaultApiUrl: string = "/api/data/v8.2/";
     private contextFallback: XrmContext = null;
     apiUrl: string = '/api/data/v8.2/';
+    debug: boolean = false;
 
     constructor(private http: HttpClient) {
         let v = this.getContext().getVersion().split('.');
@@ -110,7 +111,6 @@ export class XrmService {
         };
 
         this.http.get("http://localhost:4200/api/data/v8.0/WhoAmI()").map(response => response).subscribe(r => {
-            console.log(r);
             this.contextFallback["userid"] = r["UserId"];
             this.contextFallback["username"] = "Dev. fallback from whoami";
         });
@@ -291,7 +291,7 @@ export class XrmService {
         };
 
         let url = this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")" + field;
-        console.log(url);
+        if (this.debug)  console.log(url);
 
         return this.http.put<T>(url, v, options).map(response => response);
     }

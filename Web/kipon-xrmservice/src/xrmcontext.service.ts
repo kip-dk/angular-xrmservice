@@ -223,6 +223,7 @@ export class Condition {
     group(opr: Operator): Condition {
         let result: Condition = new Condition(opr);
         result.parent = this;
+
         this.children.push(result);
         return result;
     }
@@ -365,6 +366,8 @@ export class XrmContextService {
             url += sep + '$count=true';
             sep = '&';
         }
+
+        if (this.xrmService.debug) console.log(url);
 
         return this.http.get(url, options).map(response => {
             let result = me.resolveQueryResult<T>(prototype, response, top, [url], 0);
