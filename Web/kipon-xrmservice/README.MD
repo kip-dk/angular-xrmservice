@@ -1,6 +1,6 @@
 # xrmservice
 
-## What i kipon-xrmservice
+## What is kipon-xrmservice
 The XrmService is a very basic service you can use to build angular pages with Dynamics 365 as backend.
 
 It is based on the HttpClient implementation of angular 4/5.
@@ -251,7 +251,7 @@ change management is supported, allowing  you to call a simple update(objectinst
 
 For a more complete documentation of the XrmContextContext service:
 
-[Go to the XrmCContextService documentation page](https://github.com/kip-dk/angular-xrmservice/blob/master/Web/kipon-xrmservice/XRMCONTEXTSERVICE.MD)
+[Go to the XrmContextService documentation page](https://github.com/kip-dk/angular-xrmservice/blob/master/Web/kipon-xrmservice/XRMCONTEXTSERVICE.MD)
 
 
 ## License
