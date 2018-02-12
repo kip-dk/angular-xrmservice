@@ -1,3 +1,10 @@
+### 1.0.91 - 2018-02-12
+
+xrmContextService.context and xrmContextService.changemanager made private
+
+Handling 8.0 not able to return object on update. The initial object will be returned (result is that calculated fields are not updated according to server), 
+and the changemanagement cache is updated according to the client side object already in place from the client.
+
 ### 1.0.89 - 2018-02-09
 
 Handling 8.0 not able to return object on create, will return { id : 'newid', $$keyonly = true } instead. This allow the client to fetch the line in such situation

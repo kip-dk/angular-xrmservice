@@ -4,7 +4,7 @@ The XrmContextService is build on top of the XrmService, but allow a simple yet 
 by defining object prototypes that reflects the properties of the corresponding Dynamics 365 entities. 
 
 XrmContextService also behave as a context for the Dynamics 365, caching the objects fetched by get or query within the context, and ensure that you 
-always get the same object instance back from a api call, if it has already been fetch by another call. 
+always get the same object instance back from an api call, if it has already been fetch by another call. 
 As an example, lets say you fetch an account, and its primary contact in one query, and in next query, you fetch all child contacts of the same account. 
 Now, if the primary contact of the account has this account as parent account, you will actually get two different objects back from the server representing 
 the primary contact. 
@@ -58,7 +58,7 @@ the XrmContextService into your custom services:<br /><br />
 
 xrmContextService.setVersion(v:string)<br />
 xrmContextService.getContext()<br />
-xrmService.getCurrenKey(): Observable&lt;XrmEntityKey&gt;<br />
+xrmContextService.getCurrenKey(): Observable&lt;XrmEntityKey&gt;<br />
 
 
 ## The XrmContextService programming model
@@ -83,7 +83,7 @@ export class Account extends Entity {
 	industrycode: OptionSetValue = new OptionSetValue();
 	lastonholdtime: Date = new Date();
 	name: string = null;
-	primarycontactid: EntityReference = new EntityReference("contacts","primarycontactid");
+	primarycontactid: EntityReference = new EntityReference().meta("contacts","primarycontactid");
 }
 
 @Injectable()
@@ -197,6 +197,13 @@ when we go into advanced use-cases for the entity prototype.
 As you can see, each method in the service parses the localProperty instance to the corresponding method in the XrmContextService. By defining
 a specific entity service, you hide these dirty details from all other parts of your code, and your AccountService (or what ever entity you need to work on) 
 becomes very simple and natural in its method signature.
+
+For create and update, be aware that Web API 8.0 do not support returning the object on the corresponding calls, so what you will get back
+and create is only the key value { id: 'guid'} and what you get back on update is the original object parsed in.
+This might have impact if you are working with calculated fields. Then they will stay the same, until you manually do a get or fetch of the same record.
+
+For API later than 8.0, create and update will use the Prefer: return=representation to make sure that the client object is updated according to new values on the server,
+even on create and update methods.
 
 
 ## Advanced use-cases in your prototype object.

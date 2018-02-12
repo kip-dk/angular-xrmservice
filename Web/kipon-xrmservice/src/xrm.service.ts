@@ -283,7 +283,8 @@ export class XrmService {
         headers = headers.append("OData-Version", "4.0");
         headers = headers.append("Content-Type", "application/json; charset=utf-8");
         headers = headers.append("Prefer", "odata.include-annotations=*");
-        if (fields != null) {
+
+        if (fields != null && !this.getContext().getVersion().startsWith("8.0")) {
             headers = headers.append("Prefer", "return=representation");
         } 
 
@@ -295,7 +296,12 @@ export class XrmService {
         if (fields != null) {
             _f = '?$select=' + fields;
         }
-        return this.http.patch<T>(this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")" + _f, entity, options).map(response => response);
+        return this.http.patch<T>(this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")" + _f, entity, options).map(response => {
+            if (this.getContext().getVersion().startsWith("8.0")) {
+                return entity;
+            }
+            return response;
+        });
     }
 
     put<T>(entityType: string, id: string, field: string, value: any): Observable<T> {

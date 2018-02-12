@@ -91,6 +91,13 @@ export class OptionSetValue {
         return this.value == o.value;
     }
 
+    clone(): OptionSetValue {
+        let r = new OptionSetValue();
+        r.name = this.name;
+        r.value = this.value;
+        return r;
+    }
+
     static same(o1: OptionSetValue, o2: OptionSetValue): boolean {
         if (o1 == null && o2 == null) return true;
         let v1: number = null;
@@ -278,8 +285,8 @@ class ExpandProperty {
 
 @Injectable()
 export class XrmContextService {
-    context: any = {};
-    changemanager: any = {};
+    private context: any = {};
+    private changemanager: any = {};
 
     constructor(private http: HttpClient, private xrmService: XrmService) { }
 
@@ -518,6 +525,10 @@ export class XrmContextService {
         let fields = this.columnBuilder(prototype).columns;
 
         return this.xrmService.update<T>(prototype._pluralName, upd as T, instance.id, fields).map(response => {
+            if (this.getContext().getVersion().startsWith("8.0")) {
+                this.updateCM(prototype, instance);
+                return instance;
+            }
             return me.resolve(prototype, response, true);
         });
     }
@@ -652,7 +663,6 @@ export class XrmContextService {
         let me = this;
         let key = prototype._pluralName + ':' + instance[prototype._keyName];
         let result = instance;
-        let change = null;
 
         if (this.context.hasOwnProperty(key)) {
             result = this.context[key];
@@ -662,11 +672,6 @@ export class XrmContextService {
             result["_pluralName"] = prototype._pluralName;
             result["_keyName"] = prototype._keyName;
             delete result[prototype._keyName];
-        }
-
-        if (updateable) {
-            change = {};
-            this.changemanager[key] = change;
         }
 
         result['_updateable'] = updateable;
@@ -693,9 +698,6 @@ export class XrmContextService {
                         delete instance["_" + prop + "_value@Microsoft.Dynamics.CRM.associatednavigationproperty"];
                     }
                     result[prop] = ref;
-                    if (change != null) {
-                        change[prop.toString()] = ref.clone();
-                    }
                     done = true;
                 }
 
@@ -704,10 +706,6 @@ export class XrmContextService {
                     opt.value = instance[prop];
                     opt.name = instance[prop + '@OData.Community.Display.V1.FormattedValue'];
                     result[prop] = opt;
-                    if (change != null) {
-                        change[prop.toString()] = new OptionSetValue(opt.value);
-                    }
-
                     done = true;
                 }
 
@@ -719,17 +717,11 @@ export class XrmContextService {
                         result[prop] = null;
                     }
 
-                    if (change != null) {
-                        change[prop.toString()] = result[prop];
-                    }
                     done = true;
                 }
 
                 if (!done) {
                     result[prop] = instance[prop];
-                    if (change != null) {
-                        change[prop.toString()] = result[prop];
-                    }
                     done = true;
                 }
             }
@@ -737,6 +729,10 @@ export class XrmContextService {
             if (typeof prototype[prop] === 'function') {
                 result[prop] = prototype[prop];
             }
+        }
+
+        if (updateable) {
+            this.updateCM(prototype, instance);
         }
 
         let ep = this.getExpandProperty(prototype);
@@ -766,6 +762,42 @@ export class XrmContextService {
         return result as T;
     }
 
+
+    private updateCM(prototype: any, instance: any): void {
+        let key = prototype._pluralName + ':' + instance[prototype._keyName];
+        let change = {};
+        this.changemanager[key] = change;
+
+        for (let prop in prototype) {
+            if (this.ignoreColumn(prop)) continue;
+            if (prototype.hasOwnProperty(prop) && typeof prototype[prop] != 'function') {
+                let v = instance[prop];
+                if (v = null) continue;
+                let done = false;
+
+                if (v instanceof EntityReference) {
+                    change[prop] = v.clone();
+                    done = true;
+                }
+
+                if (!done && v instanceof OptionSetValue) {
+                    change[prop] = v.clone();
+                    done = true;
+                }
+
+                if (!done && v instanceof Date) {
+
+                    change[prop] = new Date(v.valueOf());
+                    done = true;
+                }
+
+                if (!done) {
+                    change[prop] = v;
+                    done = true;
+                }
+            }
+        }
+    }
 
     private columnBuilder(entity: Entity): ColumnBuilder {
         let hasEntityReference: boolean = false;
