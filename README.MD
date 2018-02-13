@@ -33,7 +33,7 @@ The code base for the npm module. This is the code repository for the reusable D
 This is an angular 5 demo application, testing most use-cases supported by the xrm-service library. It is a single page application, and it demonstrates both
 use of XrmService directly, and the use of the XrmContextService. It is demonstrating usecases based on the standard account > contact relationship in Dynamics 365.
 
-If you need details on setting up such application on your Dynamics 365 instalation, you can fork this folder and follow my guide on builing Dynamics 365 pages
+If you need details on setting up such application on your Dynamics 365 installation, you can fork this folder and follow my guide on builing Dynamics 365 pages
 with angular. Take a look at that guide here:
 [go to the angular dynamics 365 web resource guide](https://github.com/kip-dk/angular-xrm-webresource)
 

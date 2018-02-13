@@ -1,3 +1,14 @@
+### 1.0.100 - 2018-02-13
+
+introduced $devclienturl(): string in XrmContext to support different url in local developer mode, compared with value when running inside xrm.
+$devclienturl() of XrmContext is used internally in XrmContextService when it needs to know the real origin url of CRM
+
+support for put EntityReference in xrmContextService and xrmService.put, enable put and delete of entityrefrences values
+
+put null value in xrmService (and xrmContextService) will map to delete property value on entity request, to keep consistance and simplicity on setting a value to null
+
+fixed wrong url on put and add put method to xrmContetService
+
 ### 1.0.91 - 2018-02-12
 
 xrmContextService.context and xrmContextService.changemanager made private

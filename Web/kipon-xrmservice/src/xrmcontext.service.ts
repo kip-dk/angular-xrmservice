@@ -533,6 +533,35 @@ export class XrmContextService {
         });
     }
 
+    put(prototype: Entity, instance: Entity, field: string): Observable<null> {
+        let v = instance[field];
+        let t = prototype[field];
+        let f = v;
+        let done: boolean = false;
+        let pv: string = null;
+
+        if (t instanceof OptionSetValue) {
+            if (v == null || v['value'] == null) {
+                f = null;
+            } else {
+                f = v.value;
+            }
+            done = true;
+        }
+
+        if (t instanceof EntityReference) {
+            pv = "@odata.id";
+            field = t.associatednavigationpropertyname().split('@')[0] + "/$ref";
+            if (v.id == null || v.id == '') {
+                f = null;
+            } else {
+                f = this.getContext().$devClientUrl() + t.pluralName + "(" + v.id + ")";
+            }
+        }
+        return this.xrmService.put(prototype._pluralName, instance.id, field, f, pv);
+    }
+
+
     delete<T extends Entity>(t: T): Observable<null> {
         let me = this;
         return this.xrmService.delete(t._pluralName, t.id).map(r => {

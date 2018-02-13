@@ -9,6 +9,7 @@ export interface XrmContext {
     getVersion(): string;
     getUserName(): string;
     getUserId(): string;
+    $devClientUrl(): string;
 }
 
 export class XrmEntityKey {
@@ -41,11 +42,13 @@ export class XrmService {
     private defaultApiUrl: string = "/api/data/v8.2/";
     private contextFallback: XrmContext = null;
     apiUrl: string = '/api/data/v8.2/';
+    apiVersion: string = 'v8.2';
     debug: boolean = false;
 
     constructor(private http: HttpClient) {
         let v = this.getContext().getVersion().split('.');
         this.setVersion(v[0] + "." + v[1]);
+        this.apiUrl = 'v' + v[0] + '.' + 'v';
     }
 
     setVersion(v: string): void {
@@ -62,6 +65,7 @@ export class XrmService {
             if (x.getVersion == undefined) {
                 x.getVersion = (): string => "8.0.0.0"
             }
+            x.$devClientUrl = x.getClientUrl;
             return x;
         }
 
@@ -71,6 +75,7 @@ export class XrmService {
                 if (x.getVersion == undefined) {
                     x.getVersion = (): string => "8.0.0.0"
                 }
+                x.$devClientUrl = x.getClientUrl;
                 return x;
             }
         }
@@ -81,6 +86,7 @@ export class XrmService {
                 if (x.getVersion == undefined) {
                     x.getVersion = (): string => "8.0.0.0"
                 }
+                x.$devClientUrl = x.getClientUrl;
                 return x;
             }
         }
@@ -107,10 +113,24 @@ export class XrmService {
             },
             getUserName(): string {
                 return this["username"];
+            },
+            $devClientUrl(): string {
+                return this['$clienturl'];
             }
         };
 
         this.http.get("http://localhost:4200/api/data/v8.0/WhoAmI()").map(response => response).subscribe(r => {
+            if (this.debug) {
+                console.log(r);
+            }
+
+            let url = r['@odata.context'] as string;
+
+            let firstpart = url.split('/api/data/')[0];
+            let version = url.split('/api/data/')[1].split('/')[0];
+
+            this.contextFallback["$clienturl"] = firstpart + '/api/data/' + version + '/';
+
             this.contextFallback["userid"] = r["UserId"];
             this.contextFallback["username"] = "Dev. fallback from whoami";
         });
@@ -304,7 +324,11 @@ export class XrmService {
         });
     }
 
-    put<T>(entityType: string, id: string, field: string, value: any): Observable<T> {
+    put(entityType: string, id: string, field: string, value: any);
+    put(entityType: string, id: string, field: string, value: any, propertyValueAs: string);
+    put(entityType: string, id: string, field: string, value: any, propertyValueAs: string = null): Observable<null> {
+        if (propertyValueAs == null) propertyValueAs = 'value';
+
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
         headers = headers.append("OData-MaxVersion", "4.0");
         headers = headers.append("OData-Version", "4.0");
@@ -314,13 +338,20 @@ export class XrmService {
             headers: headers
         }
         let v = {
-            value: value
         };
 
-        let url = this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")" + field;
+        v[propertyValueAs] = value;
+
+        if (this.debug) { console.log(v); }
+
+        let url = this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")/" + field;
         if (this.debug)  console.log(url);
 
-        return this.http.put<T>(url, v, options).map(response => response);
+        if (v[propertyValueAs] != null) {
+            return this.http.put(url, v, options).map(response => null);
+        } else {
+            return this.http.delete(url, options).map(response => null);
+        }
     }
 
     delete(entityType: string, id: string): Observable<null> {
