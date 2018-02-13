@@ -1,3 +1,11 @@
+### 
+
+handle xrmContextService put a decimal value without decimal, causing Int32 => Decimal case error in the dynamics web api. 
+Solution is a hack in the xrmContextService, adding 0.0000000001 to the value send to dynamics before sending.
+fields that require this must be defined in the prototype with the value, ex. as   myentity_mydecimalfield: number = 0.0000000001;
+
+fixed the service generator to auto generate these stupid numeric metadata instead of just setting the values to null.
+
 ### 1.0.100 - 2018-02-13
 
 introduced $devclienturl(): string in XrmContext to support different url in local developer mode, compared with value when running inside xrm.

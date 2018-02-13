@@ -198,9 +198,9 @@ export class AppComponent {
                                 }
                                 break;
                             }
-                            case 'Double': this.code += ' number = null;'; break;
-                            case 'Decimal': this.code += ' number = null;'; break;
-                            case 'Money':  this.code += ' number = null;'; break;
+                            case 'Double': this.code += ' number = 0.0000000001;'; break;
+                            case 'Decimal': this.code += ' number = 0.0000000001;'; break;
+                            case 'Money':  this.code += ' number = 0.0000000001;'; break;
                             case 'Integer': this.code += ' number = null;'; break;
                             case 'Boolean': this.code += ' boolean = null;'; break;
                             default: this.code += '?? ' + a.AttributeType + ' ??;'; break;

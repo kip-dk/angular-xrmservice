@@ -549,7 +549,13 @@ export class XrmContextService {
             done = true;
         }
 
-        if (t instanceof EntityReference) {
+        if (!done && typeof t == 'number' && typeof v == 'number') {
+            // this is a really really stupid hack, because dynamics do not accept Integer for decimal fields, so we force 
+            // a decimal position into the value before it is send.
+            f = v + t;
+        }
+
+        if (!done && t instanceof EntityReference) {
             pv = "@odata.id";
             field = t.associatednavigationpropertyname().split('@')[0] + "/$ref";
             if (v.id == null || v.id == '') {
