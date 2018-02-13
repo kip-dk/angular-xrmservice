@@ -1,4 +1,4 @@
-### 
+### 1.0.101 - 2018-02-13
 
 handle xrmContextService put a decimal value without decimal, causing Int32 => Decimal case error in the dynamics web api. 
 Solution is a hack in the xrmContextService, adding 0.0000000001 to the value send to dynamics before sending.
