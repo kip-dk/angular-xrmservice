@@ -198,9 +198,9 @@ export class AppComponent {
                                 }
                                 break;
                             }
-                            case 'Double': this.code += ' number = 0.0000000001;'; break;
-                            case 'Decimal': this.code += ' number = 0.0000000001;'; break;
-                            case 'Money':  this.code += ' number = 0.0000000001;'; break;
+                            case 'Double': this.code += ' number = null;'; break;
+                            case 'Decimal': this.code += ' number = null;'; break;
+                            case 'Money':  this.code += ' number = null;'; break;
                             case 'Integer': this.code += ' number = null;'; break;
                             case 'Boolean': this.code += ' boolean = null;'; break;
                             default: this.code += '?? ' + a.AttributeType + ' ??;'; break;
@@ -209,13 +209,28 @@ export class AppComponent {
                         this.code += '\n';
                     }
                 });
+
+                this.code += "\n";
+                this.code += "\tmeta():" +  this.current.SchemaName + " {\n";
+
+                this.current.Attributes.forEach(a => {
+                    if (a['selected']) {
+                        switch (a.AttributeType) {
+                            case 'Double':
+                            case 'Decimal':
+                            case 'Money': this.code += '\t\tthis.' + a.LogicalName + ' = 0.0000000001;\n'; break;
+                        }
+                    }
+                });
+                this.code += "\t\t return this;\n"
+                this.code += "\t}\n"
             }
             this.code += "}\n"
 
             this.code += "\n";
             this.code += "@Injectable()\n";
             this.code += "export class " + this.current.SchemaName + "Service {\n";
-            this.code += "\tlocalPrototype: " + this.current.SchemaName + " = new " + this.current.SchemaName + "();\n";
+            this.code += "\tlocalPrototype: " + this.current.SchemaName + " = new " + this.current.SchemaName + "().meta();\n";
             this.code += "\tconstructor(private xrmService: XrmContextService) { }\n";
 
             if (this.support.get) {

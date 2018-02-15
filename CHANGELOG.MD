@@ -1,3 +1,22 @@
+###
+
+xrmContextService.createAll(prototype, array)  allow create multi records of same time in one transaction.
+
+
+xrmSErvice.clone (clone method based on defined prototype   returns a clone on the parsed entity, based on the parsed prototype. Makes it easy to copy an object if
+multi line create is needed, based on single input)
+
+Strip { and } when Condition filter on reference fields.
+
+$devClientUrl() returning wrong url when running with CRM
+
+debug url to console on delete
+
+service-generator, setting the decimal default directly in the prototype property definition was not the best idea, because it
+also impact the default when using new MyEntity(),  therefore the generator now generates a meta() method on the entity
+that is setting these values.
+
+
 ### 1.0.101 - 2018-02-13
 
 handle xrmContextService put a decimal value without decimal, causing Int32 => Decimal case error in the dynamics web api. 

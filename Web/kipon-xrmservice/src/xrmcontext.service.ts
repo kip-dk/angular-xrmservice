@@ -166,6 +166,10 @@ export class Filter {
             }
         }
 
+        if (_f.startsWith('_') && _f.endsWith('_value')) {
+            _v = _v.replace('{', '').replace('}', '');
+        }
+
        switch (this.operator) {
            case Comparator.Equals: {
                return _f + ' eq ' + _v;
@@ -287,6 +291,7 @@ class ExpandProperty {
 export class XrmContextService {
     private context: any = {};
     private changemanager: any = {};
+    private tick: number = 0;
 
     constructor(private http: HttpClient, private xrmService: XrmService) { }
 
@@ -383,42 +388,7 @@ export class XrmContextService {
     }
 
     create<T extends Entity>(prototype: T, instance: T): Observable<T> {
-        let newr = {
-        };
-
-        for (let prop in prototype) {
-            if (prototype.hasOwnProperty(prop) && typeof prototype[prop] !== 'function') {
-                if (this.ignoreColumn(prop)) continue;
-
-                let value = instance[prop];
-                if (value !== 'undefined' && value !== null) {
-
-                    if (prototype[prop] instanceof EntityReference) {
-                        let ref = instance[prop] as EntityReference;
-                        if (ref.id != null) {
-                            newr[prototype[prop]['associatednavigationpropertyname']()] = '/' + prototype[prop]['pluralName'] + '(' + ref.id + ')';
-                        }
-                        continue;
-                    }
-
-                    if (prototype[prop] instanceof OptionSetValue) {
-                        let o = instance[prop] as OptionSetValue;
-                        if (o.value != null) {
-                            newr[prop.toString()] = o.value; 
-                        }
-                        continue;
-                    }
-
-                    if (prototype[prop] instanceof Date) {
-                        let d = value as Date;
-                        newr[prop.toString()] = d.toISOString();
-                        continue;
-                    }
-
-                    newr[prop.toString()] = instance[prop];
-                }
-            }
-        }
+        let newr = this.prepareNewInstance(prototype, instance);
 
         if (this.xrmService.debug) {
             console.log(newr);
@@ -458,6 +428,70 @@ export class XrmContextService {
                 }
             }
             return null;
+        });
+    }
+
+    createAll<T extends Entity>(prototype: T, instance: T[]): Observable<string[]> {
+        this.tick++;
+        let batch = 'batch_KO' + new Date().valueOf() + "$" + this.tick.toString();
+        let change = 'changeset_KO' + new Date().valueOf() + "!" + this.tick.toString();
+        let headers = new HttpHeaders({ 'Accept': 'application/json' });
+        headers = headers.append("Content-Type", "multipart/mixed;boundary=" + batch);
+        headers = headers.append("OData-MaxVersion", "4.0");
+        headers = headers.append("OData-Version", "4.0");
+
+        let body = '--' + batch + "\n";
+        body += "Content-Type: multipart/mixed;boundary=" + change + "\n";
+        body += "\n";
+
+        let count = 1;
+        instance.forEach(r => {
+            let nextI = this.prepareNewInstance(prototype, r);
+            body += '--' + change + "\n";
+            body += "Content-Type: application/http\n";
+            body += "Content-Transfer-Encoding:binary\n";
+            body += "Content-ID: " + count.toString() + "\n";
+            body += "\n";
+            body += "POST " + this.getContext().$devClientUrl() + prototype._pluralName + " HTTP/1.1\n";
+            body += "Content-Type: application/json;type=entry\n";
+            body += "\n";
+            body += JSON.stringify(nextI) + "\n";
+            count++;
+        });
+        body += '--' + change + '--\n';
+        body += "\n";
+        body += "--" + batch + "--\n";
+
+        if (this.xrmService.debug) {
+            console.log(body);
+        }
+
+        let url = this.getContext().getClientUrl() + this.xrmService.apiUrl + "$batch";
+
+        if (this.xrmService.debug) {
+            console.log(url);
+        }
+
+        return this.http.post(url, body, { headers: headers, responseType: "text" }).map(r => {
+            if (this.xrmService.debug)
+            {
+                console.log(r);
+            }
+
+            let ids: string[] = [];
+            let index = 0;
+            r.split('\n').forEach(l => {
+                if (l.startsWith('Content-ID:')) {
+                    index = Number(l.split(':')[1].trim()) - 1;
+                    return true;
+                }
+                if (l.startsWith('OData-EntityId:')) {
+                    let id = l.split('OData-EntityId:')[1].split('/' + prototype._pluralName + '(')[1].replace(')', '').trim();
+                    instance[index].id = id;
+                    ids.push(id);
+                }
+            });
+            return ids;
         });
     }
 
@@ -553,6 +587,7 @@ export class XrmContextService {
             // this is a really really stupid hack, because dynamics do not accept Integer for decimal fields, so we force 
             // a decimal position into the value before it is send.
             f = v + t;
+            done = true;
         }
 
         if (!done && t instanceof EntityReference) {
@@ -600,6 +635,66 @@ export class XrmContextService {
 
         console.log('xrmContextService supported the current log types: context, xrmcontext, url, version');
     } 
+
+    clone(prototype: Entity, instance: Entity): Entity {
+        let r = new Entity(prototype._pluralName, prototype._keyName);
+        for (let prop in prototype) {
+            if (this.ignoreColumn(prop)) continue;
+            let pv = prototype[prop];
+            if (typeof pv == 'function')
+            {
+                r[prop] = pv;
+                continue;
+            }
+
+            let v = instance[prop];
+            if (v != null) {
+                r[prop] = v;
+            }
+        }
+        r.id = null;
+        return r;
+    }
+
+
+    private prepareNewInstance(prototype: Entity, instance: Entity): any {
+        let newr = { };
+
+        for (let prop in prototype) {
+            if (prototype.hasOwnProperty(prop) && typeof prototype[prop] !== 'function') {
+                if (this.ignoreColumn(prop)) continue;
+
+                let value = instance[prop];
+                if (value !== 'undefined' && value !== null) {
+
+                    if (prototype[prop] instanceof EntityReference) {
+                        let ref = instance[prop] as EntityReference;
+                        if (ref.id != null) {
+                            newr[prototype[prop]['associatednavigationpropertyname']()] = '/' + prototype[prop]['pluralName'] + '(' + ref.id + ')';
+                        }
+                        continue;
+                    }
+
+                    if (prototype[prop] instanceof OptionSetValue) {
+                        let o = instance[prop] as OptionSetValue;
+                        if (o.value != null) {
+                            newr[prop.toString()] = o.value;
+                        }
+                        continue;
+                    }
+
+                    if (prototype[prop] instanceof Date) {
+                        let d = value as Date;
+                        newr[prop.toString()] = d.toISOString();
+                        continue;
+                    }
+
+                    newr[prop.toString()] = instance[prop];
+                }
+            }
+        }
+        return newr;
+    }
 
     private $expandToExpand(prop: ExpandProperty): Expand {
         if (prop != null) {

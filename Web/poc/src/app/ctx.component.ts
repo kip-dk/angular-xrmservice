@@ -150,6 +150,33 @@ export class CtxComponent {
         }
     }
 
+    createTwo(): void {
+        let me = this;
+        if (this.newContact != null && this.newContact != '') {
+            let spl = this.newContact.split(' ');
+            if (spl.length == 2) {
+                let all = [];
+                let count = 1;
+
+                for (let i = 0; i < 2; i++) {
+                    let con = new CtxContact();
+                    con.firstname = spl[0] + count;
+                    con.lastname = spl[1] +  count;
+                    con.parentcustomerid = new EntityReference(this.account.id);
+                    all.push(con);
+                    count++;
+                }
+
+                this.xrmContextService.createAll(this.contactPrototype, all).subscribe(r => {
+                    console.log(r);
+                    console.log(all);
+                    me.getContacts();
+                    me.newContact = null;
+                });
+            }
+        }
+    }
+
     update() {
         let me = this;
         if (this.currentContact != null && this.editCurrentName != null && this.editCurrentName != '') {

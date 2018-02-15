@@ -48,7 +48,7 @@ export class XrmService {
     constructor(private http: HttpClient) {
         let v = this.getContext().getVersion().split('.');
         this.setVersion(v[0] + "." + v[1]);
-        this.apiUrl = 'v' + v[0] + '.' + 'v';
+        this.apiVersion = 'v' + v[0] + '.' + v[1];
     }
 
     setVersion(v: string): void {
@@ -65,7 +65,7 @@ export class XrmService {
             if (x.getVersion == undefined) {
                 x.getVersion = (): string => "8.0.0.0"
             }
-            x.$devClientUrl = x.getClientUrl;
+            x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
             return x;
         }
 
@@ -75,7 +75,7 @@ export class XrmService {
                 if (x.getVersion == undefined) {
                     x.getVersion = (): string => "8.0.0.0"
                 }
-                x.$devClientUrl = x.getClientUrl;
+                x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
                 return x;
             }
         }
@@ -86,7 +86,7 @@ export class XrmService {
                 if (x.getVersion == undefined) {
                     x.getVersion = (): string => "8.0.0.0"
                 }
-                x.$devClientUrl = x.getClientUrl;
+                x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
                 return x;
             }
         }
@@ -363,7 +363,12 @@ export class XrmService {
         let options = {
             headers: headers
         }
-        return this.http.delete(this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")").map(response => null);
+
+        let url = this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")";
+        if (this.debug) {
+            console.log(url);
+        }
+        return this.http.delete(url).map(response => null);
     }
 
     private expandString(expand: Expand, sep: string): string {
