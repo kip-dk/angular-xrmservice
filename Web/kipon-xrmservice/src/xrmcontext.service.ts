@@ -640,6 +640,7 @@ export class XrmContextService {
         let r = new Entity(prototype._pluralName, prototype._keyName);
         for (let prop in prototype) {
             if (this.ignoreColumn(prop)) continue;
+
             let pv = prototype[prop];
             if (typeof pv == 'function')
             {
@@ -653,6 +654,10 @@ export class XrmContextService {
             }
         }
         r.id = null;
+        if (this.xrmService.debug) {
+            console.log('clone');
+            console.log(r);
+        }
         return r;
     }
 
@@ -669,7 +674,7 @@ export class XrmContextService {
 
                     if (prototype[prop] instanceof EntityReference) {
                         let ref = instance[prop] as EntityReference;
-                        if (ref.id != null) {
+                        if (ref != null && ref.id != null) {
                             newr[prototype[prop]['associatednavigationpropertyname']()] = '/' + prototype[prop]['pluralName'] + '(' + ref.id + ')';
                         }
                         continue;
@@ -677,7 +682,7 @@ export class XrmContextService {
 
                     if (prototype[prop] instanceof OptionSetValue) {
                         let o = instance[prop] as OptionSetValue;
-                        if (o.value != null) {
+                        if (o != null && o.value != null) {
                             newr[prop.toString()] = o.value;
                         }
                         continue;
@@ -685,7 +690,9 @@ export class XrmContextService {
 
                     if (prototype[prop] instanceof Date) {
                         let d = value as Date;
-                        newr[prop.toString()] = d.toISOString();
+                        if (d != null) {
+                            newr[prop.toString()] = d.toISOString();
+                        }
                         continue;
                     }
 
