@@ -1,6 +1,11 @@
 ###
 
-xrmContextService.createAll(prototype, array)  allow create multi records of same time in one transaction.
+added POC code for deleteAll() 
+added POC code for createAll()
+
+xrmContextService.deleteAll(instance[]) -- Delete multi row in a single transaction.
+xrmContextService.putAll(prototype,instances[], field, value) -- allow put same value into a number of rows in a single transaction. The process will also put the value into the parsed instance to keep ui sync
+xrmContextService.createAll(prototype, array)  -- allow create multi records of same time in one transaction.
 
 
 xrmSErvice.clone (clone method based on defined prototype   returns a clone on the parsed entity, based on the parsed prototype. Makes it easy to copy an object if

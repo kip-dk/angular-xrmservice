@@ -291,7 +291,7 @@ class ExpandProperty {
 export class XrmContextService {
     private context: any = {};
     private changemanager: any = {};
-    private tick: number = 0;
+    private tick: number = new Date().valueOf();
 
     constructor(private http: HttpClient, private xrmService: XrmService) { }
 
@@ -432,7 +432,6 @@ export class XrmContextService {
     }
 
     createAll<T extends Entity>(prototype: T, instance: T[]): Observable<string[]> {
-        this.tick++;
         let batch = 'batch_KO' + new Date().valueOf() + "$" + this.tick.toString();
         let change = 'changeset_KO' + new Date().valueOf() + "!" + this.tick.toString();
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
@@ -567,41 +566,92 @@ export class XrmContextService {
         });
     }
 
-    put(prototype: Entity, instance: Entity, field: string): Observable<null> {
-        let v = instance[field];
-        let t = prototype[field];
-        let f = v;
-        let done: boolean = false;
-        let pv: string = null;
+    put(prototype: Entity, instance: Entity, field: string): Observable<null>;
+    put(prototype: Entity, instance: Entity, field: string, value: any): Observable<null>;
+    put(prototype: Entity, instance: Entity, field: string, value: any = 'ko-@value-not-parsed!'): Observable<null> {
+        let v = value;
+        if (value == 'ko-@value-not-parsed!') {
+            v = instance[field];
+        }
 
-        if (t instanceof OptionSetValue) {
-            if (v == null || v['value'] == null) {
-                f = null;
-            } else {
-                f = v.value;
+        let pvx = this.preparePutValue(prototype, field, v);
+        return this.xrmService.put(prototype._pluralName, instance.id, pvx.field, pvx.value, pvx.propertyAs).map(response => {
+            if (value != 'ko-@value-not-parsed!') {
+                this.assignValue(prototype, instance, field, value);
+                return null;
             }
-            done = true;
-        }
-
-        if (!done && typeof t == 'number' && typeof v == 'number') {
-            // this is a really really stupid hack, because dynamics do not accept Integer for decimal fields, so we force 
-            // a decimal position into the value before it is send.
-            f = v + t;
-            done = true;
-        }
-
-        if (!done && t instanceof EntityReference) {
-            pv = "@odata.id";
-            field = t.associatednavigationpropertyname().split('@')[0] + "/$ref";
-            if (v.id == null || v.id == '') {
-                f = null;
-            } else {
-                f = this.getContext().$devClientUrl() + t.pluralName + "(" + v.id + ")";
-            }
-        }
-        return this.xrmService.put(prototype._pluralName, instance.id, field, f, pv);
+        });
     }
 
+    putAll(prototype: Entity, instances: Entity[], field: string, value: any): Observable<null> {
+        if (instances != null && instances.length == 1) {
+            return this.put(prototype, instances[0], field, value);
+        }
+
+        if (instances != null && instances.length > 0) {
+            this.tick++;
+            let batch = 'batch_KO' + new Date().valueOf() + "$" + this.tick.toString();
+            let change = 'changeset_KO' + new Date().valueOf() + "!" + this.tick.toString();
+            let headers = new HttpHeaders({ 'Accept': 'application/json' });
+            headers = headers.append("Content-Type", "multipart/mixed;boundary=" + batch);
+            headers = headers.append("OData-MaxVersion", "4.0");
+            headers = headers.append("OData-Version", "4.0");
+
+            let body = '--' + batch + "\n";
+            body += "Content-Type: multipart/mixed;boundary=" + change + "\n";
+            body += "\n";
+
+            let count = 1;
+            instances.forEach(r => {
+                let nextV = this.preparePutValue(prototype, field, value);
+
+                body += '--' + change + "\n";
+                body += "Content-Type: application/http\n";
+                body += "Content-Transfer-Encoding:binary\n";
+                body += "Content-ID: " + count.toString() + "\n";
+                body += "\n";
+                if (nextV.value != null) {
+                    body += "PUT " + this.getContext().$devClientUrl() + prototype._pluralName + "(" + r.id + ")/" + nextV.field + " HTTP/1.1\n";
+                } else {
+                    body += "DELETE " + this.getContext().$devClientUrl() + prototype._pluralName + "(" + r.id + ")/" + nextV.field + " HTTP/1.1\n";
+                }
+
+                let xr = {};
+                if (nextV.value != null) {
+                    xr[nextV.propertyAs] = nextV.value;
+                }
+                body += "Content-Type: application/json;type=entry\n";
+                body += "\n";
+                body += JSON.stringify(xr) + "\n";
+                count++;
+            });
+            body += '--' + change + '--\n';
+            body += "\n";
+            body += "--" + batch + "--\n";
+
+            if (this.xrmService.debug) {
+                console.log(body);
+            }
+
+            let url = this.getContext().getClientUrl() + this.xrmService.apiUrl + "$batch";
+
+            if (this.xrmService.debug) {
+                console.log(url);
+            }
+
+            return this.http.post(url, body, { headers: headers, responseType: "text" }).map(r => {
+                if (this.xrmService.debug) {
+                    console.log(r);
+                }
+
+                instances.forEach(r => {
+                    this.assignValue(prototype, r, field, value);
+                });
+                return null;
+            });
+        }
+        throw 'you must parse at least one instance in the instances array';
+    }
 
     delete<T extends Entity>(t: T): Observable<null> {
         let me = this;
@@ -612,6 +662,61 @@ export class XrmContextService {
             }
             return null;
         });
+    }
+
+    deleteAll<T extends Entity>(instances: T[]): Observable<null> {
+        if (instances != null && instances.length == 1) {
+            return this.delete(instances[0]);
+        }
+
+        if (instances != null && instances.length > 0) {
+            this.tick++;
+            let batch = 'batch_KO' + new Date().valueOf() + "$" + this.tick.toString();
+            let change = 'changeset_KO' + new Date().valueOf() + "!" + this.tick.toString();
+            let headers = new HttpHeaders({ 'Accept': 'application/json' });
+            headers = headers.append("Content-Type", "multipart/mixed;boundary=" + batch);
+            headers = headers.append("OData-MaxVersion", "4.0");
+            headers = headers.append("OData-Version", "4.0");
+
+            let body = '--' + batch + "\n";
+            body += "Content-Type: multipart/mixed;boundary=" + change + "\n";
+            body += "\n";
+
+            let count = 1;
+            instances.forEach(r => {
+                body += '--' + change + "\n";
+                body += "Content-Type: application/http\n";
+                body += "Content-Transfer-Encoding:binary\n";
+                body += "Content-ID: " + count.toString() + "\n";
+                body += "\n";
+                body += "DELETE " + this.getContext().$devClientUrl() + r._pluralName + "(" + r.id + ")" + " HTTP/1.1\n";
+                body += "Content-Type: application/json;type=entry\n";
+                body += "\n";
+                body += "{ }\n";
+                count++;
+            });
+            body += '--' + change + '--\n';
+            body += "\n";
+            body += "--" + batch + "--\n";
+
+            if (this.xrmService.debug) {
+                console.log(body);
+            }
+
+            let url = this.getContext().getClientUrl() + this.xrmService.apiUrl + "$batch";
+
+            if (this.xrmService.debug) {
+                console.log(url);
+            }
+
+            return this.http.post(url, body, { headers: headers, responseType: "text" }).map(r => {
+                if (this.xrmService.debug) {
+                    console.log(r);
+                }
+                return null;
+            });
+        }
+        throw 'you must parse at least one instance in the instances array';
     }
 
     log(type: string): void {
@@ -661,6 +766,38 @@ export class XrmContextService {
         return r;
     }
 
+    private preparePutValue(prototype: Entity, field: string, value: any): any {
+        let t = prototype[field];
+
+        if (t instanceof OptionSetValue) {
+            if (value == null || value['value'] == null) {
+                return { field: field, value: null, propertyAs: 'value' };
+            } else {
+                return { field: field, value: value['value'], propertyAs: 'value' };
+            }
+        }
+
+        if ( typeof t == 'number' && typeof value == 'number') {
+            if (value == null) {
+                return { field: field, value: null, propertyAs: null };
+            } else {
+            // this is a really really stupid hack, because dynamics do not accept Integer for decimal fields, so we force 
+            // a decimal position into the value before it is send.
+                return { field: field, value: value + t, propertyAs: 'value' };
+            }
+        }
+
+        if (t instanceof EntityReference) {
+            field = t.associatednavigationpropertyname().split('@')[0] + "/$ref";
+
+            if (value.id == null || value.id == '') {
+                return { field: field, value: null, propertyAs: '@odata.id' };
+            } else {
+                return { field: field, value: this.getContext().$devClientUrl() + t.pluralName + "(" + value.id + ")", propertyAs: '@odata.id' };
+            }
+        }
+        return { field: field, value: value, propertyAs: 'value' };
+    }
 
     private prepareNewInstance(prototype: Entity, instance: Entity): any {
         let newr = { };
@@ -701,6 +838,26 @@ export class XrmContextService {
             }
         }
         return newr;
+    }
+
+    private assignValue(prototype: Entity, instance: Entity, prop: string, value: any) {
+        if (value != null) {
+            instance[prop] = value;
+            return;
+        }
+
+        let t = prototype[prop];
+        if (t instanceof EntityReference) {
+            instance[prop] = t.clone();
+            return;
+        }
+
+        if (t instanceof OptionSetValue) {
+            instance[prop] = new OptionSetValue();
+            return;
+        }
+
+        instance[prop] = null;
     }
 
     private $expandToExpand(prop: ExpandProperty): Expand {

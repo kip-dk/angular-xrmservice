@@ -324,8 +324,8 @@ export class XrmService {
         });
     }
 
-    put(entityType: string, id: string, field: string, value: any);
-    put(entityType: string, id: string, field: string, value: any, propertyValueAs: string);
+    put(entityType: string, id: string, field: string, value: any): Observable<null>;
+    put(entityType: string, id: string, field: string, value: any, propertyValueAs: string): Observable<null>;
     put(entityType: string, id: string, field: string, value: any, propertyValueAs: string = null): Observable<null> {
         if (propertyValueAs == null) propertyValueAs = 'value';
 

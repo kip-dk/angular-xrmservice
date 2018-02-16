@@ -37,6 +37,7 @@ export class CtxContact extends Entity {
 
     server_fullname: string;
     views: number;
+    checked: boolean;
 
     onFetch(): void {
         this.server_fullname = this.fullname;
@@ -45,6 +46,7 @@ export class CtxContact extends Entity {
         } else {
             this.views++;
         }
+        if (this.checked == null) this.checked = false;
     }
 }
 
@@ -208,13 +210,26 @@ export class CtxComponent {
         });
     }
 
+    deleteSelected() {
+        let r: CtxContact[] = this.contacts.filter(r => r.checked);
+        this.xrmContextService.deleteAll(r).subscribe(a => {
+            this.getContacts();
+        });
+    }
+
+    checked(): number {
+        if (this.contacts != null && this.contacts.length > 0) {
+            return this.contacts.filter(r => r.checked).length;
+        }
+        return 0;
+    }
 
     private getContacts() {
         let me = this;
 
         if (this.account != null) {
             let c = new Condition().where("parentcustomerid", Comparator.Equals, new EntityReference(me.account.id));
-            me.xrmContextService.query<CtxContact>(me.contactPrototype, c, "fullname", 2, true).subscribe(r => {
+            me.xrmContextService.query<CtxContact>(me.contactPrototype, c, "fullname", 4, true).subscribe(r => {
                 me.contacts = r.value;
                 me.contactResult = r;
             });
