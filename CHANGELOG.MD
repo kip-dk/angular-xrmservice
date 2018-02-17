@@ -1,3 +1,13 @@
+### 1.0.145 - 2018.02.17
+
+XrmStateService introduced to enable monitoring of activites in the XrmService. Please look in the npm documentation page for the module for details. It basically
+enable you to draw a spinner in your UI when the XrmService (or XrmContextService) is active talking to Dynamics 365.
+
+xrmContextService changemanager was out of office since version 1.0.130 preventing any context based update of an object, it is fixed now
+
+xrmContextService.clone(..) is now cloning Date, EntityReference, OptionSetValue, so updating one instance after clone will not impact other instances
+cloned from the same root.
+
 ### 1.0.130 - 2018.02.16
 
 added POC code for deleteAll() 

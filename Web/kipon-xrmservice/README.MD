@@ -241,6 +241,73 @@ export class AccountService {
   }
 }
 ```
+
+### XrmStateService
+The XrmStateService allow you to monitor if the XrmService is currently active, and the number of request successed and number of errors.
+Especially the first is convinient, because it allow you to draw a spinner or similar in the UI, while the service is running requests.
+
+This concept is optional, and is based on the angular HttpClient interceptor concept. This means, that if your application has other types of
+HttpCient activities than the Dynamics 365, these activities will be included in the state of the XrmStateService. In other words, the XrmStateService
+actually has very little to do with the XrmService, because it is just providing a simple mechanisme to monitor HttpClient activities.
+
+To include the XrmStateService capacity in your model, change your app.module.ts according to below
+
+```typescript
+import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
+import { NgModule } from '@angular/core';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AppComponent } from './app.component';
+import { XrmServiceModule, XrmService, XrmStateService, XrmInterceptor } from 'kipon-xrmservice';
+
+@NgModule({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+      XrmServiceModule
+  ],
+  providers: [
+      XrmStateService,
+      XrmService,
+      { provide: HTTP_INTERCEPTORS, useClass: XrmInterceptor, multi: true }
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+As you can see in above example, a new XrmStateService is imported, and the XrmInterceptor is imported. 
+Finally we setup the HttpClient HTTP_INTERCEPTORS to use the XrmInterceptor
+
+When these elements has been added to the module, you can inject the XrmStateService into your components or services and 
+use the service as below example.
+
+```typescript
+import { Component } from '@angular/core';
+import { XrmStateService } from 'kipon-xrmservice';
+
+
+@Component({
+    selector: 'xrm-running',
+    template: '<span *ngIf="xrmState.running">I am talking to a server</span>'
+})
+export class XrmRunning {
+    constructor(public xrmState: XrmStateService) {
+    }
+}
+
+```
+Beside "running", an instance of the XrmStateService also have the following readonly attributes
+
+```typescript
+{ 
+	running: boolean,
+	success: number,
+	error: number
+}
+```
+
+
 ### XrmContextService
 The xrm context service is  work in progress. The services i still experimental and subject to api changes, however the basic idea is
 taken form.

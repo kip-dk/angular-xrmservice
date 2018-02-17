@@ -1,5 +1,15 @@
 <h2>Demo of XrmContextService</h2>
 
+<h4>Statistic from xrmState</h4>
+<div>
+  <span *ngIf="xrmState.running">TALKING&nbsp;</span>
+  <span *ngIf="!xrmState.running">QUIET&nbsp;</span>
+  <span>Success {{ xrmState.success }}&nbsp;</span>
+  <span>Errors {{ xrmState.error }}</span>
+</div>
+
+
+<h4>Account and contact maintanance</h4>
 <div *ngIf="account != null">
   Name: {{ account.name }}<br />
   Last on hold: {{ account.lastonholdtime  }}<br />

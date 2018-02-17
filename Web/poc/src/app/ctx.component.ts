@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { XrmContext, XrmEntityKey, XrmQueryResult, XrmContextService, Entity, EntityReference, OptionSetValue, Condition, Operator, Comparator } from 'kipon-xrmservice';
+import { XrmContext, XrmStateService, XrmEntityKey, XrmQueryResult, XrmContextService, Entity, EntityReference, OptionSetValue, Condition, Operator, Comparator } from 'kipon-xrmservice';
 
 export class CtxAccount extends Entity {
     constructor() {
@@ -86,7 +86,7 @@ export class CtxComponent {
         new industry(5, "Building Supply Retail")
     ];
 
-    constructor(private xrmContextService: XrmContextService) {
+    constructor(private xrmContextService: XrmContextService, public xrmState: XrmStateService) {
     }
 
     ngOnInit() {

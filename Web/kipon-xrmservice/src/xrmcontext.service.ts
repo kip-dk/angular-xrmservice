@@ -754,6 +754,27 @@ export class XrmContextService {
             }
 
             let v = instance[prop];
+
+            if (v == null) {
+                r[prop] = null;
+                continue;
+            }
+
+            if (v instanceof Date) {
+                r[prop] = new Date(v.valueOf());
+                continue;
+            }
+
+            if (v instanceof EntityReference) {
+                r[prop] = v.clone();
+                continue;
+            }
+
+            if (v instanceof OptionSetValue) {
+                r[prop] = v.clone();
+                continue;
+            }
+
             if (v != null) {
                 r[prop] = v;
             }
@@ -1026,7 +1047,7 @@ export class XrmContextService {
         }
 
         if (updateable) {
-            this.updateCM(prototype, instance);
+            this.updateCM(prototype, result);
         }
 
         let ep = this.getExpandProperty(prototype);
@@ -1058,15 +1079,21 @@ export class XrmContextService {
 
 
     private updateCM(prototype: any, instance: any): void {
-        let key = prototype._pluralName + ':' + instance[prototype._keyName];
+        let key = prototype._pluralName + ':' + instance['id'];
         let change = {};
+
+        if (this.xrmService.debug) {
+            console.log('Adding to cm ' + key);
+        }
+
         this.changemanager[key] = change;
 
         for (let prop in prototype) {
             if (this.ignoreColumn(prop)) continue;
             if (prototype.hasOwnProperty(prop) && typeof prototype[prop] != 'function') {
                 let v = instance[prop];
-                if (v = null) continue;
+                if (v == null) continue;
+
                 let done = false;
 
                 if (v instanceof EntityReference) {
@@ -1090,6 +1117,10 @@ export class XrmContextService {
                     done = true;
                 }
             }
+        }
+
+        if (this.xrmService.debug) {
+            console.log(change);
         }
     }
 

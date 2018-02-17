@@ -1,6 +1,6 @@
 {
   "name": "kipon-xrmservice",
-  "version": "1.0.130",
+  "version": "1.0.145",
   "scripts": {
     "build": "gulp build",
     "build:watch": "gulp",
