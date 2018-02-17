@@ -1,4 +1,4 @@
-### 1.0.145 - 2018.02.17
+### 1.0.146 - 2018.02.17
 
 XrmStateService introduced to enable monitoring of activites in the XrmService. Please look in the npm documentation page for the module for details. It basically
 enable you to draw a spinner in your UI when the XrmService (or XrmContextService) is active talking to Dynamics 365.
