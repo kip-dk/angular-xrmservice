@@ -1,3 +1,14 @@
+### 1.0.149 - 2018-02-17
+
+XrmTransaction introduced to allow bundle independent operation into a single transaction.  
+To commit the transaction, use xrmContextService.commit(transInstance);
+
+createAll ATTENTION, API changed!!, it is not longer returning an array of keys, but it still set the id of the parsed instance according to creation
+putAll
+deleteAll
+
+all refactored to use XrmTransaction internally
+
 ### 1.0.146 - 2018.02.17
 
 XrmStateService introduced to enable monitoring of activites in the XrmService. Please look in the npm documentation page for the module for details. It basically

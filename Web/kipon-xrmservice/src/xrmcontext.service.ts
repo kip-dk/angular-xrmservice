@@ -281,6 +281,42 @@ export class Condition {
     }
 }
 
+class XrmTransactionItem {
+    constructor(type: string, prototype: Entity, instance: Entity);
+    constructor(type: string, prototype: Entity, instance: Entity, field: string, value: any);
+    constructor(type: string, prototype: Entity, instance: Entity, field: string = null, value: any = null) {
+        this.type = type;
+        this.prototype = prototype;
+        this.instance = instance;
+        this.field = field;
+        this.value = value;
+    }
+
+    type: string;
+    prototype: Entity;
+    instance: Entity;
+    field: string;
+    value: any;
+    id: number = null;
+}
+
+
+export class XrmTransaction {
+    private oprs: XrmTransactionItem[] = [];
+
+    put<T extends Entity>(prototype: T, instance: T, field: string, value: any): void {
+        this.oprs.push(new XrmTransactionItem("put", prototype, instance, field, value));
+    }
+
+    delete<T extends Entity>(instance: T): void {
+        this.oprs.push(new XrmTransactionItem("delete", null, instance));
+    }
+
+    create<T extends Entity>(prototype: T, instance: T): void {
+        this.oprs.push(new XrmTransactionItem("create", prototype, instance));
+    }
+}
+
 class ExpandProperty {
     name: string;
     entity: Entity;
@@ -431,67 +467,16 @@ export class XrmContextService {
         });
     }
 
-    createAll<T extends Entity>(prototype: T, instance: T[]): Observable<string[]> {
-        let batch = 'batch_KO' + new Date().valueOf() + "$" + this.tick.toString();
-        let change = 'changeset_KO' + new Date().valueOf() + "!" + this.tick.toString();
-        let headers = new HttpHeaders({ 'Accept': 'application/json' });
-        headers = headers.append("Content-Type", "multipart/mixed;boundary=" + batch);
-        headers = headers.append("OData-MaxVersion", "4.0");
-        headers = headers.append("OData-Version", "4.0");
-
-        let body = '--' + batch + "\n";
-        body += "Content-Type: multipart/mixed;boundary=" + change + "\n";
-        body += "\n";
-
-        let count = 1;
-        instance.forEach(r => {
-            let nextI = this.prepareNewInstance(prototype, r);
-            body += '--' + change + "\n";
-            body += "Content-Type: application/http\n";
-            body += "Content-Transfer-Encoding:binary\n";
-            body += "Content-ID: " + count.toString() + "\n";
-            body += "\n";
-            body += "POST " + this.getContext().$devClientUrl() + prototype._pluralName + " HTTP/1.1\n";
-            body += "Content-Type: application/json;type=entry\n";
-            body += "\n";
-            body += JSON.stringify(nextI) + "\n";
-            count++;
-        });
-        body += '--' + change + '--\n';
-        body += "\n";
-        body += "--" + batch + "--\n";
-
-        if (this.xrmService.debug) {
-            console.log(body);
-        }
-
-        let url = this.getContext().getClientUrl() + this.xrmService.apiUrl + "$batch";
-
-        if (this.xrmService.debug) {
-            console.log(url);
-        }
-
-        return this.http.post(url, body, { headers: headers, responseType: "text" }).map(r => {
-            if (this.xrmService.debug)
-            {
-                console.log(r);
-            }
-
-            let ids: string[] = [];
-            let index = 0;
-            r.split('\n').forEach(l => {
-                if (l.startsWith('Content-ID:')) {
-                    index = Number(l.split(':')[1].trim()) - 1;
-                    return true;
-                }
-                if (l.startsWith('OData-EntityId:')) {
-                    let id = l.split('OData-EntityId:')[1].split('/' + prototype._pluralName + '(')[1].replace(')', '').trim();
-                    instance[index].id = id;
-                    ids.push(id);
-                }
+    createAll<T extends Entity>(prototype: T, instances: T[]): Observable<null> {
+        if (prototype != null && instances != null && instances.length > 0) {
+            let trans = new XrmTransaction();
+            instances.forEach(r => {
+                trans.create(prototype, r);
             });
-            return ids;
-        });
+
+            return this.commit(trans);
+        }
+        throw "You must parse a prototype and at least one instance to be created";
     }
 
     update<T extends Entity>(prototype: T, instance: T): Observable<T> {
@@ -589,67 +574,13 @@ export class XrmContextService {
         }
 
         if (instances != null && instances.length > 0) {
-            this.tick++;
-            let batch = 'batch_KO' + new Date().valueOf() + "$" + this.tick.toString();
-            let change = 'changeset_KO' + new Date().valueOf() + "!" + this.tick.toString();
-            let headers = new HttpHeaders({ 'Accept': 'application/json' });
-            headers = headers.append("Content-Type", "multipart/mixed;boundary=" + batch);
-            headers = headers.append("OData-MaxVersion", "4.0");
-            headers = headers.append("OData-Version", "4.0");
-
-            let body = '--' + batch + "\n";
-            body += "Content-Type: multipart/mixed;boundary=" + change + "\n";
-            body += "\n";
-
-            let count = 1;
+            let trans = new XrmTransaction();
             instances.forEach(r => {
-                let nextV = this.preparePutValue(prototype, field, value);
-
-                body += '--' + change + "\n";
-                body += "Content-Type: application/http\n";
-                body += "Content-Transfer-Encoding:binary\n";
-                body += "Content-ID: " + count.toString() + "\n";
-                body += "\n";
-                if (nextV.value != null) {
-                    body += "PUT " + this.getContext().$devClientUrl() + prototype._pluralName + "(" + r.id + ")/" + nextV.field + " HTTP/1.1\n";
-                } else {
-                    body += "DELETE " + this.getContext().$devClientUrl() + prototype._pluralName + "(" + r.id + ")/" + nextV.field + " HTTP/1.1\n";
-                }
-
-                let xr = {};
-                if (nextV.value != null) {
-                    xr[nextV.propertyAs] = nextV.value;
-                }
-                body += "Content-Type: application/json;type=entry\n";
-                body += "\n";
-                body += JSON.stringify(xr) + "\n";
-                count++;
+                trans.put(prototype, r, field, value);
             });
-            body += '--' + change + '--\n';
-            body += "\n";
-            body += "--" + batch + "--\n";
-
-            if (this.xrmService.debug) {
-                console.log(body);
-            }
-
-            let url = this.getContext().getClientUrl() + this.xrmService.apiUrl + "$batch";
-
-            if (this.xrmService.debug) {
-                console.log(url);
-            }
-
-            return this.http.post(url, body, { headers: headers, responseType: "text" }).map(r => {
-                if (this.xrmService.debug) {
-                    console.log(r);
-                }
-
-                instances.forEach(r => {
-                    this.assignValue(prototype, r, field, value);
-                });
-                return null;
-            });
+            return this.commit(trans);
         }
+
         throw 'you must parse at least one instance in the instances array';
     }
 
@@ -670,6 +601,19 @@ export class XrmContextService {
         }
 
         if (instances != null && instances.length > 0) {
+            let trans = new XrmTransaction();
+            instances.forEach(r => {
+                trans.delete(r);
+            });
+            return this.commit(trans);
+        }
+        throw 'you must parse at least one instance in the instances array';
+    }
+
+    commit(transaction: XrmTransaction): Observable<null> {
+        let oprs = transaction["oprs"] as XrmTransactionItem[];
+
+        if (oprs != null && oprs.length > 0) {
             this.tick++;
             let batch = 'batch_KO' + new Date().valueOf() + "$" + this.tick.toString();
             let change = 'changeset_KO' + new Date().valueOf() + "!" + this.tick.toString();
@@ -683,16 +627,55 @@ export class XrmContextService {
             body += "\n";
 
             let count = 1;
-            instances.forEach(r => {
-                body += '--' + change + "\n";
-                body += "Content-Type: application/http\n";
-                body += "Content-Transfer-Encoding:binary\n";
-                body += "Content-ID: " + count.toString() + "\n";
-                body += "\n";
-                body += "DELETE " + this.getContext().$devClientUrl() + r._pluralName + "(" + r.id + ")" + " HTTP/1.1\n";
-                body += "Content-Type: application/json;type=entry\n";
-                body += "\n";
-                body += "{ }\n";
+            oprs.forEach(r => {
+                r.id = count;
+                if (r.type == "put") {
+                    let nextV = this.preparePutValue(r.prototype, r.field, r.value);
+                    body += '--' + change + "\n";
+                    body += "Content-Type: application/http\n";
+                    body += "Content-Transfer-Encoding:binary\n";
+                    body += "Content-ID: " + count.toString() + "\n";
+                    body += "\n";
+                    if (nextV.value != null) {
+                        body += "PUT " + this.getContext().$devClientUrl() + r.prototype._pluralName + "(" + r.id + ")/" + nextV.field + " HTTP/1.1\n";
+                    } else {
+                        body += "DELETE " + this.getContext().$devClientUrl() + r.prototype._pluralName + "(" + r.id + ")/" + nextV.field + " HTTP/1.1\n";
+                    }
+
+                    let xr = {};
+                    if (nextV.value != null) {
+                        xr[nextV.propertyAs] = nextV.value;
+                    }
+                    body += "Content-Type: application/json;type=entry\n";
+                    body += "\n";
+                    body += JSON.stringify(xr) + "\n";
+                }
+
+                if (r.type == "delete") {
+                    body += '--' + change + "\n";
+                    body += "Content-Type: application/http\n";
+                    body += "Content-Transfer-Encoding:binary\n";
+                    body += "Content-ID: " + count.toString() + "\n";
+                    body += "\n";
+                    body += "DELETE " + this.getContext().$devClientUrl() + r.instance._pluralName + "(" + r.instance.id + ")" + " HTTP/1.1\n";
+                    body += "Content-Type: application/json;type=entry\n";
+                    body += "\n";
+                    body += "{ }\n";
+                }
+
+                if (r.type == "create") {
+                    let nextI = this.prepareNewInstance(r.prototype, r.instance);
+                    body += '--' + change + "\n";
+                    body += "Content-Type: application/http\n";
+                    body += "Content-Transfer-Encoding:binary\n";
+                    body += "Content-ID: " + count.toString() + "\n";
+                    body += "\n";
+                    body += "POST " + this.getContext().$devClientUrl() + r.prototype._pluralName + " HTTP/1.1\n";
+                    body += "Content-Type: application/json;type=entry\n";
+                    body += "\n";
+                    body += JSON.stringify(nextI) + "\n";
+
+                }
                 count++;
             });
             body += '--' + change + '--\n';
@@ -709,15 +692,39 @@ export class XrmContextService {
                 console.log(url);
             }
 
-            return this.http.post(url, body, { headers: headers, responseType: "text" }).map(r => {
+            return this.http.post(url, body, { headers: headers, responseType: "text" }).map(txt => {
                 if (this.xrmService.debug) {
-                    console.log(r);
+                    console.log(txt);
                 }
+
+                oprs.forEach(r => {
+                    if (r.type == 'put') {
+                        this.assignValue(r.prototype, r.instance, r.field, r.value);
+                    }
+                });
+
+                let index: number = 0;
+                txt.split('\n').forEach(l => {
+                    if (l.startsWith('Content-ID:')) {
+                        index = Number(l.split(':')[1].trim());
+                        return true;
+                    }
+                    if (l.startsWith('OData-EntityId:')) {
+                        let opr = oprs.find(o => o.id == index);
+
+                        if (opr != null && opr.type == 'create') {
+                            let id = l.split('OData-EntityId:')[1].split('/' + opr.prototype._pluralName + '(')[1].replace(')', '').trim();
+                            opr.instance.id = id;
+                        }
+                    }
+                    return true;
+                });
                 return null;
             });
         }
-        throw 'you must parse at least one instance in the instances array';
+        throw 'you must parse at least one operation to the transaction by calling put, create, update or delete';
     }
+
 
     log(type: string): void {
         if (type == 'context') {

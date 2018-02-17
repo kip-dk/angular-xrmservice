@@ -338,6 +338,24 @@ On top of that, the XrmContextService is using a Condition() object to define th
 operators and value maps are still missing. They will be added on a need base. Please post and issue on the git repository if you are in need of ceertain maps, and i will
 try to find time to implement them asap.
 
+### XrmTransaction
+XrmTransaction object allow you to setup a list of operations that must be performend in a single transaction.
+
+in your service:
+```typescript
+let trans = new XrmTransaction();
+trans.put(...);
+trans.create(...)
+trans.update(...)  // to-do, not there yet sorry
+trans.delete(...)
+
+xrmContextService.commit( trans ).subscribe( r => { });
+```
+
+Under the hood, the xrmContextService will use the $batch capacity of the Dynamics 365 Web API.
+Remember, the XrmTransaction can and will not do any operations it self. Its only purpuse is to collect a serie of operations to be performed. You must
+use the xrmContextService.commit(..) method to execute the transaction, and it will not be executed until you subscribe. The transaction
+will however, when execute be performed in a single http/https request.
 
 
 ### Service generator
