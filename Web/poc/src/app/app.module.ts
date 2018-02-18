@@ -4,11 +4,11 @@ import { NgModule } from '@angular/core';
 
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
+
 import { AppComponent } from './app.component';
 import { CtxComponent } from './ctx.component';
 
-import { XrmServiceModule, XrmStateService, XrmService, XrmContextService, XrmInterceptor } from 'kipon-xrmservice';
-
+import { XrmServiceModule, XrmStateService, XrmService, XrmContextService, XrmInterceptor } from 'kipon-xrmservice'
 
 @NgModule({
   declarations: [
