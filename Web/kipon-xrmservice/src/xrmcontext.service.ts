@@ -159,14 +159,16 @@ export class Filter {
 
         if (prototype[this.field] instanceof EntityReference) {
             _f = "_" + this.field + "_value";
-            if (typeof this.value == 'string') {
-                _v = this.value;
-            } else {
-                _v = this.value.id;
+            if (this.value != null) {
+                if (typeof this.value == 'string') {
+                    _v = this.value;
+                } else {
+                    _v = this.value.id;
+                }
             }
         }
 
-        if (_f.startsWith('_') && _f.endsWith('_value')) {
+        if (_f.startsWith('_') && _f.endsWith('_value') && _v != null) {
             _v = _v.replace('{', '').replace('}', '');
         }
 

@@ -1,3 +1,7 @@
+### 1.0.151 - 2018-02-19
+
+fixed Filter does not have a value for ContainsData and NotContainsData Comparator. No longer giving ...undefined error
+
 ### 1.0.149 - 2018-02-17
 
 XrmTransaction introduced to allow bundle independent operation into a single transaction.  
