@@ -1,3 +1,11 @@
+### 1.0.51 - 2018-02-19
+Development and bug fix has been moved into the poc sub project, so changes and fixes can be done locally and tested without push to the npm.
+This should result in fewer and more stable releases, and easy up the development and bug fix.
+
+Current "stable" build is hosted in Web/kipon-xrmservice
+Current "nightly build" is hosted in Web/Poc/src/app/xrm
+
+
 ### 1.0.151 - 2018-02-19
 
 fixed Filter does not have a value for ContainsData and NotContainsData Comparator. No longer giving ...undefined error

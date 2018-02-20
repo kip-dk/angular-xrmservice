@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 
-import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult, XrmContextService, Expand } from 'kipon-xrmservice';
+import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult, Expand } from './xrm/xrm.service';
+import { XrmContextService } from './xrm/xrmcontext.service';
 
 
 export class Account {

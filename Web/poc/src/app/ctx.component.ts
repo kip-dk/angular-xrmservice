@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 
-import { XrmContext, XrmStateService, XrmEntityKey, XrmQueryResult, XrmContextService, Entity, EntityReference, OptionSetValue, Condition, Operator, Comparator } from 'kipon-xrmservice';
+import { XrmStateService } from './xrm/xrmstate.service';
+import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult, Expand } from './xrm/xrm.service';
+import { XrmContextService, Entity, EntityReference, OptionSetValue, Condition, Operator, Comparator } from './xrm/xrmcontext.service';
+
 
 export class CtxAccount extends Entity {
     constructor() {
