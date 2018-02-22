@@ -1,4 +1,8 @@
-### 1.0.51 - 2018-02-19
+### 1.0.152 - 2018-02-22
+
+Introduction of XrmAccess to support ui that needs to know the current access abilities for the current user on an object instance.
+
+### 1.0.151 - 2018-02-19
 Development and bug fix has been moved into the poc sub project, so changes and fixes can be done locally and tested without push to the npm.
 This should result in fewer and more stable releases, and easy up the development and bug fix.
 

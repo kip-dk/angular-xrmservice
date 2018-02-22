@@ -1,5 +1,8 @@
-﻿import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest, HttpResponse, HttpErrorResponse, HttpClient, HttpHeaders } from '@angular/common/http';
+
+import { _throw } from 'rxjs/observable/throw';
+import 'rxjs/add/operator/catch';
 import { Observable } from 'rxjs/Observable';
 
 import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult, Expand } from './xrm.service';
@@ -317,6 +320,18 @@ export class XrmTransaction {
     create<T extends Entity>(prototype: T, instance: T): void {
         this.oprs.push(new XrmTransactionItem("create", prototype, instance));
     }
+}
+
+export class XrmAccess {
+    resolved: boolean = null;
+    read: boolean;
+    write: boolean;
+    append: boolean;
+    appendTo: boolean;
+    create: boolean;
+    delete: boolean;
+    share: boolean;
+    assign: boolean;
 }
 
 class ExpandProperty {
@@ -796,6 +811,57 @@ export class XrmContextService {
         return r;
     }
 
+    private resolveAccess(prototype: Entity, instance: Entity) {
+        if (!prototype.hasOwnProperty('access') || !(prototype['access'] instanceof XrmAccess)) {
+            return;
+        }
+        if (!instance.hasOwnProperty('access')) {
+            instance['access'] = new XrmAccess();
+        } else {
+            let r = instance['access'] as XrmAccess;
+            if (r.resolved != null) {
+                return;
+            }
+        }
+        let r = instance['access'] as XrmAccess;
+        r.resolved = false;
+
+        let headers = new HttpHeaders({ 'Accept': 'application/json' });
+        headers = headers.append("OData-MaxVersion", "4.0");
+        headers = headers.append("OData-Version", "4.0");
+        headers = headers.append("Content-Type", "application/json; charset=utf-8");
+        headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
+
+        let url = this.getContext().getClientUrl() + this.xrmService.apiUrl + "systemusers(" + this.getContext().getUserId() + ")/Microsoft.Dynamics.CRM.RetrievePrincipalAccess(Target=@tid)?@tid={'@odata.id':'" + prototype._pluralName + "(" + instance.id + ")'}";
+
+        if (this.xrmService.debug) {
+            console.log(url);
+        }
+
+        this.http.get(url, { headers: headers })
+            .catch((err: HttpErrorResponse) => {
+                r.resolved = null;
+                return _throw(err);
+            }).subscribe(r => {
+                if (this.xrmService.debug) {
+                    console.log(r);
+                }
+
+                let i = instance['access'] as XrmAccess;
+                let perm = r["AccessRights"] as string;
+                // ReadAccess, WriteAccess, AppendAccess, AppendToAccess, CreateAccess, DeleteAccess, ShareAccess, AssignAccess
+                i.append = perm.indexOf('AppendAccess') >= 0;
+                i.appendTo = perm.indexOf('AppendToAccess') >= 0
+                i.assign = perm.indexOf('AssignAccess') >= 0;
+                i.create = perm.indexOf('CreateAccess') >= 0;
+                i.delete = perm.indexOf('DeleteAccess') >= 0;
+                i.read = perm.indexOf('ReadAccess') >= 0;
+                i.share = perm.indexOf('ShareAccess') >= 0;
+                i.write = perm.indexOf('WriteAccess') >= 0;
+                i.resolved = true;
+            });
+    }
+
     private preparePutValue(prototype: Entity, field: string, value: any): any {
         let t = prototype[field];
 
@@ -1083,6 +1149,9 @@ export class XrmContextService {
         if (result['onFetch'] !== 'undefined' && result["onFetch"] != null  && typeof result["onFetch"] === 'function') {
             result['onFetch']();
         }
+
+        this.resolveAccess(prototype, instance);
+
         return result as T;
     }
 
@@ -1194,7 +1263,7 @@ export class XrmContextService {
     }
 
     private ignoreColumn(prop: string): boolean {
-        if (prop == "_pluralName" || prop == "_keyName" || prop == "id" || prop == '_updateable' || prop == '$expand') {
+        if (prop == "_pluralName" || prop == "_keyName" || prop == "id" || prop == '_updateable' || prop == '$expand' || prop == 'access') {
             return true;
         }
         return false;

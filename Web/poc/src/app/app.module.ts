@@ -7,13 +7,15 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 import { CtxComponent } from './ctx.component';
-
+import { AccessViewComponent } from './accessView.component';
+ 
 import { XrmServiceModule, XrmStateService, XrmService, XrmContextService, XrmInterceptor } from './xrm/index'
 
 @NgModule({
   declarations: [
     AppComponent,
-    CtxComponent
+      CtxComponent,
+      AccessViewComponent
   ],
   imports: [
       BrowserModule,

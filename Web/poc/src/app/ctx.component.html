@@ -11,6 +11,11 @@
 
 <h4>Account and contact maintanance</h4>
 <div *ngIf="account != null">
+  <h4>User access</h4>
+  <access-view [entity]="account"></access-view>
+
+  <br />
+  <h4>Account info</h4>
   Name: {{ account.name }}<br />
   Last on hold: {{ account.lastonholdtime  }}<br />
   <input type="text" [(ngModel)]="newDate" placeholder="yyyy-mm-ddThh:mm:ssZ" /><button (click)="updateDate()">Update date</button><br /><br />

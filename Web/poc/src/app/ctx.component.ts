@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 
 import { XrmStateService } from './xrm/xrmstate.service';
 import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult, Expand } from './xrm/xrm.service';
-import { XrmContextService, Entity, EntityReference, OptionSetValue, Condition, Operator, Comparator } from './xrm/xrmcontext.service';
+import { XrmContextService, Entity, EntityReference, OptionSetValue, Condition, Operator, Comparator, XrmAccess } from './xrm/xrmcontext.service';
 
 
 export class CtxAccount extends Entity {
@@ -25,6 +25,8 @@ export class CtxAccount extends Entity {
     onFetch(): void {
         this.ignoreMe = 'ignore me was initialized by onFetch';
     }
+
+    access: XrmAccess = new XrmAccess();
 }
 
 export class CtxContact extends Entity {
