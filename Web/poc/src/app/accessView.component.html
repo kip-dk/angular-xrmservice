@@ -1,4 +1,4 @@
-<div *ngIf="access != null && access.resolved == true">
+<span *ngIf="access != null && access.resolved == true">
   <span *ngIf="access.read">Read&nbsp;</span>
   <span *ngIf="access.write">Write&nbsp;</span>
   <span *ngIf="access.create">Create&nbsp;</span>
@@ -6,4 +6,4 @@
   <span *ngIf="access.append">Append&nbsp;</span>
   <span *ngIf="access.appendTo">AppendTo&nbsp;</span>
   <span *ngIf="access.assign">Assign&nbsp;</span>
-</div>
+</span>

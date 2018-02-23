@@ -8,6 +8,7 @@ class Support {
     update: boolean = true;
     create: boolean = true;
     delete: boolean = true;
+    access: boolean = false;
 }
 
 @Component({
@@ -145,9 +146,10 @@ export class AppComponent {
 
     renderCode(): void {
         let me = this;
+        let acc = this.support.access ? ', XrmAccess': '';
         this.code = "import { Injectable } from '@angular/core';\n";
         this.code += "import { Observable } from 'rxjs/Observable';\n";
-        this.code += "import { XrmQueryResult, XrmContextService, Entity, EntityReference, OptionSetValue, Condition, Operator, Comparator } from 'kipon-xrmservice';\n";
+        this.code += "import { XrmQueryResult, XrmContextService, Entity, EntityReference, OptionSetValue, Condition, Operator, Comparator"+acc+" } from 'kipon-xrmservice';\n";
         this.code += "\n";
         if (this.current != null) {
             this.code += "export class " + this.current.SchemaName + " extends Entity {\n";
@@ -209,6 +211,10 @@ export class AppComponent {
                         this.code += '\n';
                     }
                 });
+
+                if (this.support.access) {
+                    this.code += "\taccess:XrmAccess = new XrmAccess(true);\t";
+                }
 
                 this.code += "\n";
                 this.code += "\tmeta():" +  this.current.SchemaName + " {\n";

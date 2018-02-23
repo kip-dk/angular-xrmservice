@@ -21,6 +21,7 @@
             <button class="btn" [ngClass]="{'btn-success' : support.create, 'btn-default' : !support.create }" (click)="toggleSupport('create')">Create</button>
             <button class="btn" [ngClass]="{'btn-success' : support.update, 'btn-default' : !support.update }" (click)="toggleSupport('update')">Update</button>
             <button class="btn" [ngClass]="{'btn-success' : support.delete, 'btn-default' : !support.delete }" (click)="toggleSupport('delete')">Delete</button>
+            <button class="btn" [ngClass]="{'btn-success' : support.access, 'btn-default' : !support.access }" (click)="toggleSupport('access')">Access</button>
           </div>
         </ko-view>
       </ko-vertical-split>

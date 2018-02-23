@@ -323,6 +323,7 @@ export class XrmTransaction {
 }
 
 export class XrmAccess {
+    private lazy: boolean = null;
     resolved: boolean = null;
     read: boolean;
     write: boolean;
@@ -332,6 +333,12 @@ export class XrmAccess {
     delete: boolean;
     share: boolean;
     assign: boolean;
+
+    constructor();
+    constructor(lasy: boolean);
+    constructor(lazy: boolean = false) {
+        this.lazy = lazy;
+    }
 }
 
 class ExpandProperty {
@@ -811,10 +818,25 @@ export class XrmContextService {
         return r;
     }
 
+    applyAccess(prototype: Entity, instance: Entity): Observable<Entity> {
+        if (!prototype.hasOwnProperty('access')) throw 'The metadata must define a property "access" of type XrmAccess';
+
+        if (instance.hasOwnProperty('access') && instance['access']['resolved']) {
+            return Observable.create(obs => obs.next(instance));
+        }
+
+        return this.mapAccess(prototype, instance);
+    }
+
     private resolveAccess(prototype: Entity, instance: Entity) {
+        this.mapAccess(prototype, instance).subscribe(r => { });
+    }
+
+    private mapAccess(prototype: Entity, instance: Entity): Observable<Entity> {
         if (!prototype.hasOwnProperty('access') || !(prototype['access'] instanceof XrmAccess)) {
             return;
         }
+
         if (!instance.hasOwnProperty('access')) {
             instance['access'] = new XrmAccess();
         } else {
@@ -838,11 +860,11 @@ export class XrmContextService {
             console.log(url);
         }
 
-        this.http.get(url, { headers: headers })
+        return this.http.get(url, { headers: headers })
             .catch((err: HttpErrorResponse) => {
                 r.resolved = null;
                 return _throw(err);
-            }).subscribe(r => {
+            }).map(r => {
                 if (this.xrmService.debug) {
                     console.log(r);
                 }
@@ -859,6 +881,7 @@ export class XrmContextService {
                 i.share = perm.indexOf('ShareAccess') >= 0;
                 i.write = perm.indexOf('WriteAccess') >= 0;
                 i.resolved = true;
+                return instance;
             });
     }
 
@@ -1150,7 +1173,10 @@ export class XrmContextService {
             result['onFetch']();
         }
 
-        this.resolveAccess(prototype, instance);
+
+        if (prototype.hasOwnProperty('access') && !prototype['access']['lazy']) {
+            this.resolveAccess(prototype, instance);
+        }
 
         return result as T;
     }

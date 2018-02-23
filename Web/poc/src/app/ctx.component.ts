@@ -44,6 +44,8 @@ export class CtxContact extends Entity {
     views: number;
     checked: boolean;
 
+    access: XrmAccess = new XrmAccess(true);
+
     onFetch(): void {
         this.server_fullname = this.fullname;
         if (this.views == null) {
@@ -227,6 +229,11 @@ export class CtxComponent {
             return this.contacts.filter(r => r.checked).length;
         }
         return 0;
+    }
+
+    resolveAccess(con: CtxContact) {
+        this.xrmContextService.applyAccess(this.contactPrototype, con).subscribe(r => {
+        });
     }
 
     private getContacts() {

@@ -1,3 +1,9 @@
+### 1.0.153 - 2018-02-23
+
+XrmAccess can be resolved lazy. Parse true to the XrmAccess constructor in the prototype instance, and call xrmContextService.applyAccess(prototype, instance) when you
+need to know the defacto access for current user on the instance. If you do not parse anything to the constructor of XrmAccess on you prototype, access will be
+resolved as an automatic request after fetch of an instance through get or query.
+
 ### 1.0.152 - 2018-02-22
 
 Introduction of XrmAccess to support ui that needs to know the current access abilities for the current user on an object instance.

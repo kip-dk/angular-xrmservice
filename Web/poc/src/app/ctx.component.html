@@ -42,6 +42,8 @@
       <li *ngFor="let con of contacts" (click)="click(con)">
         <input type="checkbox" [(ngModel)]="con.checked" />
         {{ con.server_fullname }} : {{ con.views }}&nbsp;<button (click)="delete(con)">Delete</button>
+        &nbsp;<button (click)="resolveAccess(con)" *ngIf="con.access == null">Resolve access</button>
+        <access-view [entity]="con" *ngIf="con.access != null"></access-view>
       </li>
     </ul>
     <br />

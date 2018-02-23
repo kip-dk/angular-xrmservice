@@ -365,15 +365,11 @@ export class MyPrototype extends Entity
 {
    ..whatefter...
 
-   access : XrmAccess = new XrmAccess();
+   access : XrmAccess = new XrmAccess(lazy:boolean?);
 }
 ```
 The system will on fetch and get of the object, retreive the current users access rights to the object. This is handy if you wish to hide, disable or display buttons or flags in the UI
 based on the access rights for the current user.
-
-The upcomming version, will allow lazy load on these settings, but for now, they are loaded on get and fetch. They are loaded in its own request, after the object is returned to the client
-so you do not have to wait until it is done. The object in place will be assigned an instance of the XrmAccess, and the "resolved" property will be set to true, when the values in the object
-is trust worthy.
 
 Look in the poc project for <access-view> component to see how it can be used.
 
