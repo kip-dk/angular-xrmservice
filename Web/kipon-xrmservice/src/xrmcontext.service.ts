@@ -854,7 +854,7 @@ export class XrmContextService {
         headers = headers.append("Content-Type", "application/json; charset=utf-8");
         headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
 
-        let url = this.getContext().getClientUrl() + this.xrmService.apiUrl + "systemusers(" + this.getContext().getUserId() + ")/Microsoft.Dynamics.CRM.RetrievePrincipalAccess(Target=@tid)?@tid={'@odata.id':'" + prototype._pluralName + "(" + instance.id + ")'}";
+        let url = this.getContext().getClientUrl() + this.xrmService.apiUrl + "systemusers(" + this.getContext().getUserId() + ")/Microsoft.Dynamics.CRM.RetrievePrincipalAccess(Target=@tid)?@tid={\"@odata.id\":\"" + prototype._pluralName + "(" + instance.id + ")\"}";
 
         if (this.xrmService.debug) {
             console.log(url);
@@ -1270,7 +1270,7 @@ export class XrmContextService {
                 if (_v.length > 0) {
                     let pt = _v[0] as Entity;
                     return {
-                        name: pt._pluralName,
+                        name: prop,
                         entity: pt,
                         isArray: true
                     }

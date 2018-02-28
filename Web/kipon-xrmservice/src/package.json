@@ -1,6 +1,6 @@
 {
   "name": "kipon-xrmservice",
-  "version": "1.0.153",
+  "version": "1.0.155",
   "repository": {
     "type": "git",
     "url": "https://github.com/kip-dk/angular-xrmservice"

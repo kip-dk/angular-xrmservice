@@ -1,3 +1,6 @@
+### 1.0.155 - 2018-02-28
+Fixed wrong name used on expand one > many and many > many expand for get method in xrmContextService
+
 ### 1.0.153 - 2018-02-23
 
 XrmAccess can be resolved lazy. Parse true to the XrmAccess constructor in the prototype instance, and call xrmContextService.applyAccess(prototype, instance) when you

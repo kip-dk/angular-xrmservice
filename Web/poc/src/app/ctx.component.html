@@ -44,6 +44,10 @@
         {{ con.server_fullname }} : {{ con.views }}&nbsp;<button (click)="delete(con)">Delete</button>
         &nbsp;<button (click)="resolveAccess(con)" *ngIf="con.access == null">Resolve access</button>
         <access-view [entity]="con" *ngIf="con.access != null"></access-view>
+        &nbsp;<button (click)="resolveList(con)" *ngIf="con.listcontact_association == null">Get lists</button>
+        <ng-container *ngIf="con.listcontact_association != null && con.listcontact_association.length > 0">
+          <span *ngFor="let list of con.listcontact_association">{{ list.listname }} |</span>
+        </ng-container>
       </li>
     </ul>
     <br />

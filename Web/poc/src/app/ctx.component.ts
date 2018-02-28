@@ -5,6 +5,17 @@ import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult, Expand } from './
 import { XrmContextService, Entity, EntityReference, OptionSetValue, Condition, Operator, Comparator, XrmAccess } from './xrm/xrmcontext.service';
 
 
+export class List extends Entity {
+    constructor() {
+        super('lists', 'listid', true);
+    }
+    listname: string = null;
+
+    meta(): List {
+        return this;
+    }
+}
+
 export class CtxAccount extends Entity {
     constructor() {
         super("accounts", "accountid", true);
@@ -27,6 +38,10 @@ export class CtxAccount extends Entity {
     }
 
     access: XrmAccess = new XrmAccess();
+
+    meta(): CtxAccount {
+        return this;
+    }
 }
 
 export class CtxContact extends Entity {
@@ -44,6 +59,8 @@ export class CtxContact extends Entity {
     views: number;
     checked: boolean;
 
+    listcontact_association: List[];
+
     access: XrmAccess = new XrmAccess(true);
 
     onFetch(): void {
@@ -54,6 +71,11 @@ export class CtxContact extends Entity {
             this.views++;
         }
         if (this.checked == null) this.checked = false;
+    }
+
+    meta(): CtxContact {
+        this.listcontact_association = [new List().meta()];
+        return this;
     }
 }
 
@@ -72,8 +94,8 @@ class industry {
     templateUrl: './ctx.component.html'
 })
 export class CtxComponent {
-    private accountPrototype = new CtxAccount();
-    private contactPrototype = new CtxContact();
+    private accountPrototype = new CtxAccount().meta();
+    private contactPrototype = new CtxContact().meta();
 
     account: CtxAccount;
     contacts: CtxContact[];
@@ -101,7 +123,6 @@ export class CtxComponent {
         this.xrmContextService.getCurrentKey().subscribe(r => {
             if (r.id != null && r.id != '') {
                 me.xrmContextService.get<CtxAccount>(me.accountPrototype, r.id).subscribe(a => {
-                    console.log(a);
                     me.account = a;
                     me.getContacts();
                 });
@@ -177,8 +198,6 @@ export class CtxComponent {
                 }
 
                 this.xrmContextService.createAll(this.contactPrototype, all).subscribe(r => {
-                    console.log(r);
-                    console.log(all);
                     me.getContacts();
                     me.newContact = null;
                 });
@@ -233,6 +252,11 @@ export class CtxComponent {
 
     resolveAccess(con: CtxContact) {
         this.xrmContextService.applyAccess(this.contactPrototype, con).subscribe(r => {
+        });
+    }
+
+    resolveList(con: CtxContact) {
+        this.xrmContextService.get(this.contactPrototype, con.id).subscribe(r => {
         });
     }
 
