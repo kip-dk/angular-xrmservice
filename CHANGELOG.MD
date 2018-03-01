@@ -1,3 +1,11 @@
+### 1.0.156 - 2018-03-01
+Consistent handling of id's and references. 
+If Dynamics addes {} to an id, or return an id in uppercase (using EntityReference as reference data container), it will be manipulated to not have {}, and 
+always be in lowercase.
+
+XrmEntityKey return from xrmService.getCurrentKey() will always return without {} and in lowercase.  This fix makes it easier to do client side join of data based on keys
+if data is fetch from several calls and need to be "joined" clientside.
+
 ### 1.0.155 - 2018-02-28	
 Fixed wrong name used on expand one > many and many > many expand for get method in xrmContextService
 

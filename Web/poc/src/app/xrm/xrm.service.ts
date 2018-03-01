@@ -145,7 +145,7 @@ export class XrmService {
         result.entityType = params["typename"];
 
         if (result.id != null) {
-            result.id = decodeURIComponent(result.id).replace('{', '').replace('}', '');
+            result.id = decodeURIComponent(result.id).replace('{', '').replace('}', '').toLowerCase();
             if (result.entityType === 'undefined' ||result.entityType == null || result.entityType == '') {
                 result.entityType = this.getQueryStringParameters()["typename"];
             }
@@ -157,7 +157,7 @@ export class XrmService {
             result.entityType = window.parent["Xrm"]["Page"]["data"]["entity"]["getEntityName"]();
 
             if (result.id != null) {
-                result.id = decodeURIComponent(result.id).replace('{', '').replace('}', '');
+                result.id = decodeURIComponent(result.id).replace('{', '').replace('}', '').toLowerCase();
                 if (result.entityType === 'undefined' || result.entityType == null || result.entityType == '') {
                     result.entityType = this.getQueryStringParameters()["typename"];
                 }
@@ -169,8 +169,8 @@ export class XrmService {
                     result.id = window.parent["Xrm"]["Page"]["data"]["entity"]["getId"]();
                     result.entityType = window.parent["Xrm"]["Page"]["data"]["entity"]["getEntityName"]();
                     if (result.id != null) {
-                        clearInterval(intervalThread);
-                        result.id = decodeURIComponent(result.id).replace('{', '').replace('}', '');
+                      clearInterval(intervalThread);
+                        result.id = decodeURIComponent(result.id).replace('{', '').replace('}', '').toLowerCase();
                         if (result.entityType === 'undefined' || result.entityType == null || result.entityType == '') {
                             result.entityType = this.getQueryStringParameters()["typename"];
                         }

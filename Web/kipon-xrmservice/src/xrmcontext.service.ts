@@ -1096,9 +1096,9 @@ export class XrmContextService {
                 let done = false;
                 if (prototype[prop] instanceof EntityReference) {
                     let ref = new EntityReference();
-                    let id = instance["_" + prop + "_value"];
+                    let id = instance["_" + prop + "_value"] as string;
                     if (id != null && id != 'undefined') {
-                        ref.id = id;
+                        ref.id = id.toLowerCase();
                         delete result["_" + prop + "_value"];
 
                         ref.logicalname = instance["_" + prop + "_value@Microsoft.Dynamics.CRM.lookuplogicalname"];
