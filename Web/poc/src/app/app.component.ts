@@ -42,6 +42,7 @@ export class AppComponent {
 
     key: XrmEntityKey;
 
+    testparam: string;
 
 
     constructor(private xrmService: XrmService, private contextService: XrmContextService) {
@@ -53,7 +54,8 @@ export class AppComponent {
     // "C54BEC0B-B543-E711-A962-000D3A27D441"
 
     ngOnInit() {
-        let me = this;
+      let me = this;
+      this.testparam = this.xrmService.getParameter('testparam');
         this.xrmService.getCurrenKey().subscribe(r => {
             if (r.id != null && r.entityType === 'account') {
                 let expand = new Expand();

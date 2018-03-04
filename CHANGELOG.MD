@@ -1,3 +1,6 @@
+### 1.0.157 - 2018-03-04
+xrmService.getParameter(string) returns a value from the parameter string if it is there. Convinient to extract other parameters from the url than the entity key.
+
 ### 1.0.156 - 2018-03-01
 Consistent handling of id's and references. 
 If Dynamics addes {} to an id, or return an id in uppercase (using EntityReference as reference data container), it will be manipulated to not have {}, and 

@@ -371,6 +371,11 @@ export class XrmService {
         return this.http.delete(url).map(response => null);
     }
 
+    getParameter(param: string): string {
+      return this.getQueryStringParameters()[param];
+    }
+
+
     private expandString(expand: Expand, sep: string): string {
         if (expand == null || expand.name == null || expand.name == '') return '';
 
