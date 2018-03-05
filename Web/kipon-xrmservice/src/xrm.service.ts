@@ -152,7 +152,12 @@ export class XrmService {
             return new Observable<XrmEntityKey>(obs => obs.next(result));
         }
 
-        if (window.parent && window.parent["Xrm"] && window.parent["Xrm"]["Page"] && window.parent["Xrm"]["Page"]["ui"]["getFormType"] && window.parent["Xrm"]["Page"]["ui"]["getFormType"]() == 2) {
+        if (window.parent && window.parent["Xrm"] &&
+            window.parent["Xrm"]["Page"] &&
+            window.parent["Xrm"]["Page"]["ui"] &&
+            window.parent["Xrm"]["Page"]["ui"]["getFormType"] &&
+            window.parent["Xrm"]["Page"]["ui"]["getFormType"] != null &&
+            window.parent["Xrm"]["Page"]["ui"]["getFormType"]() == 2) {
             result.id = window.parent["Xrm"]["Page"]["data"]["entity"]["getId"]();
             result.entityType = window.parent["Xrm"]["Page"]["data"]["entity"]["getEntityName"]();
 

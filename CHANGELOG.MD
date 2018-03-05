@@ -1,3 +1,6 @@
+### 1.0.158 - 2018-03-05
+fail on xrmContext.getCurrentKey if called in a non entity context
+
 ### 1.0.157 - 2018-03-04
 xrmService.getParameter(string) returns a value from the parameter string if it is there. Convinient to extract other parameters from the url than the entity key.
 
