@@ -630,7 +630,7 @@ export class XrmContextService {
                     if (nextV.value != null) {
                         body += "PUT " + this.getContext().$devClientUrl() + r.prototype._pluralName + "(" + r.instance.id + ")/" + nextV.field + " HTTP/1.1\n";
                     } else {
-                        body += "DELETE " + this.getContext().$devClientUrl() + r.prototype._pluralName + "(" + r.instance.id + ")/" + nextV.field + " HTTP/1.1\n";
+                        body += "DELETE " + this.getContext().$devClientUrl() + r.instance._pluralName + "(" + r.instance.id + ")/" + nextV.field + " HTTP/1.1\n";
                     }
 
                     let xr = {};

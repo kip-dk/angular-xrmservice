@@ -149,6 +149,7 @@ export class XrmService {
             if (result.entityType === 'undefined' ||result.entityType == null || result.entityType == '') {
                 result.entityType = this.getQueryStringParameters()["typename"];
             }
+            result.id = this.toGuid(result.id);
             return new Observable<XrmEntityKey>(obs => obs.next(result));
         }
 
@@ -166,6 +167,8 @@ export class XrmService {
                 if (result.entityType === 'undefined' || result.entityType == null || result.entityType == '') {
                     result.entityType = this.getQueryStringParameters()["typename"];
                 }
+
+                result.id = this.toGuid(result.id);
                 return new Observable<XrmEntityKey>(obs => obs.next(result));
             }
 
@@ -184,6 +187,7 @@ export class XrmService {
                 }, 800);
             });
         } else {
+            result.id = this.toGuid(result.id);
             return new Observable<XrmEntityKey>(obs => obs.next(result));
         }
     }
@@ -487,5 +491,17 @@ export class XrmService {
             params[key] = decodeURIComponent(val)
         })
         return params;
+    }
+
+    private toGuid(v: string): string {
+        // 5C48BB2A-BFC0-4E56-A262-8494E0F6A8FD
+        if (v == null || v == '') {
+            return v;
+        }
+
+        if (v.indexOf('-') >= 0) {
+            return v;
+        }
+        return v.substr(0, 8) + '-' + v.substr(8, 4) + '-' + v.substr(12, 4) + '-' + v.substr(16, 4) + '-' + v.substr(20); 
     }
 }
