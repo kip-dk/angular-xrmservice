@@ -40,7 +40,8 @@
     Contacts: {{ contactResult.count }}<br />
     <ul>
       <li *ngFor="let con of contacts" (click)="click(con)">
-        <input type="checkbox" [(ngModel)]="con.checked" />
+        <input type="checkbox" [(ngModel)]="con.checked" />&nbsp;
+        <input type="text" [(ngModel)]="con.nextname" placeholder="Change name to" (ngModelChange)="nextNameChanged()"/>&nbsp;
         {{ con.server_fullname }} : {{ con.views }}&nbsp;<button (click)="delete(con)">Delete</button>
         &nbsp;<button (click)="resolveAccess(con)" *ngIf="con.access == null">Resolve access</button>
         <access-view [entity]="con" *ngIf="con.access != null"></access-view>
@@ -54,6 +55,7 @@
     <button (click)="prev()" [disabled]="contactResult.prev == null">Prev</button>
     {{ contactResult.pageIndex + 1 }}
     <button (click)="next()" [disabled]="contactResult.next == null">Next</button>
+    <button (click)="saveNextName()" [disabled]="!hasNextName">Save next names</button>
     <button (click)="deleteSelected()" [disabled]="checked() == 0">Delete Selected ( {{checked() }} )</button>
 
     <div *ngIf="currentContact != null">

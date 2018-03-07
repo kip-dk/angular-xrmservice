@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 
 import { XrmStateService } from './xrm/xrmstate.service';
 import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult, Expand } from './xrm/xrm.service';
-import { XrmContextService, Entity, EntityReference, OptionSetValue, Condition, Operator, Comparator, XrmAccess } from './xrm/xrmcontext.service';
+import { XrmContextService, Entity, EntityReference, OptionSetValue, Condition, Operator, Comparator, XrmTransaction, XrmAccess } from './xrm/xrmcontext.service';
 
 
 export class List extends Entity {
@@ -77,6 +77,8 @@ export class CtxContact extends Entity {
         this.listcontact_association = [new List().meta()];
         return this;
     }
+
+    nextname: string;
 }
 
 class industry {
@@ -106,6 +108,8 @@ export class CtxComponent {
     newContact: string;
 
     newDate: string;
+
+    hasNextName: boolean = false;
 
     industries: industry[] = [
         new industry(1, "Accounting"),
@@ -258,6 +262,36 @@ export class CtxComponent {
     resolveList(con: CtxContact) {
         this.xrmContextService.get(this.contactPrototype, con.id).subscribe(r => {
         });
+    }
+
+    nextNameChanged() {
+      this.hasNextName = false;
+      this.contacts.forEach(c => {
+        if (c.nextname != null && c.nextname.split(' ').length == 2) {
+          this.hasNextName = true;
+        }
+      });
+    }
+
+    saveNextName() {
+      let trans = new XrmTransaction();
+      this.contacts.forEach(c => {
+        if (c.nextname != null) {
+          var spl = c.nextname.split(' ');
+          if (spl.length == 2) {
+            c.firstname = spl[0];
+            c.lastname = spl[1];
+            trans.update(this.contactPrototype, c);
+          }
+        }
+      });
+      this.xrmContextService.commit(trans).subscribe(r => {
+        this.contacts.forEach(c => {
+          c.server_fullname = c.nextname;
+          c.nextname = null;
+        });
+        this.nextNameChanged();
+      });
     }
 
     private getContacts() {

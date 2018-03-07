@@ -127,7 +127,11 @@ export enum Comparator {
     StartsWith,
     NotStartsWith,
     EndsWith,
-    NotEndsWith
+    NotEndsWith,
+    GreaterThan,
+    GreaterThanOrEqual,
+    LessThan,
+    LessThanOrEQual
 }
 
 export class ColumnBuilder {
@@ -181,7 +185,19 @@ export class Filter {
             }
            case Comparator.NotEquals: {
                return _f + ' ne ' + _v;
-            }
+           }
+           case Comparator.GreaterThan: {
+               return _f + ' gt ' + _v;
+           }
+           case Comparator.GreaterThanOrEqual: {
+               return _f + ' ge ' + _v;
+           }
+           case Comparator.LessThan: {
+               return _f + ' lt ' + _v;
+           }
+           case Comparator.LessThanOrEQual: {
+               return _f + ' le ' + _v;
+           }
             case Comparator.Contains: {
                 return "contains(" + _f + ","+ _v + ")"; 
            }
@@ -319,6 +335,10 @@ export class XrmTransaction {
 
     create<T extends Entity>(prototype: T, instance: T): void {
         this.oprs.push(new XrmTransactionItem("create", prototype, instance));
+    }
+
+    update<T extends Entity>(prototype: T, instance: T): void {
+      this.oprs.push(new XrmTransactionItem("update", prototype, instance));
     }
 }
 
@@ -505,63 +525,10 @@ export class XrmContextService {
 
     update<T extends Entity>(prototype: T, instance: T): Observable<T> {
         let me = this;
-        let upd = {
-        }
+        let upd = this.prepareUpdate(prototype, instance);
 
-        let key = instance._pluralName + ':' + instance.id;
-        let cm = this.changemanager[key];
-        if (typeof cm === 'undefined' || cm === null) {
-            throw 'the object is not under change control and cannot be updated within this context';
-        }
-
-        for (let prop in prototype) {
-            if (prototype.hasOwnProperty(prop) && typeof prototype[prop] != 'function') {
-                if (this.ignoreColumn(prop)) continue;
-                let prevValue = cm[prop];
-                let newValue = instance[prop];
-
-                if ((prevValue === 'undefined' || prevValue === null) && (newValue === 'undefined' || newValue === null)) continue;
-
-                if (prototype[prop] instanceof EntityReference) {
-                    let r = prototype[prop] as EntityReference;
-                    if (!EntityReference.same(prevValue, newValue)) {
-                        if (newValue != null && newValue["id"] != null && newValue["id"] != '') {
-                            upd[prototype[prop]['associatednavigationpropertyname']()] = '/' + prototype[prop]['pluralName'] + '(' + newValue['id'] + ')';
-                        } else {
-                            upd[prototype[prop]['associatednavigationpropertyname']()] = null;
-                        }
-                    }
-                    continue;
-                }
-
-                if (prototype[prop] instanceof OptionSetValue) {
-                    if (!OptionSetValue.same(prevValue, newValue)) {
-                        let o = newValue as OptionSetValue;
-                        if (o == null || o.value == null) {
-                            upd[prop.toString()] = null;
-                        } else {
-                            upd[prop.toString()] = o.value;
-                        }
-                    }
-                    continue;
-                }
-
-                if (prototype[prop] instanceof Date) {
-                    if (prevValue != newValue) {
-                        if (newValue == null) {
-                            upd[prop.toString()] = null;
-                        } else {
-                            let d = newValue as Date;
-                            upd[prop.toString()] = d.toISOString();
-                        }
-                    }
-                    continue;
-                }
-
-                if (prevValue != newValue) {
-                    upd[prop.toString()] = instance[prop];
-                }
-            }
+        if (upd == null) {
+          upd = {};
         }
 
         let fields = this.columnBuilder(prototype).columns;
@@ -698,7 +665,23 @@ export class XrmContextService {
                     body += "Content-Type: application/json;type=entry\n";
                     body += "\n";
                     body += JSON.stringify(nextI) + "\n";
+                }
 
+                if (r.type == "update") {
+                  let nextU = this.prepareUpdate(r.prototype, r.instance);
+                  if (nextU != null) {
+                    let fields = "?$select=" + this.columnBuilder(r.prototype).columns;
+
+                    body += '--' + change + "\n";
+                    body += "Content-Type: application/http\n";
+                    body += "Content-Transfer-Encoding:binary\n";
+                    body += "Content-ID: " + count.toString() + "\n";
+                    body += "\n";
+                    body += "PATCH " + this.getContext().$devClientUrl() + r.prototype._pluralName + "(" + r.instance.id + ")" + fields + " HTTP/1.1\n";
+                    body += "Content-Type: application/json;type=entry\n";
+                    body += "\n";
+                    body += JSON.stringify(nextU) + "\n";
+                  }
                 }
                 count++;
             });
@@ -724,6 +707,10 @@ export class XrmContextService {
                 oprs.forEach(r => {
                     if (r.type == 'put') {
                         this.assignValue(r.prototype, r.instance, r.field, r.value);
+                  }
+
+                    if (r.type == 'update') {
+                      this.updateCM(r.prototype, r.instance);
                     }
                 });
 
@@ -826,6 +813,79 @@ export class XrmContextService {
         }
 
         return this.mapAccess(prototype, instance);
+    }
+
+    private prepareUpdate(prototype: Entity, instance: Entity): any {
+      let me = this;
+      let upd = {
+      }
+
+      let countFields = 0;
+
+      let key = instance._pluralName + ':' + instance.id;
+      let cm = this.changemanager[key];
+      if (typeof cm === 'undefined' || cm === null) {
+        throw 'the object is not under change control and cannot be updated within this context';
+      }
+
+      for (let prop in prototype) {
+        if (prototype.hasOwnProperty(prop) && typeof prototype[prop] != 'function') {
+          if (this.ignoreColumn(prop)) continue;
+          let prevValue = cm[prop];
+          let newValue = instance[prop];
+
+          if ((prevValue === 'undefined' || prevValue === null) && (newValue === 'undefined' || newValue === null)) continue;
+
+          if (prototype[prop] instanceof EntityReference) {
+            let r = prototype[prop] as EntityReference;
+            if (!EntityReference.same(prevValue, newValue)) {
+              if (newValue != null && newValue["id"] != null && newValue["id"] != '') {
+                upd[prototype[prop]['associatednavigationpropertyname']()] = '/' + prototype[prop]['pluralName'] + '(' + newValue['id'] + ')';
+              } else {
+                upd[prototype[prop]['associatednavigationpropertyname']()] = null;
+              }
+              countFields++;
+            }
+            continue;
+          }
+
+          if (prototype[prop] instanceof OptionSetValue) {
+            if (!OptionSetValue.same(prevValue, newValue)) {
+              let o = newValue as OptionSetValue;
+              if (o == null || o.value == null) {
+                upd[prop.toString()] = null;
+              } else {
+                upd[prop.toString()] = o.value;
+              }
+              countFields++;
+            }
+            continue;
+          }
+
+          if (prototype[prop] instanceof Date) {
+            if (prevValue != newValue) {
+              if (newValue == null) {
+                upd[prop.toString()] = null;
+              } else {
+                let d = newValue as Date;
+                upd[prop.toString()] = d.toISOString();
+              }
+              countFields++;
+            }
+            continue;
+          }
+
+          if (prevValue != newValue) {
+            upd[prop.toString()] = instance[prop];
+            countFields++;
+          }
+        }
+      }
+
+      if (countFields > 0) {
+        return upd;
+      }
+      return null;
     }
 
     private resolveAccess(prototype: Entity, instance: Entity) {

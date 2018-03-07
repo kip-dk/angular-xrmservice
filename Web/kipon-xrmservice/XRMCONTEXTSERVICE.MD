@@ -346,7 +346,7 @@ in your service:
 let trans = new XrmTransaction();
 trans.put(...);
 trans.create(...)
-trans.update(...)  // to-do, not there yet sorry
+trans.update(...)  
 trans.delete(...)
 
 xrmContextService.commit( trans ).subscribe( r => { });
@@ -356,6 +356,9 @@ Under the hood, the xrmContextService will use the $batch capacity of the Dynami
 Remember, the XrmTransaction can and will not do any operations it self. Its only purpuse is to collect a serie of operations to be performed. You must
 use the xrmContextService.commit(..) method to execute the transaction, and it will not be executed until you subscribe. The transaction
 will however, when execute be performed in a single http/https request.
+
+Be aware that trans.update(..) will NOT auto update full object from server, because the $batch does not return the object, even when decorated with the $select= url parameter
+So, if your query contains calculated fields (ex. fullname on contact), then you ether have to fetch the object manually, or update the properties your self.
 
 ### XrmAccess
 If you add a property on your prototype, specifically named 'access' (lowercase exactly as define here), and you define it as an XrmAccess instace, and assign it a value on the form

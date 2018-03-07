@@ -1,3 +1,9 @@
+### 1.0.160 - 2018-03-07
+support for update on XrmTransaction
+
+### 1.0.159 - 2018-03-05
+added Comparators Greater and Less
+
 ### 1.0.158 - 2018-03-05
 fail on xrmContext.getCurrentKey if called in a none entity context
 
