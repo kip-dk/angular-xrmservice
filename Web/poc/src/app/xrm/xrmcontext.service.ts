@@ -707,10 +707,17 @@ export class XrmContextService {
                 oprs.forEach(r => {
                     if (r.type == 'put') {
                         this.assignValue(r.prototype, r.instance, r.field, r.value);
+                        this.updateCM(r.prototype, r.instance);
                   }
 
                     if (r.type == 'update') {
                       this.updateCM(r.prototype, r.instance);
+                    }
+
+                    if (r.type == 'delete') {
+                        let key = r.instance._pluralName + ':' + r.instance.id;
+                        delete this.context[key];
+                        delete this.changemanager[key];
                     }
                 });
 
@@ -726,6 +733,10 @@ export class XrmContextService {
                         if (opr != null && opr.type == 'create') {
                             let id = l.split('OData-EntityId:')[1].split('/' + opr.prototype._pluralName + '(')[1].replace(')', '').trim();
                             opr.instance.id = id;
+                            let key = opr.prototype._pluralName + ':' + opr.instance.id;
+                            this.context[key] = opr.instance;
+                            opr.instance._updateable = true;
+                            this.updateCM(opr.prototype, opr.instance);
                         }
                     }
                     return true;
@@ -962,7 +973,8 @@ export class XrmContextService {
             } else {
             // this is a really really stupid hack, because dynamics do not accept Integer for decimal fields, so we force 
             // a decimal position into the value before it is send.
-                return { field: field, value: value + t, propertyAs: 'value' };
+                let rv = value + t;
+                return { field: field, value: rv, propertyAs: 'value' };
             }
         }
 
@@ -970,9 +982,9 @@ export class XrmContextService {
             field = t.associatednavigationpropertyname().split('@')[0] + "/$ref";
 
             if (value.id == null || value.id == '') {
-                return { field: field, value: null, propertyAs: '@odata.id' };
+                return { field: field, value: null, propertyAs: '@odata.id', isDefault: false };
             } else {
-                return { field: field, value: this.getContext().$devClientUrl() + t.pluralName + "(" + value.id + ")", propertyAs: '@odata.id' };
+                return { field: field, value: this.getContext().$devClientUrl() + t.pluralName + "(" + value.id + ")", propertyAs: '@odata.id', isdecimal: false };
             }
         }
         return { field: field, value: value, propertyAs: 'value' };

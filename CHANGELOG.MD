@@ -1,6 +1,10 @@
+### 1.0.167 - 2018-03-11
+xrmContextService [context] is updated on batch operations, elements created is added and marked updateable, elements deleted are removed from context and changemanagement context
+element updated or with single value put are simply updated in the changemanage object.
+
 ### 1.0.165 - 2018-03-07
 For some reason getCurrentKey sometimes returns a guid without - in the correct positions. This results in wrong requests when used to build api calles.
-this has been fixed by validating key before returned. - will be added to the id if missing.
+this has been fixed by validating key before returned. "-"'s will be added to the id if missing.
 
 ### 1.0.161 - 2018-03-07
 xrmContextService.clone is setting keyname and pluralname according to prototype
