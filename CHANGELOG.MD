@@ -1,3 +1,7 @@
+### 
+
+references to ssri in poc and generator project update. (this change has no impact on the kipon-xrmservice, it is just to remove warning on git)
+
 ### 1.0.167 - 2018-03-11
 xrmContextService [context] is updated on batch operations, elements created is added and marked updateable, elements deleted are removed from context and changemanagement context
 element updated or with single value put are simply updated in the changemanage object.
