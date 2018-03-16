@@ -407,6 +407,10 @@ export class XrmContextService {
         });
     }
 
+    debug(setting: boolean): void {
+        this.xrmService.debug = setting;
+    }
+
     query<T extends Entity>(prototype: T, condition: Condition): Observable<XrmQueryResult<T>>;
     query<T extends Entity>(prototype: T, condition: Condition, orderBy: string): Observable<XrmQueryResult<T>>;
     query<T extends Entity>(prototype: T, condition: Condition, orderBy: string, top: number): Observable<XrmQueryResult<T>>;
