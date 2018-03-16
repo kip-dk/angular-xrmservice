@@ -1,4 +1,4 @@
-### 1.0.168
+### 1.0.169
 added debug(bool) on xrmContextService to make it easy to enable and disable debugging without having to inject the basic xrmService
 
 references to ssri in poc and generator project update. (this change has no impact on the kipon-xrmservice, it is just to remove warning on git)
