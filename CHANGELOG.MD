@@ -1,3 +1,8 @@
+### 1.1.4 2018-03-17
+
+Comparator.where, now declare that all overridden paramter signatures returns a Comparator, making it easier to use the builder wattern
+condtion.where(...).where(...)
+
 ### 1.1.3 2018-03-17
 
 Sorry for the strange versioning. npm had a crash on 2018.03.17, and i ended up increasing versions to get it to work, but the bug was on the hpm site.

@@ -241,8 +241,8 @@ export class Condition {
         this.children = [];
     }
 
-    where(field: string, opr: Comparator);
-    where(field: string, opr: Comparator, value: any);
+    where(field: string, opr: Comparator): Condition;
+    where(field: string, opr: Comparator, value: any): Condition;
     where(field: string, opr: Comparator, value: any = null): Condition {
         let f = new Filter();
         f.field = field;

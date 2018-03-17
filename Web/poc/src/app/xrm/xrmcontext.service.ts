@@ -241,8 +241,8 @@ export class Condition {
         this.children = [];
     }
 
-    where(field: string, opr: Comparator);
-    where(field: string, opr: Comparator, value: any);
+    where(field: string, opr: Comparator): Condition;
+    where(field: string, opr: Comparator, value: any): Condition;
     where(field: string, opr: Comparator, value: any = null): Condition {
         let f = new Filter();
         f.field = field;
@@ -405,6 +405,10 @@ export class XrmContextService {
         return this.xrmService.get<T>(prototype._pluralName, id, columnDef.columns, expand).map(r => {
             return me.resolve<T>(prototype, r, prototype._updateable);
         });
+    }
+
+    debug(setting: boolean): void {
+        this.xrmService.debug = setting;
     }
 
     query<T extends Entity>(prototype: T, condition: Condition): Observable<XrmQueryResult<T>>;
