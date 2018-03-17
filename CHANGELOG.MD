@@ -1,4 +1,7 @@
-### 1.0.169
+### 1.1.3 2018-03-17
+
+Sorry for the strange versioning. npm had a crash on 2018.03.17, and i ended up increasing versions to get it to work, but the bug was on the hpm site.
+
 added debug(bool) on xrmContextService to make it easy to enable and disable debugging without having to inject the basic xrmService
 
 references to ssri in poc and generator project update. (this change has no impact on the kipon-xrmservice, it is just to remove warning on git)
