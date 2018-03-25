@@ -11,6 +11,7 @@ namespace Web
     {
         public static void Main(string[] args)
         {
+            Console.WriteLine("her");
             var host = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())

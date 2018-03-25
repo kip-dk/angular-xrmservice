@@ -8,14 +8,12 @@ always get the same object instance back from an api call, if it has already bee
 As an example, lets say you fetch an account, and its primary contact in one query, and in next query, you fetch all child contacts of the same account. 
 Now, if the primary contact of the account has this account as parent account, you will actually get two different objects back from the server representing 
 the primary contact. 
+
 The XrmServiceContext ensure that these two instance are merged into a single instance on the client, so you only have one instance of the object, 
 even though it has been fetch twise by two difference api calls.
 
 This is	quite powerfull, especially if you create UI that allow changes to the object, because you will not need to do anything to keep content of
 the two instance in sync.
-
-If this sound to much for you, and what you need is a more plain service, you can go back to the XrmService and settle with the simplicity of that cat.
-[Go to documentation page for the XrmService](README.MD)
 
 ## Installation
 To install this library, run:
@@ -59,6 +57,11 @@ the XrmContextService into your custom services:<br /><br />
 xrmContextService.setVersion(v:string)<br />
 xrmContextService.getContext()<br />
 xrmContextService.getCurrenKey(): Observable&lt;XrmEntityKey&gt;<br />
+
+## Debug
+xrmContextService.debug(value: boolean)
+
+Use the debug enable/disable logging of all http call. This is convinient for troubleshooting. Enabeling it globally will cause a log og info in the console.
 
 
 ## The XrmContextService programming model
@@ -291,8 +294,46 @@ export class Account extends Entity {
 
 
 ### expand
-Document how to define and expand property for get method.
+The GET method of the dynamics 365 Web API supports expanding a related entity. This means, that you can get the entity it self + data from a related entity in a single query.
+You can use this to get  values from a lookup table, ex getting information about the primary contact while getting an account, or you can get a list of realted entities, ex. getting
+all contact that has this account as parentcustomerid.
 
+The XrmContext service supports this by adding a navigation property of the related entitytype on your entity prototype.
+
+```typescript
+export class List extends Entity {
+    constructor() {
+        super('lists', 'listid', true);
+    }
+    listname: string = null;
+
+    meta(): List {
+        return this;
+    }
+}
+
+export class Contact extends Entity {
+    constructor() {
+        super("contacts", "contactid", true);
+    }
+
+    fullname: string = null;
+
+    listcontact_association: List[];
+
+    meta(): CtxContact {
+        this.listcontact_association = [new List().meta()];
+        return this;
+    }
+}
+```
+
+Take a look at above example. The listcontact_association represents a M:M relationship between a contact and a Marketing list (Listmember). By defining a property on the Contact entity
+that has the exact name of the relationship between the two entities, and making sure that the prototype instance of Contact has a value in this property, the xrmContextService is now
+able to expand the related data, so a get on the contact using the prototype returned from new Contact().meta(), you will now get both the contact, and all its related list in one query.
+
+Be aware that expand is only supported on GET. If you have worked with the old Dynamics 2015 Odata interface, you might remember that you could do this on multiRetreive (query) as well, but that
+is NOT the case for Web API. If you need that level of complexity in your query, you must go with FetchXML.
 
 
 ## Inject your EntityService into a component and use it
@@ -329,14 +370,29 @@ Be aware that any of the methods defined in the Account services, returns Observ
 code example shows how that is done.
 
 
-### query
+### Query
 The query method of the XrmContextService has the same basic signature as the query method of the XrmService. This means that what we are getting back is an 
 XrmQueryResult that allow us to do next() and prev() calls on the result to browse through the result. The only difference between the XrmService and the XrmContextService
 is the signature of the method, and the fact that the XrmContextService is resolving strongly typed properties, methods etc. , also on the next() and prev() methods.
 
-On top of that, the XrmContextService is using a Condition() object to define the where clause of a query. This part of the implementation is still very draft, and several
-operators and value maps are still missing. They will be added on a need base. Please post and issue on the git repository if you are in need of ceertain maps, and i will
-try to find time to implement them asap.
+On top of that, the XrmContextService is using a Condition() object to define the where clause of a query. The Condition class uses a builder pattern to make it easy
+to setup the where clause.
+
+```typescript
+  search(name) : Observable<Accounts> {
+	let condition = new Condtion()
+		.where("name", Comparator.Contains, name)
+		.isActive()
+		.group(Operator.OR)
+			.where(...)
+			.where(...);
+
+		this.xrmService.query(this.prototype, condition);
+  }
+```
+
+
+
 
 ### XrmTransaction
 XrmTransaction object allow you to setup a list of operations that must be performend in a single transaction.
@@ -361,7 +417,7 @@ Be aware that trans.update(..) will NOT auto update full object from server, bec
 So, if your query contains calculated fields (ex. fullname on contact), then you ether have to fetch the object manually, or update the properties your self.
 
 ### XrmAccess
-If you add a property on your prototype, specifically named 'access' (lowercase exactly as define here), and you define it as an XrmAccess instace, and assign it a value on the form
+If you add a property on your prototype, specifically named 'access' (lowercase exactly as define here), and you define it as an XrmAccess instance, and assign it a value on the form
 
 ```typescript
 export class MyPrototype extends Entity 
@@ -371,7 +427,7 @@ export class MyPrototype extends Entity
    access : XrmAccess = new XrmAccess(lazy:boolean?);
 }
 ```
-The system will on fetch and get of the object, retreive the current users access rights to the object. This is handy if you wish to hide, disable or display buttons or flags in the UI
+The system will on fetch and get of the object, retreive the current users access rights for the object. This is handy if you wish to hide, disable or display buttons or flags in the UI
 based on the access rights for the current user.
 
 Look in the poc project for <access-view> component to see how it can be used.
@@ -382,7 +438,7 @@ To make it easy to create a new service, i have created a simple solution, where
 service for you that you can copy/paste into your angular projects
 
 [Dynamics 365 8.0 solution](XrmContextServiceGenerator_target_CRM_8.0_managed.zip) <br />
-[Dynamics 365 8.2 solution](XrmContextServiceGenerator_managed.zip) <br />
+[Dynamics 365 8.2 solution](XrmContextServiceGenerator_managed.zip)  (also works from 9.0) <br />
 
 
 ## License

@@ -14,8 +14,13 @@ You can use XrmService directly in your components, but to keep a good solid sep
 concerns and components concerns, I recommend that you only inject the XrmService into other services.
 These services can then use the XrmService to perform the actual http(s) calls to the Dynamics 365 platform.
 
-If you are looking for a more powerfull programming model, it might make sense to take a look at the XrmContextService
-documentation page, found here:
+XrmService is a low level map of simple string top Web API calls. It does not offer more than just mapping string, and adding correct
+headers to the https calls. 
+
+XrmContextService has been build on top og XrmService to provide a more complete programming experience, where prototypes defines your queries.
+
+Even though XrmService can be used as stand-alone, i recommend that you take a look at the XrmContextService documentation. This service offers
+a more natural programming model with powerfull features that makes it very easy to build complex Dynamics 365 WEB API base extensions.
 
 [Go to XrmContextService documentation page](https://github.com/kip-dk/angular-xrmservice/blob/master/Web/kipon-xrmservice/XRMCONTEXTSERVICE.MD)
 
@@ -309,9 +314,6 @@ Beside "running", an instance of the XrmStateService also have the following rea
 
 
 ### XrmContextService
-The xrm context service is  work in progress. The services i still experimental and subject to api changes, however the basic idea is
-taken form.
-
 While XrmService is a simple map of strings to correct url and methods against the Dynamics 365 service, the XrmContextService is more a
 programming model where queries is defined by TS prototype objects, objects are cached within the context, field level 
 change management is supported, allowing  you to call a simple update(objectinstance) method to push your changes to the api and more.
