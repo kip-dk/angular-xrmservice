@@ -51,6 +51,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="kipon-xrmservice\src\auth.service.ts" />
     <None Remove="service-generator\.editorconfig" />
     <None Remove="xrmservice\.travis.yml" />
     <None Remove="xrmservice\gulpfile.js" />
@@ -70,6 +71,10 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.2" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.0.2" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="kipon-xrmservice\src\auth.service.ts" />
   </ItemGroup>
 
 </Project>
