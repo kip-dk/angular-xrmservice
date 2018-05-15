@@ -6,6 +6,10 @@
   Be aware that the new authenticate() method of xrmService is still draft and untested. The vision is to be able to use this
   framework to create SPA application, running outside Dyanmics 365 WebResource context, but still use single signon with Dynamics 365.
 
+  You can now parse null as condition to a query in XrmContextService
+
+  All get methods will add "Cache-Control", "no-cache" to the httpheaders to prevent anything between the angular client and the Crm service to cache results.
+
 ### 1.1.5 
 Documentation only
 
