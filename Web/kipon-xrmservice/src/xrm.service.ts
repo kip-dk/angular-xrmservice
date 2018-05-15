@@ -3,6 +3,40 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
+type Tokencallback = (error: string, token: string) => void; 
+
+export interface AuthUserProfile {
+  name: string;
+}
+
+export interface AuthUser {
+  profile: AuthUserProfile;
+}
+
+export interface AuthContext {
+  isCallback(hash: string): boolean;
+  handleWindowCallback(): void;
+  getLoginError(): string;
+  getCachedUser(): AuthUser;
+  login(): void;
+  logOut(): void;
+  acquireToken(url: string, callback: Tokencallback): void;
+}
+
+
+export interface AuthConfigEndpoint {
+  orgUri: string;
+}
+
+export interface AuthConfig {
+  tenant: string;
+  clientId: string;
+  postLogoutRedirectUri: string;
+  endpoints: AuthConfigEndpoint;
+  cacheLocation: string;
+}
+
+
 export interface XrmContext {
     getClientUrl(): string;
     getQueryStringParameters(): any;
@@ -10,6 +44,7 @@ export interface XrmContext {
     getUserName(): string;
     getUserId(): string;
     $devClientUrl(): string;
+
 }
 
 export class XrmEntityKey {
@@ -44,6 +79,9 @@ export class XrmService {
     apiUrl: string = '/api/data/v8.2/';
     apiVersion: string = 'v8.2';
     debug: boolean = false;
+    token: string = null;
+    authConfig: AuthConfig;
+    private loginObserver: any;
 
     constructor(private http: HttpClient) {
         let v = this.getContext().getVersion().split('.');
@@ -53,6 +91,69 @@ export class XrmService {
 
     setVersion(v: string): void {
         this.apiUrl = this.defaultApiUrl.replace("8.2", v);
+    }
+
+    authenticate(): Observable<boolean> {
+      if (window["AuthenticationContext"] == null) {
+        throw "You must load adal.js to the page header scripts.";
+      }
+
+      if (window["AuthenticationConfiguration"] == null) {
+        throw "You must define AuthenticationConfiguration before you call authenticate method";
+      }
+
+      this.authConfig = window["AuthenticationConfiguration"] as AuthConfig;
+
+      let authCtx = new window["AuthenticationContext"](window["AuthenticationConfiguration"]) as AuthContext;
+      let isCallback = authCtx.isCallback(window.location.hash);
+
+      if (isCallback) {
+        authCtx.handleWindowCallback();
+      }
+
+      var loginError = authCtx.getLoginError();
+
+      if (!loginError && isCallback) {
+
+        setTimeout(() => {
+          authCtx.acquireToken(this.authConfig.endpoints.orgUri, this.getToken);
+        }, 1);
+
+        return Observable.create(obs => {
+          this.loginObserver = obs;
+        });
+      }
+
+      if (loginError) {
+        throw loginError;
+      }
+
+      if (!isCallback) {
+        let user = authCtx.getCachedUser();
+        if (user == null) {
+          authCtx.login();
+        } else {
+          console.log(user);
+        }
+      }
+
+      return Observable.create(obs => {
+        setTimeout(() => {
+          obs.next(true);
+        });
+      });
+    }
+
+    private getToken(error: string, token: string): void {
+      if (error) {
+        console.log(error);
+      }
+
+      if (this.debug) {
+        console.log(token);
+      }
+      this.token = token;
+      this.loginObserver.next(true);
     }
 
     getContext(): XrmContext {
@@ -106,7 +207,7 @@ export class XrmService {
                 return params;
             },
             getVersion(): string {
-                return "8.0.0.0";
+                return "8.2.0.0";
             },
             getUserId(): string {
                 return this["userid"];
@@ -119,7 +220,7 @@ export class XrmService {
             }
         };
 
-        this.http.get("http://localhost:4200/api/data/v8.0/WhoAmI()").map(response => response).subscribe(r => {
+        this.http.get("http://localhost:4200/api/data/v8.2/WhoAmI()").map(response => response).subscribe(r => {
             if (this.debug) {
                 console.log(r);
             }
@@ -194,11 +295,15 @@ export class XrmService {
     get<T>(entityTypes: string, id: string, fields: string): Observable<T>;
     get<T>(entityTypes: string, id: string, fields: string, expand: Expand): Observable<T>;
     get<T>(entityTypes: string, id: string, fields: string, expand: Expand = null): Observable<T> {
-        let headers = new HttpHeaders({ 'Accept': 'application/json' });
+      let headers = new HttpHeaders({ 'Accept': 'application/json' });
+        if (this.token != null) {
+          headers = headers.append("Authorization", "Bearer " + this.token);
+        }
         headers = headers.append("OData-MaxVersion", "4.0");
         headers = headers.append("OData-Version", "4.0");
         headers = headers.append("Content-Type", "application/json; charset=utf-8");
         headers = headers.append("Prefer", "odata.include-annotations=*");
+        headers = headers.append("Cache-Control", "no-cache");
 
         let options = {
             headers: headers
@@ -231,6 +336,9 @@ export class XrmService {
     query<T>(entityTypes: string, fields: string, filter: string, orderBy: string = null, top: number = 0, count: boolean = false): Observable<XrmQueryResult<T>> {
         let me = this;
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
+        if (this.token != null) {
+          headers = headers.append("Authorization", "Bearer " + this.token);
+        }
         headers = headers.append("OData-MaxVersion", "4.0");
         headers = headers.append("OData-Version", "4.0");
         headers = headers.append("Content-Type", "application/json; charset=utf-8");
@@ -239,6 +347,7 @@ export class XrmService {
             headers = headers.append("Prefer", "odata.maxpagesize=" + top.toString());
         } else {
         }
+        headers = headers.append("Cache-Control", "no-cache");
 
         let options = {
             headers: headers
@@ -278,6 +387,9 @@ export class XrmService {
 
     create<T>(entityType: string, entity: T): Observable<T> {
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
+        if (this.token != null) {
+          headers = headers.append("Authorization", "Bearer " + this.token);
+        }
         headers = headers.append("OData-MaxVersion", "4.0");
         headers = headers.append("OData-Version", "4.0");
         headers = headers.append("Content-Type", "application/json; charset=utf-8");
@@ -308,6 +420,9 @@ export class XrmService {
     update<T>(entityType: string, entity: T, id: string, fields: string): Observable<T>;
     update<T>(entityType: string, entity: T, id: string, fields: string = null): Observable<T> {
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
+        if (this.token != null) {
+          headers = headers.append("Authorization", "Bearer " + this.token);
+        }
         headers = headers.append("OData-MaxVersion", "4.0");
         headers = headers.append("OData-Version", "4.0");
         headers = headers.append("Content-Type", "application/json; charset=utf-8");
@@ -339,6 +454,9 @@ export class XrmService {
         if (propertyValueAs == null) propertyValueAs = 'value';
 
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
+        if (this.token != null) {
+          headers = headers.append("Authorization", "Bearer " + this.token);
+        }
         headers = headers.append("OData-MaxVersion", "4.0");
         headers = headers.append("OData-Version", "4.0");
         headers = headers.append("Content-Type", "application/json; charset=utf-8");
@@ -365,6 +483,9 @@ export class XrmService {
 
     delete(entityType: string, id: string): Observable<null> {
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
+        if (this.token != null) {
+          headers = headers.append("Authorization", "Bearer " + this.token);
+        }
         headers = headers.append("OData-MaxVersion", "4.0");
         headers = headers.append("OData-Version", "4.0");
         headers = headers.append("Content-Type", "application/json; charset=utf-8");
@@ -382,6 +503,57 @@ export class XrmService {
 
     getParameter(param: string): string {
       return this.getQueryStringParameters()[param];
+    }
+
+    associate(fromType: string, fromId: string, toType: string, toId: string, refname: string): Observable<null> {
+      let headers = new HttpHeaders({ 'Accept': 'application/json' });
+      if (this.token != null) {
+        headers = headers.append("Authorization", "Bearer " + this.token);
+      }
+      headers = headers.append("OData-MaxVersion", "4.0");
+      headers = headers.append("OData-Version", "4.0");
+      headers = headers.append("Content-Type", "application/json; charset=utf-8");
+      headers = headers.append("Prefer", "odata.include-annotations=*");
+      let options = {
+        headers: headers
+      }
+
+      let url = this.getContext().getClientUrl() + this.apiUrl + fromType + "(" + this.toGuid(fromId) + ")/" + refname + "/$ref";
+
+      let data = {
+        "@odata.id": this.getContext().$devClientUrl() + toType + "(" + this.toGuid(toId) + ")"
+      }
+
+      if (this.debug) {
+        console.dir(url);
+        console.log(data);
+      }
+
+      return this.http.post(url, data, options).map(response => null);
+    }
+
+    disassociate(fromType: string, fromId: string, toType: string, toId: string, refname: string): Observable<null> {
+      let headers = new HttpHeaders({ 'Accept': 'application/json' });
+      if (this.token != null) {
+        headers = headers.append("Authorization", "Bearer " + this.token);
+      }
+      headers = headers.append("OData-MaxVersion", "4.0");
+      headers = headers.append("OData-Version", "4.0");
+      let options = {
+        headers: headers
+      }
+
+      let url = this.getContext().getClientUrl() + this.apiUrl + fromType + "(" + this.toGuid(fromId) + ")/" + refname + "/$ref?$id=" + this.getContext().$devClientUrl() + toType + "(" + this.toGuid(toId) + ")";
+      if (this.debug) {
+        console.dir(url);
+      }
+
+      return this.http.delete(url, options).map(response => {
+        if (this.debug) {
+          console.log(response);
+        }
+        return null;
+      });
     }
 
 
@@ -435,6 +607,9 @@ export class XrmService {
                 nextLink: nextLink,
                 next: (): Observable<XrmQueryResult<T>> => {
                     let headers = new HttpHeaders({ 'Accept': 'application/json' });
+                    if (this.token != null) {
+                      headers = headers.append("Authorization", "Bearer " + this.token);
+                    }
                     headers = headers.append("OData-MaxVersion", "4.0");
                     headers = headers.append("OData-Version", "4.0");
                     headers = headers.append("Content-Type", "application/json; charset=utf-8");
@@ -442,6 +617,7 @@ export class XrmService {
                     if (top > 0) {
                         headers = headers.append("Prefer", "odata.maxpagesize=" + top.toString());
                     } 
+                    headers = headers.append("Cache-Control", "no-cache");
 
                     let options = {
                         headers: headers
@@ -458,6 +634,9 @@ export class XrmService {
         if (result.pageIndex >= 1) {
             result.prev = (): Observable<XrmQueryResult<T>> => {
                 let headers = new HttpHeaders({ 'Accept': 'application/json' });
+                if (this.token != null) {
+                  headers = headers.append("Authorization", "Bearer " + this.token);
+                }
                 headers = headers.append("OData-MaxVersion", "4.0");
                 headers = headers.append("OData-Version", "4.0");
                 headers = headers.append("Content-Type", "application/json; charset=utf-8");
@@ -466,6 +645,7 @@ export class XrmService {
                     headers = headers.append("Prefer", "odata.maxpagesize=" + top.toString());
                 } else {
                 }
+                headers = headers.append("Cache-Control", "no-cache");
 
                 let options = {
                     headers: headers
@@ -498,6 +678,8 @@ export class XrmService {
         if (v == null || v == '') {
             return v;
         }
+
+        v = decodeURIComponent(v).replace('{', '').replace('}', '');
 
         if (v.indexOf('-') >= 0) {
             return v;

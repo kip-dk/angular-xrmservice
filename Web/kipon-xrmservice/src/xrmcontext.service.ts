@@ -403,6 +403,7 @@ export class XrmContextService {
         }
 
         return this.xrmService.get<T>(prototype._pluralName, id, columnDef.columns, expand).map(r => {
+          console.log(r);
             return me.resolve<T>(prototype, r, prototype._updateable);
         });
     }
@@ -420,11 +421,17 @@ export class XrmContextService {
         let fields = this.columnBuilder(prototype).columns;
 
         let con = condition;
-        while (con.parent != null) con = con.parent;
+        let filter = null;
+        if (condition != null) {
+          while (con.parent != null) { con = con.parent };
 
-        let filter = con.toQueryString(prototype);
+          filter = con.toQueryString(prototype);
+        }
 
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
+        if (this.xrmService.token != null) {
+          headers = headers.append("Authorization", "Bearer " + this.xrmService.token);
+        }
         headers = headers.append("OData-MaxVersion", "4.0");
         headers = headers.append("OData-Version", "4.0");
         headers = headers.append("Content-Type", "application/json; charset=utf-8");
@@ -432,6 +439,7 @@ export class XrmContextService {
         if (top > 0) {
             headers = headers.append("Prefer", "odata.maxpagesize=" + top.toString());
         } 
+        headers = headers.append("Cache-Control", "no-cache");
 
         let options = {
             headers: headers
@@ -613,6 +621,9 @@ export class XrmContextService {
             let batch = 'batch_KO' + new Date().valueOf() + "$" + this.tick.toString();
             let change = 'changeset_KO' + new Date().valueOf() + "!" + this.tick.toString();
             let headers = new HttpHeaders({ 'Accept': 'application/json' });
+            if (this.xrmService.token != null) {
+              headers = headers.append("Authorization", "Bearer " + this.xrmService.token);
+            }
             headers = headers.append("Content-Type", "multipart/mixed;boundary=" + batch);
             headers = headers.append("OData-MaxVersion", "4.0");
             headers = headers.append("OData-Version", "4.0");
@@ -924,10 +935,14 @@ export class XrmContextService {
         r.resolved = false;
 
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
+        if (this.xrmService.token != null) {
+          headers = headers.append("Authorization", "Bearer " + this.xrmService.token);
+        }
         headers = headers.append("OData-MaxVersion", "4.0");
         headers = headers.append("OData-Version", "4.0");
         headers = headers.append("Content-Type", "application/json; charset=utf-8");
         headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
+        headers = headers.append("Cache-Control", "no-cache");
 
         let url = this.getContext().getClientUrl() + this.xrmService.apiUrl + "systemusers(" + this.getContext().getUserId() + ")/Microsoft.Dynamics.CRM.RetrievePrincipalAccess(Target=@tid)?@tid={\"@odata.id\":\"" + prototype._pluralName + "(" + instance.id + ")\"}";
 
@@ -1100,6 +1115,9 @@ export class XrmContextService {
                 prev: null,
                 next: (): Observable<XrmQueryResult<T>> => {
                     let headers = new HttpHeaders({ 'Accept': 'application/json' });
+                    if (this.xrmService.token != null) {
+                      headers = headers.append("Authorization", "Bearer " + this.xrmService.token);
+                    }
                     headers = headers.append("OData-MaxVersion", "4.0");
                     headers = headers.append("OData-Version", "4.0");
                     headers = headers.append("Content-Type", "application/json; charset=utf-8");
@@ -1108,6 +1126,7 @@ export class XrmContextService {
                     } else {
                         headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
                     }
+                    headers = headers.append("Cache-Control", "no-cache");
 
                     let options = {
                         headers: headers
@@ -1124,6 +1143,9 @@ export class XrmContextService {
         if (result.pageIndex >= 1) {
             result.prev = (): Observable<XrmQueryResult<T>> => {
                 let headers = new HttpHeaders({ 'Accept': 'application/json' });
+                if (this.xrmService.token != null) {
+                  headers = headers.append("Authorization", "Bearer " + this.xrmService.token);
+                }
                 headers = headers.append("OData-MaxVersion", "4.0");
                 headers = headers.append("OData-Version", "4.0");
                 headers = headers.append("Content-Type", "application/json; charset=utf-8");
@@ -1132,6 +1154,7 @@ export class XrmContextService {
                     headers = headers.append("Prefer", "odata.maxpagesize=" + top.toString());
                 } else {
                 }
+                headers = headers.append("Cache-Control", "no-cache");
 
                 let options = {
                     headers: headers

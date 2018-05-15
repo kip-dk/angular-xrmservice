@@ -1,3 +1,11 @@
+### 1.1.6
+  Added associate and disassociate to xrmService to support maintanance of M:M relationship
+
+  For now the raw api function execute M:M operations in XrmService only. It will be added to XrmContextService and XrmTransaction shortly.
+
+  Be aware that the new authenticate() method of xrmService is still draft and untested. The vision is to be able to use this
+  framework to create SPA application, running outside Dyanmics 365 WebResource context, but still use single signon with Dynamics 365.
+
 ### 1.1.5 
 Documentation only
 

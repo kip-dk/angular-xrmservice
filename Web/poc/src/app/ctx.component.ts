@@ -44,6 +44,37 @@ export class CtxAccount extends Entity {
     }
 }
 
+export class CtxOpportunity extends Entity {
+  constructor() {
+    super('opportunities', 'opportunityid', true);
+  }
+  name: string = null;
+  customerid: EntityReference = new EntityReference().meta("contacts", "customerid_contact");
+
+  opportunitycompetitors_association: CtxCompetitor[]
+
+  meta(): CtxOpportunity {
+    this.opportunitycompetitors_association = [new CtxCompetitor().meta()];
+    return this;
+  }
+
+  hasCompetitor(com: CtxCompetitor) {
+    return this.opportunitycompetitors_association != null && this.opportunitycompetitors_association.find(r => r.id == com.id) != null;
+  }
+}
+
+export class CtxCompetitor extends Entity {
+  constructor() {
+    super('competitors', 'competitorid', true);
+  }
+  name: string = null;
+
+  meta(): CtxCompetitor {
+    return this;
+  }
+}
+
+
 export class CtxContact extends Entity {
     constructor() {
         super("contacts", "contactid", true);
@@ -60,6 +91,8 @@ export class CtxContact extends Entity {
     checked: boolean;
 
     listcontact_association: List[];
+
+    opportunities: CtxOpportunity[];
 
     access: XrmAccess = new XrmAccess(true);
 
@@ -98,11 +131,14 @@ class industry {
 export class CtxComponent {
     private accountPrototype = new CtxAccount().meta();
     private contactPrototype = new CtxContact().meta();
+    private opportunityPrototype = new CtxOpportunity().meta();
+    private competitorPrototype = new CtxCompetitor().meta();
 
     account: CtxAccount;
     contacts: CtxContact[];
     currentContact: CtxContact;
     editCurrentName: string;
+    competitors: CtxCompetitor[];
 
     contactResult: XrmQueryResult<CtxContact>;
     newContact: string;
@@ -119,7 +155,7 @@ export class CtxComponent {
         new industry(5, "Building Supply Retail")
     ];
 
-    constructor(private xrmContextService: XrmContextService, public xrmState: XrmStateService) {
+    constructor(private xrmContextService: XrmContextService, private xrmService: XrmService, public xrmState: XrmStateService) {
     }
 
     ngOnInit() {
@@ -129,8 +165,14 @@ export class CtxComponent {
                 me.xrmContextService.get<CtxAccount>(me.accountPrototype, r.id).subscribe(a => {
                     me.account = a;
                     me.getContacts();
-                });
-            };
+              });
+          };
+
+          me.xrmContextService.query(me.competitorPrototype, null).subscribe(r => {
+            console.log(r.value);
+            me.competitors = r.value;
+          });
+
         });
     }
 
@@ -260,8 +302,38 @@ export class CtxComponent {
     }
 
     resolveList(con: CtxContact) {
-        this.xrmContextService.get(this.contactPrototype, con.id).subscribe(r => {
+      this.xrmContextService.get(this.contactPrototype, con.id).subscribe(r => {
+        console.log(r);
         });
+    }
+
+    resolveOpportunities(con: CtxContact) {
+      if (con.opportunities == null) {
+        var condition = new Condition().where("customerid", Comparator.Equals, con.id);
+        this.xrmContextService.query(this.opportunityPrototype, condition).subscribe(r => {
+          con.opportunities = r.value;
+        });
+      }
+    }
+
+    resolveCompetitors(opp: CtxOpportunity) {
+      if (opp.opportunitycompetitors_association == null) {
+        this.xrmContextService.get(this.opportunityPrototype, opp.id).subscribe(r => {
+          console.log(r);
+        });
+      }
+    }
+
+    disassociate(opp: CtxOpportunity, com: CtxCompetitor) {
+      this.xrmService.disassociate(opp._pluralName, opp.id, com._pluralName, com.id, "opportunitycompetitors_association").subscribe(r => {
+        opp.opportunitycompetitors_association = opp.opportunitycompetitors_association.filter(n => n != com);
+      });
+    }
+
+    associate(opp: CtxOpportunity, com: CtxCompetitor) {
+      this.xrmService.associate(opp._pluralName, opp.id, com._pluralName, com.id, "opportunitycompetitors_association").subscribe(r => {
+        opp.opportunitycompetitors_association.push(com);
+      });
     }
 
     nextNameChanged() {

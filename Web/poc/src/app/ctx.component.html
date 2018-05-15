@@ -47,7 +47,28 @@
         <access-view [entity]="con" *ngIf="con.access != null"></access-view>
         &nbsp;<button (click)="resolveList(con)" *ngIf="con.listcontact_association == null">Get lists</button>
         <ng-container *ngIf="con.listcontact_association != null && con.listcontact_association.length > 0">
-          <span *ngFor="let list of con.listcontact_association">{{ list.listname }} |</span>
+          <span *ngFor="let list of con.listcontact_association">
+            {{ list.listname }}
+            |
+          </span>
+        </ng-container>
+        &nbsp;<button (click)="resolveOpportunities(con)" *ngIf="con.opportunities == null">Get Opportunities</button>
+        <ng-container *ngIf="con.opportunities != null && con.opportunities.length > 0">
+          <span *ngFor="let opp of con.opportunities">
+            {{ opp.name }}
+            <span style="cursor: pointer" *ngIf="opp.opportunitycompetitors_association == null" (click)="resolveCompetitors(opp)">Resolve competitors</span>
+            <ng-container *ngIf="opp.opportunitycompetitors_association != null && opp.opportunitycompetitors_association.length > 0">
+              ::
+              <span *ngFor="let cop of opp.opportunitycompetitors_association">{{ cop.name }} <span (click)="disassociate(opp, cop)">[DEL]</span></span>
+            </ng-container>
+            <ng-container *ngIf="opp.opportunitycompetitors_association != null">
+              |
+              <ng-container *ngFor="let cp of competitors">
+                  <span *ngIf="!opp.hasCompetitor(cp)">{{ cp.name }} <span style="cursor: pointer" (click)="associate(opp, cp)">[ADD]</span></span>
+              </ng-container>
+            </ng-container>
+              ||
+          </span>
         </ng-container>
       </li>
     </ul>
