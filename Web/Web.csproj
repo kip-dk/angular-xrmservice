@@ -52,6 +52,7 @@
 
   <ItemGroup>
     <None Remove="kipon-xrmservice\src\auth.service.ts" />
+    <None Remove="poc\src\app\xrm\auth.service.ts" />
     <None Remove="service-generator\.editorconfig" />
     <None Remove="xrmservice\.travis.yml" />
     <None Remove="xrmservice\gulpfile.js" />
@@ -75,6 +76,7 @@
 
   <ItemGroup>
     <TypeScriptCompile Include="kipon-xrmservice\src\auth.service.ts" />
+    <TypeScriptCompile Include="poc\src\app\xrm\auth.service.ts" />
   </ItemGroup>
 
 </Project>

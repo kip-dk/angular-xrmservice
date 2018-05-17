@@ -1,1 +1,1 @@
-ng server --prod --proxy-config proxy.config.json --port 4200 --host localhost
+ng server --proxy-config proxy.config.json --port 4200 --host localhost

@@ -3,39 +3,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
-type Tokencallback = (error: string, token: string) => void; 
-
-export interface AuthUserProfile {
-  name: string;
-}
-
-export interface AuthUser {
-  profile: AuthUserProfile;
-}
-
-export interface AuthContext {
-  isCallback(hash: string): boolean;
-  handleWindowCallback(): void;
-  getLoginError(): string;
-  getCachedUser(): AuthUser;
-  login(): void;
-  logOut(): void;
-  acquireToken(url: string, callback: Tokencallback): void;
-}
-
-
-export interface AuthConfigEndpoint {
-  orgUri: string;
-}
-
-export interface AuthConfig {
-  tenant: string;
-  clientId: string;
-  postLogoutRedirectUri: string;
-  endpoints: AuthConfigEndpoint;
-  cacheLocation: string;
-}
-
 
 export interface XrmContext {
     getClientUrl(): string;
@@ -68,6 +35,28 @@ export class Expand {
     name: string;
     select: string;
     filter: string;
+    additional: Expand[];
+
+    toExpandString(): string {
+      let _ex = this.name;
+      if (this.select != null || this.filter != null) {
+        _ex += '(';
+      }
+      let semi = '';
+      if (this.select != null) {
+        _ex += '$select=' + this.select;
+        semi = ';'
+      }
+
+      if (this.filter != null) {
+        _ex += semi + '$filter=' + this.filter;
+      }
+
+      if (this.select != null || this.filter != null) {
+        _ex += ')';
+      }
+      return _ex;
+    }
 }
 
 
@@ -80,7 +69,6 @@ export class XrmService {
     apiVersion: string = 'v8.2';
     debug: boolean = false;
     token: string = null;
-    authConfig: AuthConfig;
     private loginObserver: any;
 
     constructor(private http: HttpClient) {
@@ -93,68 +81,6 @@ export class XrmService {
         this.apiUrl = this.defaultApiUrl.replace("8.2", v);
     }
 
-    authenticate(): Observable<boolean> {
-      if (window["AuthenticationContext"] == null) {
-        throw "You must load adal.js to the page header scripts.";
-      }
-
-      if (window["AuthenticationConfiguration"] == null) {
-        throw "You must define AuthenticationConfiguration before you call authenticate method";
-      }
-
-      this.authConfig = window["AuthenticationConfiguration"] as AuthConfig;
-
-      let authCtx = new window["AuthenticationContext"](window["AuthenticationConfiguration"]) as AuthContext;
-      let isCallback = authCtx.isCallback(window.location.hash);
-
-      if (isCallback) {
-        authCtx.handleWindowCallback();
-      }
-
-      var loginError = authCtx.getLoginError();
-
-      if (!loginError && isCallback) {
-
-        setTimeout(() => {
-          authCtx.acquireToken(this.authConfig.endpoints.orgUri, this.getToken);
-        }, 1);
-
-        return Observable.create(obs => {
-          this.loginObserver = obs;
-        });
-      }
-
-      if (loginError) {
-        throw loginError;
-      }
-
-      if (!isCallback) {
-        let user = authCtx.getCachedUser();
-        if (user == null) {
-          authCtx.login();
-        } else {
-          console.log(user);
-        }
-      }
-
-      return Observable.create(obs => {
-        setTimeout(() => {
-          obs.next(true);
-        });
-      });
-    }
-
-    private getToken(error: string, token: string): void {
-      if (error) {
-        console.log(error);
-      }
-
-      if (this.debug) {
-        console.log(token);
-      }
-      this.token = token;
-      this.loginObserver.next(true);
-    }
 
     getContext(): XrmContext {
         if (this.contextFallback != null) {
@@ -560,19 +486,12 @@ export class XrmService {
     private expandString(expand: Expand, sep: string): string {
         if (expand == null || expand.name == null || expand.name == '') return '';
 
-        let _ex = sep + '$expand=' + expand.name;
-        if (expand.select != null || expand.filter != null) {
-            _ex += '(';
-            let semi = '';
-            if (expand.select != null) {
-                _ex += '$select=' + expand.select;
-                semi = ';'
-            }
-            if (expand.filter != null) {
-                _ex += semi + '$filter=' + expand.filter;
-            }
+        let _ex = sep + '$expand=' + expand.toExpandString();
 
-            _ex += ')';
+        if (expand.additional != null && expand.additional.length > 0) {
+          expand.additional.forEach(ad => {
+            _ex += "," + ad.toExpandString();
+          });
         }
         return _ex;
     }

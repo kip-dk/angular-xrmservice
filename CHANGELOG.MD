@@ -1,3 +1,6 @@
+### 1.1.9 
+Documentation only. Added documentation for associate and disassociate
+
 ### 1.1.7 (and 1.1.8 is same, npm was unwilling to update the new package)
   The new auth infrastructure gave some issues when installed in other projects using npp install. From version 1.1.7 this issue should be fixed.
   When defining several interfaces in one source, angular compiler sometimes don't get it all right.

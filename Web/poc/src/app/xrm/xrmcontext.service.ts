@@ -397,9 +397,19 @@ export class XrmContextService {
 
         let expand: Expand = null;
 
-        let ep = this.getExpandProperty(prototype);
-        if (ep != null) {
-            expand = this.$expandToExpand(ep);
+        let eps = this.getExpandProperties(prototype);
+        if (eps != null && eps.length > 0) {
+          let comma = ",";
+          eps.forEach(ep => {
+            if (expand == null) {
+              expand = this.$expandToExpand(ep);
+            } else {
+              if (expand.additional == null) {
+                expand.additional = [];
+              }
+              expand.additional.push(this.$expandToExpand(ep));
+            }
+          });
         }
 
         return this.xrmService.get<T>(prototype._pluralName, id, columnDef.columns, expand).map(r => {
@@ -1247,25 +1257,31 @@ export class XrmContextService {
             this.updateCM(prototype, result);
         }
 
-        let ep = this.getExpandProperty(prototype);
-        if (ep != null) {
-            if (ep.isArray) {
+        let eps = this.getExpandProperties(prototype);
+
+        if (eps != null && eps.length > 0) {
+
+          eps.forEach(ep => {
+            if (ep != null) {
+              if (ep.isArray) {
                 let _v = instance[ep.name];
                 if (_v != null && Array.isArray(_v)) {
-                    let _tmp = [];
-                    _v.forEach(_r => {
-                        _tmp.push(me.resolve(ep.entity, _r, false));
-                    });
-                    result[ep.name] = _tmp;
+                  let _tmp = [];
+                  _v.forEach(_r => {
+                    _tmp.push(me.resolve(ep.entity, _r, false));
+                  });
+                  result[ep.name] = _tmp;
                 }
-            } else {
+              } else {
                 let _v = instance[ep.name];
                 if (_v != null) {
-                    result[ep.name] = this.resolve(ep.entity, _v, false);
-                    result[ep.name]['_keyName'] = ep.entity._keyName;
-                    result[ep.name]['_pluralName'] = ep.entity._pluralName;
+                  result[ep.name] = this.resolve(ep.entity, _v, false);
+                  result[ep.name]['_keyName'] = ep.entity._keyName;
+                  result[ep.name]['_pluralName'] = ep.entity._pluralName;
                 }
+              }
             }
+          });
         }
 
         if (result['onFetch'] !== 'undefined' && result["onFetch"] != null  && typeof result["onFetch"] === 'function') {
@@ -1359,7 +1375,8 @@ export class XrmContextService {
         return result;
     }
 
-    private getExpandProperty(entity: Entity): ExpandProperty {
+    private getExpandProperties(entity: Entity): ExpandProperty[] {
+      var result = [];
         for (var prop in entity) {
             if (prop == entity._keyName) continue;
             if (this.ignoreColumn(prop)) continue;
@@ -1367,24 +1384,24 @@ export class XrmContextService {
             let _v = entity[prop];
             if (Array.isArray(_v)) {
                 if (_v.length > 0) {
-                    let pt = _v[0] as Entity;
-                    return {
-                        name: prop,
-                        entity: pt,
-                        isArray: true
-                    }
+                  let pt = _v[0] as Entity;
+                  result.push({
+                    name: prop,
+                    entity: pt,
+                    isArray: true
+                  });
                 }
             } else {
-                if (_v instanceof Entity) {
-                    return {
-                        name: prop,
-                        entity: _v,
-                        isArray: false
-                    }
+              if (_v instanceof Entity) {
+                result.push({
+                  name: prop,
+                  entity: _v,
+                  isArray: false
+                });
                 }
             }
         }
-        return null;    
+        return result;    
     }
 
     private ignoreColumn(prop: string): boolean {
