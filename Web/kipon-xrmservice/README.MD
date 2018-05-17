@@ -247,7 +247,7 @@ export class AccountService {
 }
 ```
 
-### associate(fromEntityType: string, fromEntityId: string, toEntityType: string, toEntityId: string, refname: string)
+#### associate(fromEntityType: string, fromEntityId: string, toEntityType: string, toEntityId: string, refname: string)
 Create an M:M relationship between the from entity and the to entity.
 
 Remember that the order is significant and must correspond to the order the relationsship has been defined in Dynamics. If the request fail,
@@ -256,7 +256,7 @@ try swith around from and to.
 fromEntityType and toEntityType must be the plural name of the entity. 
 Refname is the schema name of the reference. 
 
-### disassociate(fromEntityType: string, fromEntityId: string, toEntityType: string, toEntityId: string, refname: string)
+#### disassociate(fromEntityType: string, fromEntityId: string, toEntityType: string, toEntityId: string, refname: string)
 Delete an M:M relationship between the from entity and the to entity.
 
 Remember that the order is significant and must correspond to the order the relationsship has been defined in Dynamics. If the request fail,
