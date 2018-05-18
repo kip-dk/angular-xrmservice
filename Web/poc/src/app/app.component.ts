@@ -46,7 +46,7 @@ export class AppComponent {
 
 
     constructor(private xrmService: XrmService, private contextService: XrmContextService) {
-        this.xrmService.debug = true;
+        this.xrmService.debug = false;
         this.ctx = xrmService.getContext();
         this.url = this.ctx.getClientUrl();
     }

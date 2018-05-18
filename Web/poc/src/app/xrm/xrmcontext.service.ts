@@ -413,7 +413,6 @@ export class XrmContextService {
         }
 
         return this.xrmService.get<T>(prototype._pluralName, id, columnDef.columns, expand).map(r => {
-          console.log(r);
             return me.resolve<T>(prototype, r, prototype._updateable);
         });
     }
@@ -481,7 +480,7 @@ export class XrmContextService {
             sep = '&';
         }
 
-        if (this.xrmService.debug) console.log(url);
+        this.xrmService.log(url);
 
         return this.http.get(url, options).map(response => {
             let result = me.resolveQueryResult<T>(prototype, response, top, [url], 0);
@@ -491,15 +490,10 @@ export class XrmContextService {
 
     create<T extends Entity>(prototype: T, instance: T): Observable<T> {
         let newr = this.prepareNewInstance(prototype, instance);
-
-        if (this.xrmService.debug) {
-            console.log(newr);
-        }
+        this.xrmService.log(newr);
 
         return this.xrmService.create<T>(prototype._pluralName, newr as T).map(response => {
-            if (this.xrmService.debug) {
-                console.log(response);
-            }
+          this.xrmService.log(response);
 
             if (response != null) {
                 if (response.hasOwnProperty('$keyonly')) {
@@ -713,21 +707,14 @@ export class XrmContextService {
             body += '--' + change + '--\n';
             body += "\n";
             body += "--" + batch + "--\n";
-
-            if (this.xrmService.debug) {
-                console.log(body);
-            }
+            this.xrmService.log(body);
 
             let url = this.getContext().getClientUrl() + this.xrmService.apiUrl + "$batch";
+            this.xrmService.log(url);
 
-            if (this.xrmService.debug) {
-                console.log(url);
-            }
 
             return this.http.post(url, body, { headers: headers, responseType: "text" }).map(txt => {
-                if (this.xrmService.debug) {
-                    console.log(txt);
-                }
+              this.xrmService.log(txt);
 
                 oprs.forEach(r => {
                     if (r.type == 'put') {
@@ -774,25 +761,25 @@ export class XrmContextService {
 
 
     log(type: string): void {
-        if (type == 'context') {
-            console.log(this.context);
-            return;
-        }
+      if (type == 'context') {
+        this.xrmService.log(this.context);
+          return;
+      }
 
-        if (type == 'xrmcontext') {
-            console.log(this.getContext());
-            return;
-        }
+      if (type == 'xrmcontext') {
+      this.xrmService.log(this.getContext());
+          return;
+      }
 
-        if (type == 'url') {
-            console.log(this.getContext().getClientUrl());
-        }
+      if (type == 'url') {
+        this.xrmService.log(this.getContext().getClientUrl());
+      }
 
-        if (type == 'version') {
-            console.log(this.getContext().getVersion());
-        }
+      if (type == 'version') {
+        this.xrmService.log(this.getContext().getVersion());
+      }
 
-        console.log('xrmContextService supported the current log types: context, xrmcontext, url, version');
+      this.xrmService.log('xrmContextService supported the current log types: context, xrmcontext, url, version');
     } 
 
     clone(prototype: Entity, instance: Entity): Entity {
@@ -834,10 +821,9 @@ export class XrmContextService {
             }
         }
         r.id = null;
-        if (this.xrmService.debug) {
-            console.log('clone');
-            console.log(r);
-        }
+        this.xrmService.log('clone');
+        this.xrmService.log(r);
+
         return r;
     }
 
@@ -955,33 +941,27 @@ export class XrmContextService {
         headers = headers.append("Cache-Control", "no-cache");
 
         let url = this.getContext().getClientUrl() + this.xrmService.apiUrl + "systemusers(" + this.getContext().getUserId() + ")/Microsoft.Dynamics.CRM.RetrievePrincipalAccess(Target=@tid)?@tid={\"@odata.id\":\"" + prototype._pluralName + "(" + instance.id + ")\"}";
-
-        if (this.xrmService.debug) {
-            console.log(url);
-        }
+        this.xrmService.log(url);
 
         return this.http.get(url, { headers: headers })
             .catch((err: HttpErrorResponse) => {
                 r.resolved = null;
                 return _throw(err);
-            }).map(r => {
-                if (this.xrmService.debug) {
-                    console.log(r);
-                }
-
-                let i = instance['access'] as XrmAccess;
-                let perm = r["AccessRights"] as string;
-                // ReadAccess, WriteAccess, AppendAccess, AppendToAccess, CreateAccess, DeleteAccess, ShareAccess, AssignAccess
-                i.append = perm.indexOf('AppendAccess') >= 0;
-                i.appendTo = perm.indexOf('AppendToAccess') >= 0
-                i.assign = perm.indexOf('AssignAccess') >= 0;
-                i.create = perm.indexOf('CreateAccess') >= 0;
-                i.delete = perm.indexOf('DeleteAccess') >= 0;
-                i.read = perm.indexOf('ReadAccess') >= 0;
-                i.share = perm.indexOf('ShareAccess') >= 0;
-                i.write = perm.indexOf('WriteAccess') >= 0;
-                i.resolved = true;
-                return instance;
+          }).map(r => {
+              this.xrmService.log(r);
+              let i = instance['access'] as XrmAccess;
+              let perm = r["AccessRights"] as string;
+              // ReadAccess, WriteAccess, AppendAccess, AppendToAccess, CreateAccess, DeleteAccess, ShareAccess, AssignAccess
+              i.append = perm.indexOf('AppendAccess') >= 0;
+              i.appendTo = perm.indexOf('AppendToAccess') >= 0
+              i.assign = perm.indexOf('AssignAccess') >= 0;
+              i.create = perm.indexOf('CreateAccess') >= 0;
+              i.delete = perm.indexOf('DeleteAccess') >= 0;
+              i.read = perm.indexOf('ReadAccess') >= 0;
+              i.share = perm.indexOf('ShareAccess') >= 0;
+              i.write = perm.indexOf('WriteAccess') >= 0;
+              i.resolved = true;
+              return instance;
             });
     }
 
@@ -1187,7 +1167,7 @@ export class XrmContextService {
         let result = instance;
 
         if (this.context.hasOwnProperty(key)) {
-            result = this.context[key];
+          result = this.context[key];
         } else {
             this.context[key] = result;
             result["id"] = instance[prototype._keyName];
@@ -1290,7 +1270,9 @@ export class XrmContextService {
 
 
         if (prototype.hasOwnProperty('access') && !prototype['access']['lazy']) {
-            this.resolveAccess(prototype, instance);
+          if (!result.hasOwnProperty('access') || result.access.resolved == null) {
+            this.resolveAccess(prototype, result);
+          }
         }
 
         return result as T;
@@ -1301,9 +1283,7 @@ export class XrmContextService {
         let key = prototype._pluralName + ':' + instance['id'];
         let change = {};
 
-        if (this.xrmService.debug) {
-            console.log('Adding to cm ' + key);
-        }
+        this.xrmService.log('Adding to cm ' + key);
 
         this.changemanager[key] = change;
 
@@ -1338,9 +1318,7 @@ export class XrmContextService {
             }
         }
 
-        if (this.xrmService.debug) {
-            console.log(change);
-        }
+        this.xrmService.log(change);
     }
 
     private columnBuilder(entity: Entity): ColumnBuilder {

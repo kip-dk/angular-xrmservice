@@ -1,3 +1,9 @@
+### 1.2.0
+
+XrmContextService expand now supports expanding multi properties on get. The POC project contains an example how it is done. Simply ensure that your prototype has a defined
+value corresponding to the type of related entities. Remember $expand only supports lookup (M:1) and many to many (M:M).
+
+
 ### 1.1.9 
 Documentation only. Added documentation for associate and disassociate
 

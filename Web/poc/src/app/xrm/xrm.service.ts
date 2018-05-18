@@ -147,10 +147,7 @@ export class XrmService {
         };
 
         this.http.get("http://localhost:4200/api/data/v8.2/WhoAmI()").map(response => response).subscribe(r => {
-            if (this.debug) {
-                console.log(r);
-            }
-
+            this.log(r);
             let url = r['@odata.context'] as string;
 
             let firstpart = url.split('/api/data/')[0];
@@ -248,9 +245,7 @@ export class XrmService {
         let _id = id.replace("{", "").replace("}", "");
 
         let url = this.getContext().getClientUrl() + this.apiUrl + entityTypes + "(" + _id + ")" + addFields + _ex;
-        if (this.debug) {
-            console.log(url);
-        }
+        this.log(url);
 
         return this.http.get<T>(url, options).map(response => response);
     }
@@ -394,11 +389,11 @@ export class XrmService {
         };
 
         v[propertyValueAs] = value;
+        this.log(v);
 
-        if (this.debug) { console.log(v); }
 
         let url = this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")/" + field;
-        if (this.debug)  console.log(url);
+        this.log(url);
 
         if (v[propertyValueAs] != null) {
             return this.http.put(url, v, options).map(response => null);
@@ -421,9 +416,7 @@ export class XrmService {
         }
 
         let url = this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")";
-        if (this.debug) {
-            console.log(url);
-        }
+        this.log(url);
         return this.http.delete(url).map(response => null);
     }
 
@@ -451,8 +444,8 @@ export class XrmService {
       }
 
       if (this.debug) {
-        console.dir(url);
-        console.log(data);
+        this.log(url);
+        this.log(data);
       }
 
       return this.http.post(url, data, options).map(response => null);
@@ -470,18 +463,23 @@ export class XrmService {
       }
 
       let url = this.getContext().getClientUrl() + this.apiUrl + fromType + "(" + this.toGuid(fromId) + ")/" + refname + "/$ref?$id=" + this.getContext().$devClientUrl() + toType + "(" + this.toGuid(toId) + ")";
-      if (this.debug) {
-        console.dir(url);
-      }
+      this.log(url);
 
       return this.http.delete(url, options).map(response => {
-        if (this.debug) {
-          console.log(response);
-        }
+        this.log(response);
         return null;
       });
     }
 
+    log(message:any): void {
+      if (this.debug) {
+        if (typeof message == 'string') {
+          console.dir(message);
+        } else {
+          console.log(message);
+        }
+      } 
+    }
 
     private expandString(expand: Expand, sep: string): string {
         if (expand == null || expand.name == null || expand.name == '') return '';

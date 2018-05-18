@@ -91,6 +91,7 @@ export class CtxContact extends Entity {
     checked: boolean;
 
     listcontact_association: List[];
+    parentcustomerid_account: CtxAccount;
 
     opportunities: CtxOpportunity[];
 
@@ -107,8 +108,9 @@ export class CtxContact extends Entity {
     }
 
     meta(): CtxContact {
-        this.listcontact_association = [new List().meta()];
-        return this;
+      this.listcontact_association = [new List().meta()];
+      this.parentcustomerid_account = new CtxAccount();
+      return this;
     }
 
     nextname: string;
