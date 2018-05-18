@@ -1,0 +1,7 @@
+{
+  "tenant": "",
+  "clientId": "",
+  "postLogoutRedirectUri": "",
+  "endpoints": { "orgUri": "http://kipon-dev/kip" },
+  "cacheLocation":  ""
+}

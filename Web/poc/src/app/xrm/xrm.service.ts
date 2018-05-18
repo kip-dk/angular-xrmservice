@@ -1,8 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
+import { XrmConfigService } from './xrmconfig.service';
 
 export interface XrmContext {
     getClientUrl(): string;
@@ -71,7 +72,7 @@ export class XrmService {
     token: string = null;
     private loginObserver: any;
 
-    constructor(private http: HttpClient) {
+    constructor(private http: HttpClient, private injector: Injector) {
         let v = this.getContext().getVersion().split('.');
         this.setVersion(v[0] + "." + v[1]);
         this.apiVersion = 'v' + v[0] + '.' + v[1];
@@ -118,9 +119,24 @@ export class XrmService {
             }
         }
 
+        let baseUrl = "http://localhost:4200";
+
+        try {
+            var configService = this.injector.get(XrmConfigService) as XrmConfigService;
+            if (configService != null) {
+                let config = configService.getConfig();
+                if (config != null && config.endpoints != null && config.endpoints.orgUri != null && config.endpoints.orgUri != '') {
+                    baseUrl = config.endpoints.orgUri;
+                }
+            }
+        } catch (err) {
+            // no worry, XrmConfigService is optional
+        }
+
+
         this.contextFallback = {
             getClientUrl(): string {
-                return "http://localhost:4200";
+              return baseUrl;
             },
             getQueryStringParameters(): any {
                 let search = window.location.search;

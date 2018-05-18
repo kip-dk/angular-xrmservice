@@ -1,3 +1,19 @@
+### 1.2.5
+
+Version 1.2.1 - 1.2.4 are versions not to be used, needed to get introduction of XrmConfigService to work without breaking old implementation not using the feature.
+These versions has breaking changes that are fixed in 1.2.5, so if you run into trouble, please try to upgrade to 1.2.5, breaking changes has been fixed, and
+1.2.5 is compatible with 1.2.0.
+
+XrmConfigService allow you to configure the default url for CRM. If you run the application inside Dynamics 365 as a web resource, the context is giving, but running
+ex. in developer mode, using ng serve, this concept would always fall back to http://localhost:4200. This is still the default behavior, but you can now configure
+the url. The README page of the npm package will describe how.
+
+This configuration facility has two goals. 
+
+1) Add the ability to run the application using ng serve, without using the proxy concept of angular, but simple call the correct url. You have to disable CORS in your browser and
+manually authenticate against CRM in the same browser window, before you navigate to your test page.
+2) This is also the first step in implementing authentication support based and adal.js. This part is however still work in progress.
+
 ### 1.2.0
 
 XrmContextService expand now supports expanding multi properties on get. The POC project contains an example how it is done. Simply ensure that your prototype has a defined

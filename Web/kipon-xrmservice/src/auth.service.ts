@@ -5,9 +5,6 @@ import { Observable } from 'rxjs/Observable';
 
 import { XrmService } from './xrm.service';
 
-
-type Tokencallback = (error: string, token: string) => void;
-
 export interface AuthUserProfile {
     name: string;
 }
@@ -23,7 +20,7 @@ export interface AuthContext {
     getCachedUser(): AuthUser;
     login(): void;
     logOut(): void;
-    acquireToken(url: string, callback: Tokencallback): void;
+    acquireToken(url: string, callback: any): void;
 }
 
 

@@ -58,6 +58,65 @@ import { XrmServiceModule, XrmService } from 'kipon-xrmservice';
 export class AppModule { }
 ```
 
+## Running your application with ng serve.
+If you have an onpremise installation of CRM you do develop against, the most easy way to handle CRM API request i to setup angular proxy for the api call's.  The POC project
+in Github for this project is doing so, so take a look there if you need that.
+
+If you need to do development against an online instance, this is not an option. Then you have to configure witch url to be used. 
+
+This is done by importing the XrmConfigService in your solution, and setup bootstrap configuration of the XrmService:
+
+```typescript
+import { XrmServiceModule, XrmStateService, XrmService, XrmContextService, XrmInterceptor, XrmConfigService } from './xrm/index'
+
+const xrmInitializerFn = (appConfig: XrmConfigService) => {
+  return () => {
+    return appConfig.loadAppConfig('/assets/xrmConfig.json');
+  };
+};
+
+@NgModule({
+  declarations: [
+    AppComponent,
+  ],
+  imports: [
+      XrmServiceModule
+  ],
+  providers: [
+      XrmConfigService,
+      {  provide: APP_INITIALIZER, useFactory: xrmInitializerFn, multi: true, deps: [XrmConfigService] },
+      XrmStateService,
+      XrmService,
+      XrmContextService,
+      { provide: HTTP_INTERCEPTORS, useClass: XrmInterceptor, multi: true }
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+```
+
+Take a look at above app.module example.  First of all, we import XrmConfigService.
+Secondly we create a const xrmInitializerFn, that gets XrmConfigService injected, and here we call loadAppConfig, giving it an url to use to optain an configuration file.
+In this example, the configuration file is simply placed in the assets folder, but this approach allow you to place it anywhere.
+
+Thirdly, ind the providers section, we import XrmConfigService, and we define the angular APP_INITIALIZER to use our xrmInitializerFn.
+
+The url parsed to loadAppConfig must return a json object with the following structure:
+
+```json
+{
+  "tenant": "",
+  "clientId": "",
+  "postLogoutRedirectUri": "",
+  "endpoints": { "orgUri": "http://kipon-dev/kip" },
+  "cacheLocation":  ""
+}
+```
+As you can see, the object is prepared for having all needed information to do authentication, but for now it is just to have a placeholder where we can put the endpoint for dynamics 365.
+
+If you have XrmConfigService setup for you project, but the application is running inside dynamics as a webresource, the configuration will simply be ignored.
+
 ### XrmService API
 The XrmService is Injectable, and uses angular HttpClient to map relevant calles to Dynamics 365.
 
