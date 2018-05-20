@@ -409,7 +409,7 @@ where condition0 and (condition1 or condition2)
 
 So the builder group method of the condition builder methods will return a sub condition, where you can continue build your condition. To get back to the parent condition from a sub condition, you can simply call .parent.
 
-If you parse in a child condition (in above example ommit the last ".parent"), the xrmContextService.query method, it will still generate the same where anyway, because the query method of the XrmContextService always navigate to the root condition before it
+If you parse in a child condition (in above example ommit the last ".parent") to the xrmContextService.query method, it will still generate the same where clause anyway, because the query method of the XrmContextService always navigate to the root condition before it
 generate the condition string.
 
 It is a good idea to use indent to make it visible in your code how the conditions are grouped.
@@ -458,7 +458,7 @@ To make it easy to create a new service, i have created a simple solution, where
 service for you that you can copy/paste into your angular projects
 
 [Dynamics 365 8.0 solution](XrmContextServiceGenerator_target_CRM_8.0_managed.zip) <br />
-[Dynamics 365 8.2 solution](XrmContextServiceGenerator_managed.zip)  (also works from 9.0) <br />
+[Dynamics 365 8.2 solution](XrmContextServiceGenerator_managed.zip)  (also works for 9.0) <br />
 
 
 ## License
