@@ -409,7 +409,7 @@ where condition0 and (condition1 or condition2)
 
 So the builder group method of the condition builder methods will return a sub condition, where you can continue build your condition. To get back to the root condition from a sub condition, you can simply call parent.
 
-If you parse in a child condition (in above example ommit the last .".parent"), the condition will still be the same, because the query method of the XrmContextService always navigate to the root condition before it
+If you parse in a child condition (in above example ommit the last ".parent"), the condition will still be the same, because the query method of the XrmContextService always navigate to the root condition before it
 generate the condition string.
 
 ### XrmTransaction
