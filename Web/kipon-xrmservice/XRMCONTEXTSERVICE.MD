@@ -391,8 +391,26 @@ to setup the where clause.
   }
 ```
 
+new Condtion()... is creating a condition where all child operations is AND'ed. If you need to OR conditions, you must group your conditions starting a new group with the Comparator.OR
 
+```typescript
+let condition = new Condition()
+	.where(condition0)
+	.group(Operator.OR)
+	  .where(condition1)
+	  .where(condition2)
+	  .parent;
+```
 
+the condition.Group(Comparator.OR) method will return a Condition instance that is a child of the condition is has been called upon, and in this case, any where added the the grouped condition instance
+will be OR'ed. The above example will generate
+
+where condition0 and (condition1 or condition2)
+
+So the builder group method of the condition builder methods will return a sub condition, where you can continue build your condition. To get back to the root condition from a sub condition, you can simply call parent.
+
+If you parse in a child condition (in above example ommit the last .".parent"), the condition will still be the same, because the query method of the XrmContextService always navigate to the root condition before it
+generate the condition string.
 
 ### XrmTransaction
 XrmTransaction object allow you to setup a list of operations that must be performend in a single transaction.
