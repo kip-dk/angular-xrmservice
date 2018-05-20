@@ -396,7 +396,7 @@ new Condtion()... is creating a condition where all child operations is AND'ed. 
 ```typescript
 let condition = new Condition()
 	.where(condition0)
-	.group(Operator.OR)
+	.group(Comparator.OR)
 	  .where(condition1)
 	  .where(condition2)
 	  .parent;
