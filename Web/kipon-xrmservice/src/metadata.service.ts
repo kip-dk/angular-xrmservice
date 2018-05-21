@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
@@ -31,6 +31,7 @@ export class EntityMeta extends Entity {
     Attributes: AttributeMeta[] = null;
 
     OneToManyRelations: OneToManyRelationship[];
+    ManyToManyRelations: ManyToManyRelationship[];
 
     meta(): EntityMeta {
         this.Attributes = [new AttributeMeta()];
@@ -68,6 +69,20 @@ export class OneToManyRelationship {
     ReferencingEntityNavigationPropertyName: string;
 }
 
+export class ManyToManyRelationship {
+  MetadataId: string = null;
+  Entity1LogicalName: string = null;
+  Entity1NavigationPropertyName: string = null;
+  Entity2LogicalName: string = null;
+  Entity2NavigationPropertyName: string = null;
+  SchemaName: string = null;
+  RelationshipType: string = null;
+  Other: string = null;
+  OtherSchemaName: string = null;
+  Entity1LogicalCollectionName: string = null;
+  Entity2LogicalCollectionName: string = null;
+}
+
 export class LookupAttribute {
     Targets: string[];
     LogicalName: string;
@@ -82,10 +97,17 @@ export class MetadataService {
 
     constructor(private http: HttpClient, private xrmService: XrmContextService) { }
 
-    search(name: string): Observable<XrmQueryResult<EntityMeta>> {
-        let con = new Condition()
-            .where("LogicalCollectionName", Comparator.ContainsData)
-            .where("LogicalName", Comparator.ContainsData);
+    search(name: string): Observable<XrmQueryResult<EntityMeta>>;
+    search(name: string, unique: boolean): Observable<XrmQueryResult<EntityMeta>>;
+    search(name: string, unique: boolean = false): Observable<XrmQueryResult<EntityMeta>> {
+      let con = new Condition();
+      if (!unique) {
+        con
+          .where("LogicalCollectionName", Comparator.ContainsData)
+          .where("LogicalName", Comparator.ContainsData);
+      } else {
+        con.where("LogicalName", Comparator.Equals, name);
+      }
 
         return this.xrmService.query<EntityMeta>(this.searchEntityMetaPrototype, con).map(r => {
             if (name != null && name != '') {
@@ -119,7 +141,7 @@ export class MetadataService {
         });
     }
 
-    getOneToManyRelationships(entity: EntityMeta): Observable<EntityMeta> {
+    getManyToManyRelationships(entity: EntityMeta): Observable<EntityMeta> {
         let headers = new HttpHeaders({ 'Accept': 'application/json' });
         headers = headers.append("OData-MaxVersion", "4.0");
         headers = headers.append("OData-Version", "4.0");
@@ -130,11 +152,64 @@ export class MetadataService {
             headers: headers
         }
 
-        return this.http.get(this.xrmService.getServiceUrl() + 'EntityDefinitions(' + entity.id + ')' + '/OneToManyRelationships?$select=MetadataId,RelationshipType,SchemaName,ReferencedAttribute,ReferencingAttribute,ReferencedEntity,ReferencingEntity,ReferencingEntityNavigationPropertyName', options)
-            .map(response => {
-                entity.OneToManyRelations = response["value"] as OneToManyRelationship[];
-                return entity;
-            });
+        return this.http.get(this.xrmService.getServiceUrl() + 'EntityDefinitions(' + entity.id + ')' + '/ManyToManyRelationships?$select=MetadataId,Entity1LogicalName,Entity1NavigationPropertyName,Entity2LogicalName,Entity2NavigationPropertyName,SchemaName,RelationshipType', options)
+          .map(response => {
+              entity.ManyToManyRelations = response["value"] as ManyToManyRelationship[];
+
+              entity.ManyToManyRelations.forEach(r => {
+                  if (r.Entity1LogicalName == entity.LogicalName) {
+                      r.Other = r.Entity2LogicalName;
+                      r.OtherSchemaName = entity.SchemaName;
+                      r.Entity1LogicalCollectionName = entity.LogicalCollectionName;
+                  } else {
+                      r.Other = r.Entity1LogicalName;
+                      r.Entity2LogicalCollectionName = entity.LogicalCollectionName;
+                  }
+              });
+              this.resolveRelationshipNames(entity.ManyToManyRelations);
+            return entity;
+          });
+    }
+
+    resolveRelationshipNames(relations: ManyToManyRelationship[]): void {
+        relations.forEach(r => {
+            if (r.Entity1LogicalCollectionName == null) {
+                this.search(r.Entity1LogicalName, true).subscribe(s => {
+                    r.Entity1LogicalCollectionName = s.value[0].LogicalCollectionName;
+                    if (r.Other == r.Entity1LogicalName) {
+                        r.OtherSchemaName = s.value[0].SchemaName;
+                    }
+                });
+            }
+
+            if (r.Entity2LogicalCollectionName == null) {
+                this.search(r.Entity2LogicalName, true).subscribe(s => {
+                    r.Entity2LogicalCollectionName = s.value[0].LogicalCollectionName;
+                    if (r.Other = r.Entity2LogicalName) {
+                        r.OtherSchemaName = s.value[0].SchemaName;
+                    }
+                });
+            }
+
+        });
+    }
+
+    getOneToManyRelationships(entity: EntityMeta): Observable<EntityMeta> {
+      let headers = new HttpHeaders({ 'Accept': 'application/json' });
+      headers = headers.append("OData-MaxVersion", "4.0");
+      headers = headers.append("OData-Version", "4.0");
+      headers = headers.append("Content-Type", "application/json; charset=utf-8");
+      headers = headers.append("Prefer", "odata.include-annotations=*");
+
+      let options = {
+        headers: headers
+      }
+
+      return this.http.get(this.xrmService.getServiceUrl() + 'EntityDefinitions(' + entity.id + ')' + '/OneToManyRelationships?$select=MetadataId,RelationshipType,SchemaName,ReferencedAttribute,ReferencingAttribute,ReferencedEntity,ReferencingEntity,ReferencingEntityNavigationPropertyName', options)
+        .map(response => {
+          entity.OneToManyRelations = response["value"] as OneToManyRelationship[];
+          return entity;
+        });
     }
 
     getLookup(entity: EntityMeta, attr: AttributeMeta): Observable<EntityMeta> {

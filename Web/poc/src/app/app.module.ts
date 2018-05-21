@@ -7,9 +7,10 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 import { CtxComponent } from './ctx.component';
+import { MetadataComponent } from './metadata.component';
 import { AccessViewComponent } from './accessView.component';
 
-import { XrmServiceModule, XrmStateService, XrmService, XrmContextService, XrmInterceptor, XrmConfigService } from './xrm/index'
+import { XrmServiceModule, XrmStateService, XrmService, XrmContextService, XrmInterceptor, XrmConfigService, MetadataService } from './xrm/index'
 
 const xrmInitializerFn = (appConfig: XrmConfigService) => {
   return () => {
@@ -20,8 +21,9 @@ const xrmInitializerFn = (appConfig: XrmConfigService) => {
 @NgModule({
   declarations: [
     AppComponent,
-      CtxComponent,
-      AccessViewComponent
+    CtxComponent,
+    MetadataComponent,
+    AccessViewComponent
   ],
   imports: [
       BrowserModule,
@@ -34,6 +36,7 @@ const xrmInitializerFn = (appConfig: XrmConfigService) => {
       XrmStateService,
       XrmService,
       XrmContextService,
+      MetadataService,
       { provide: HTTP_INTERCEPTORS, useClass: XrmInterceptor, multi: true }
   ],
   bootstrap: [AppComponent]

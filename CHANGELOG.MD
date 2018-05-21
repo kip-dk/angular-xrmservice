@@ -1,3 +1,9 @@
+### 1.2.10
+MetadataService now support fetch of ManyToManyRelationsships. This has been introduced so the service-generator can generate these properties. 
+
+The service-generator solutions has been updated with facility to generate M:M properties than will be resolved on get() on the xrmContextService.
+This part of the code generator is also a nice demonstration on how to define M:M properties on your entity prototype class.
+
 ### 1.2.6
 Support for M:M relationship management directly on entity object.
 

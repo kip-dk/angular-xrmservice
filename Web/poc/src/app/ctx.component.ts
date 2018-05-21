@@ -171,7 +171,6 @@ export class CtxComponent {
           };
 
           me.xrmContextService.query(me.competitorPrototype, null).subscribe(r => {
-            console.log(r.value);
             me.competitors = r.value;
           });
 

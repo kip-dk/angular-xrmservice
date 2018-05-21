@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { MetadataService, EntityMeta, AttributeMeta } from 'kipon-xrmservice';
+import { MetadataService, EntityMeta, AttributeMeta, ManyToManyRelationship } from 'kipon-xrmservice';
 
 class Support {
     get: boolean = true;
@@ -35,9 +35,15 @@ export class AppComponent {
 
     support: Support = new Support();
 
+    showMany: boolean = false;
+
     toggleSupport(attr: string) {
         this.support[attr] = !this.support[attr];
         this.renderCode();
+    }
+
+    toggleShowMany(): void {
+      this.showMany = !this.showMany;
     }
 
     ngOnInit() {
@@ -63,6 +69,13 @@ export class AppComponent {
                     this.renderCode();
                 });
             }
+
+            if (this.current.ManyToManyRelations == null) {
+              this.metadataService.getManyToManyRelationships(this.current).subscribe(r => {
+                this.renderCode();
+              });
+            }
+
         }
     }
 
@@ -136,6 +149,11 @@ export class AppComponent {
         this.renderCode();
     }
 
+    selectManyToMany(man: ManyToManyRelationship) {
+      man['selected'] = !man['selected'];
+      this.renderCode();
+    }
+
     private updateEntities() {
         let me = this;
         this.metadataService.search(null).subscribe(r => {
@@ -149,7 +167,7 @@ export class AppComponent {
         let acc = this.support.access ? ', XrmAccess': '';
         this.code = "import { Injectable } from '@angular/core';\n";
         this.code += "import { Observable } from 'rxjs/Observable';\n";
-        this.code += "import { XrmQueryResult, XrmContextService, Entity, EntityReference, OptionSetValue, Condition, Operator, Comparator"+acc+" } from 'kipon-xrmservice';\n";
+        this.code += "import { XrmQueryResult, XrmContextService, Entity, Entities, EntityReference, OptionSetValue, Condition, Operator, Comparator"+acc+" } from 'kipon-xrmservice';\n";
         this.code += "\n";
         if (this.current != null) {
             this.code += "export class " + this.current.SchemaName + " extends Entity {\n";
@@ -215,22 +233,50 @@ export class AppComponent {
                 if (this.support.access) {
                     this.code += "\taccess:XrmAccess = new XrmAccess(true);\t";
                 }
-
-                this.code += "\n";
-                this.code += "\tmeta():" +  this.current.SchemaName + " {\n";
-
-                this.current.Attributes.forEach(a => {
-                    if (a['selected']) {
-                        switch (a.AttributeType) {
-                            case 'Double':
-                            case 'Decimal':
-                            case 'Money': this.code += '\t\tthis.' + a.LogicalName + ' = 0.0000000001;\n'; break;
-                        }
-                    }
-                });
-                this.code += "\t\t return this;\n"
-                this.code += "\t}\n"
             }
+
+            if (this.current.ManyToManyRelations != null && this.current.ManyToManyRelations.length > 0) {
+              this.current.ManyToManyRelations.forEach(m => {
+                if (m['selected']) {
+                  this.code += "\t" + m.SchemaName + ":  Entities<" + m.OtherSchemaName + ">;\n" 
+                }
+              });
+            }
+
+            this.code += "\n";
+            this.code += "\tmeta():" + this.current.SchemaName + " {\n";
+
+            if (this.current.Attributes != null && this.current.Attributes.length > 0) {
+              this.current.Attributes.forEach(a => {
+                if (a['selected']) {
+                  switch (a.AttributeType) {
+                    case 'Double':
+                    case 'Decimal':
+                    case 'Money': this.code += '\t\tthis.' + a.LogicalName + ' = 0.0000000001;\n'; break;
+                  }
+                }
+              });
+            }
+
+            if (this.current.ManyToManyRelations != null && this.current.ManyToManyRelations.length > 0) {
+              this.current.ManyToManyRelations.forEach(m => {
+                if (m['selected']) {
+                  var lefttoright = 'true';
+                  var other = m.Entity2LogicalCollectionName;
+                  if (m.Other == m.Entity1LogicalName) {
+                    lefttoright = 'false';
+                    other = m.Entity1LogicalCollectionName;
+                  }
+
+                  this.code += "\t\t" + m.SchemaName + " = new Entities<" + m.OtherSchemaName + ">('" + this.current.LogicalCollectionName + "','" + other + "','" + m.SchemaName + "'," + lefttoright + ", new " + m.OtherSchemaName + "().meta());\n"
+                }
+              });
+            }
+
+            this.code += "\t\t return this;\n"
+            this.code += "\t}\n"
+
+
             this.code += "}\n"
 
             this.code += "\n";

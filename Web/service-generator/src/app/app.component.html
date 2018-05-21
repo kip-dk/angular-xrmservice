@@ -12,6 +12,8 @@
           <div class="input-group" *ngIf="current != null">
             <input type="text" class="form-control" [(ngModel)]="attrSearch" placeholder="Search for attribute" (ngModelChange)="searchAttr($event)" />
             <span class="input-group-addon"><span class="fa fa-search"></span></span>
+            <span class="input-group-addon" *ngIf="showMany == false && current.ManyToManyRelations != null && current.ManyToManyRelations.length > 0" style="cursor: pointer" (click)="toggleShowMany()">M:M</span>
+            <span class="input-group-addon" *ngIf="showMany == true && current.ManyToManyRelations != null && current.ManyToManyRelations.length > 0" style="cursor: pointer"  (click)="toggleShowMany()">P</span>
           </div>
         </ko-view>
         <ko-view right *ngIf="current != null">
@@ -40,11 +42,24 @@
             <span class="fa fa fa-hand-o-left"></span>
             &nbsp;Please select an entity from the list
           </div>
-          <nav class="nav nav-pills flex-column" *ngIf="current != null && attributes != null">
-            <a class="nav-link" *ngFor="let att of attributes" (click)="selectAttribute(att)" href="javascript:void(0)" [ngClass]="{ active: att.selected == true }">
-              {{ att.LogicalName }}
-            </a>
-          </nav>
+          <ng-container *ngIf="current != null && attributes != null && showMany == false">
+            <h6>Properties</h6>
+            <nav class="nav nav-pills flex-column">
+              <a class="nav-link" *ngFor="let att of attributes" (click)="selectAttribute(att)" href="javascript:void(0)" [ngClass]="{ active: att.selected == true }">
+                {{ att.LogicalName }}
+              </a>
+            </nav>
+          </ng-container>
+          <ng-container *ngIf="current != null && current.ManyToManyRelations != null && showMany == true">
+            <h6>Many to Many relations</h6>
+            <nav class="nav nav-pills flex-column">
+              <a class="nav-link" *ngFor="let man of current.ManyToManyRelations" (click)="selectManyToMany(man)" href="javascript:void(0)" [ngClass]="{ active: man.selected == true }">
+                <ng-container *ngIf="man.Entity1LogicalCollectionName != null && man.Entity2LogicalCollectionName != null">
+                  {{ man.OtherSchemaName }}
+                </ng-container>
+              </a>
+            </nav>
+          </ng-container>
         </ko-view>
         <ko-view right>
           <textarea [(ngModel)]="code" *ngIf="current != null" style="width: 99%; height: 99%"></textarea>
