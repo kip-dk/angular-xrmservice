@@ -170,20 +170,24 @@ export class AppComponent {
         this.code += "import { XrmQueryResult, XrmContextService, Entity, Entities, EntityReference, OptionSetValue, Condition, Operator, Comparator"+acc+" } from 'kipon-xrmservice';\n";
         this.code += "\n";
         if (this.current != null) {
+            let keyname = this.current.LogicalName + 'id';
+            if (this.current.IsActivity) {
+              keyname = 'activityid';
+            }
             this.code += "export class " + this.current.SchemaName + " extends Entity {\n";
             this.code += "\tconstructor() {\n";
-            this.code += "\t\tsuper('" + this.current.LogicalCollectionName + "','" + this.current.LogicalName + "id', " + (this.support.update ? "true" : "false") + ");\n";
+            this.code += "\t\tsuper('" + this.current.LogicalCollectionName + "','" + keyname + "', " + (this.support.update ? "true" : "false") + ");\n";
             this.code += "\t}\n";
 
             if (this.current.Attributes != null) {
                 this.current.Attributes.forEach(a => {
-                    if (a['selected']) {
-                        if (a.AttributeType == 'Uniqueidentifier' && me.current.LogicalName + 'id' == a.LogicalName) this.code += '\t// ';
+                  if (a['selected']) {
+                    if (a.AttributeType == 'Uniqueidentifier' && keyname == a.LogicalName) this.code += '\t// ';
                         this.code += "\t" + a.LogicalName + ":";
 
                         switch (a.AttributeType) {
                             case 'Uniqueidentifier': {
-                                if (me.current.LogicalName + 'id' == a.LogicalName) {
+                                if (keyname == a.LogicalName) {
                                     this.code += 'entity key column is always included, but name is converted to id';
                                 } else {
                                     this.code += ' string = null;'

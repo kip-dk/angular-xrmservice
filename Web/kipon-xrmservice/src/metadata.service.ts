@@ -28,6 +28,8 @@ export class EntityMeta extends Entity {
     ObjectTypeCode: number = null;
     SchemaName: string = null;
     LogicalCollectionName: string = null;
+    IsActivity: boolean = null;
+    IsActivityParty: boolean = null;
     Attributes: AttributeMeta[] = null;
 
     OneToManyRelations: OneToManyRelationship[];

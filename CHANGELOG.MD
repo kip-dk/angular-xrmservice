@@ -1,3 +1,7 @@
+### 1.2.11
+Include IsActivity in metadata.service EntityMeta and use the setting in the service-generator to set key name correct for entities of type activity when
+generating services.
+
 ### 1.2.10
 MetadataService now support fetch of ManyToManyRelationsships. This has been introduced so the service-generator can generate these properties. 
 
