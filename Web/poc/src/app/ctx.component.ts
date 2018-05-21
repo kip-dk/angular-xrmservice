@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 
 import { XrmStateService } from './xrm/xrmstate.service';
 import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult, Expand } from './xrm/xrm.service';
-import { XrmContextService, Entity, EntityReference, OptionSetValue, Condition, Operator, Comparator, XrmTransaction, XrmAccess } from './xrm/xrmcontext.service';
+import { XrmContextService, Entity, Entities, EntityReference, OptionSetValue, Condition, Operator, Comparator, XrmTransaction, XrmAccess } from './xrm/xrmcontext.service';
 
 
 export class List extends Entity {
@@ -51,10 +51,10 @@ export class CtxOpportunity extends Entity {
   name: string = null;
   customerid: EntityReference = new EntityReference().meta("contacts", "customerid_contact");
 
-  opportunitycompetitors_association: CtxCompetitor[]
+  opportunitycompetitors_association: Entities<CtxCompetitor>;
 
   meta(): CtxOpportunity {
-    this.opportunitycompetitors_association = [new CtxCompetitor().meta()];
+    this.opportunitycompetitors_association = new Entities<CtxCompetitor>("opportunities", "competitors", "opportunitycompetitors_association", true, new CtxCompetitor().meta());
     return this;
   }
 
@@ -327,15 +327,11 @@ export class CtxComponent {
     }
 
     disassociate(opp: CtxOpportunity, com: CtxCompetitor) {
-      this.xrmService.disassociate(opp._pluralName, opp.id, com._pluralName, com.id, "opportunitycompetitors_association").subscribe(r => {
-        opp.opportunitycompetitors_association = opp.opportunitycompetitors_association.filter(n => n != com);
-      });
+      opp.opportunitycompetitors_association.remove(com).subscribe(r => { });
     }
 
     associate(opp: CtxOpportunity, com: CtxCompetitor) {
-      this.xrmService.associate(opp._pluralName, opp.id, com._pluralName, com.id, "opportunitycompetitors_association").subscribe(r => {
-        opp.opportunitycompetitors_association.push(com);
-      });
+      opp.opportunitycompetitors_association.add(com).subscribe(r => { });
     }
 
     nextNameChanged() {

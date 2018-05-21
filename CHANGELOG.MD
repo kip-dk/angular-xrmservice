@@ -1,3 +1,11 @@
+### 1.2.6
+Support for M:M relationship management directly on entity object.
+
+If you define a property of type Entities<T extends Entity>, where the name correspond to the M:M schema name, and your prototype defines the detail on the relationship,
+you can now use add(entity) and remove(entity) directly on the M:M property.  
+
+For now, look into the POC project, and see how opportunity : competitor relationship has been defined, and how elements are associated and disassociated.
+
 ### 1.2.5
 
 Version 1.2.1 - 1.2.4 are versions not to be used, needed to get introduction of XrmConfigService to work without breaking old implementation not using the feature.

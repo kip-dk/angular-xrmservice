@@ -2,6 +2,7 @@
   "tenant": "",
   "clientId": "",
   "postLogoutRedirectUri": "",
-  "endpoints": { "orgUri": "http://kipon-dev/kip" },
-  "cacheLocation":  ""
+  "endpoints": { "orgUri": null },
+  "cacheLocation": "",
+  "version":  "v8.2"
 }

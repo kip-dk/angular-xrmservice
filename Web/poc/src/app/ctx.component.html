@@ -59,7 +59,7 @@
             <span style="cursor: pointer" *ngIf="opp.opportunitycompetitors_association == null" (click)="resolveCompetitors(opp)">Resolve competitors</span>
             <ng-container *ngIf="opp.opportunitycompetitors_association != null && opp.opportunitycompetitors_association.length > 0">
               ::
-              <span *ngFor="let cop of opp.opportunitycompetitors_association">{{ cop.name }} <span (click)="disassociate(opp, cop)">[DEL]</span></span>
+              <span *ngFor="let cop of opp.opportunitycompetitors_association">{{ cop.name }} <span style="cursor: pointer" (click)="disassociate(opp, cop)">[DEL]</span></span>
             </ng-container>
             <ng-container *ngIf="opp.opportunitycompetitors_association != null">
               |

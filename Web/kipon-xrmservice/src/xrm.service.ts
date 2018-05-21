@@ -73,9 +73,6 @@ export class XrmService {
     private loginObserver: any;
 
     constructor(private http: HttpClient, private injector: Injector) {
-        let v = this.getContext().getVersion().split('.');
-        this.setVersion(v[0] + "." + v[1]);
-        this.apiVersion = 'v' + v[0] + '.' + v[1];
     }
 
     setVersion(v: string): void {
@@ -94,6 +91,8 @@ export class XrmService {
                 x.getVersion = (): string => "8.0.0.0"
             }
             x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
+            this.contextFallback = x;
+            this.initializeVersion(this.contextFallback.getVersion());
             return x;
         }
 
@@ -104,6 +103,8 @@ export class XrmService {
                     x.getVersion = (): string => "8.0.0.0"
                 }
                 x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
+                this.contextFallback = x;
+                this.initializeVersion(this.contextFallback.getVersion());
                 return x;
             }
         }
@@ -115,18 +116,24 @@ export class XrmService {
                     x.getVersion = (): string => "8.0.0.0"
                 }
                 x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
+                this.contextFallback = x;
+                this.initializeVersion(this.contextFallback.getVersion());
                 return x;
             }
         }
 
         let baseUrl = "http://localhost:4200";
+        let version = 'v8.0';
 
         try {
             var configService = this.injector.get(XrmConfigService) as XrmConfigService;
             if (configService != null) {
                 let config = configService.getConfig();
                 if (config != null && config.endpoints != null && config.endpoints.orgUri != null && config.endpoints.orgUri != '') {
-                    baseUrl = config.endpoints.orgUri;
+                  baseUrl = config.endpoints.orgUri;
+                }
+                if (config != null && config.version != null && config.version != '') {
+                  version = config.version;
                 }
             }
         } catch (err) {
@@ -149,7 +156,7 @@ export class XrmService {
                 return params;
             },
             getVersion(): string {
-                return "8.2.0.0";
+              return version.substring(1) + '.0.0';
             },
             getUserId(): string {
                 return this["userid"];
@@ -162,7 +169,7 @@ export class XrmService {
             }
         };
 
-        this.http.get("http://localhost:4200/api/data/v8.2/WhoAmI()").map(response => response).subscribe(r => {
+        this.http.get(baseUrl + "/api/data/" + version + "/WhoAmI()").map(response => response).subscribe(r => {
             this.log(r);
             let url = r['@odata.context'] as string;
 
@@ -173,6 +180,7 @@ export class XrmService {
 
             this.contextFallback["userid"] = r["UserId"];
             this.contextFallback["username"] = "Dev. fallback from whoami";
+            this.initializeVersion(this.contextFallback.getVersion());
         });
 
         return this.contextFallback;
@@ -495,6 +503,13 @@ export class XrmService {
           console.log(message);
         }
       } 
+    }
+
+    private initializeVersion(_v: string): void {
+      if (_v == null) { _v = '8.0.0.0'; }
+      let v = _v.split('.');
+      this.setVersion(v[0] + "." + v[1]);
+      this.apiVersion = 'v' + v[0] + '.' + v[1];
     }
 
     private expandString(expand: Expand, sep: string): string {

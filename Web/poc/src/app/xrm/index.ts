@@ -6,7 +6,7 @@ import 'rxjs/Rx';
 import { _throw } from 'rxjs/observable/throw';
 import 'rxjs/add/operator/catch';
 
-import { AuthService, AuthConfig, AuthConfigEndpoint, AuthContext, AuthUser, AuthUserProfile } from './auth.service';
+import { XrmAuthService } from './auth.service';
 import { XrmConfigService } from './xrmconfig.service';
 import { XrmInterceptor } from './xrm.interceptor';
 import { XrmStateService } from './xrmstate.service';
@@ -37,7 +37,7 @@ export class XrmServiceModule {
     static forRoot(): ModuleWithProviders {
         return {
             ngModule: XrmServiceModule,
-            providers: [XrmStateService, AuthService, XrmConfigService, XrmService, XrmContextService, MetadataService]
+            providers: [XrmStateService, XrmAuthService, XrmConfigService, XrmService, XrmContextService, MetadataService]
         };
     }
 }

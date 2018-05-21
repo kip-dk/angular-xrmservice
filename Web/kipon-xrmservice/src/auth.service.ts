@@ -1,9 +1,11 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
 import { XrmService } from './xrm.service';
+import { XrmConfigService } from './xrmconfig.service';
+
 
 export interface AuthUserProfile {
     name: string;
@@ -34,27 +36,25 @@ export interface AuthConfig {
     postLogoutRedirectUri: string;
     endpoints: AuthConfigEndpoint;
     cacheLocation: string;
+    version: string;
 }
 
 
 @Injectable()
-export class AuthService {
-    authConfig: AuthConfig;
+export class XrmAuthService {
+  authConfig: AuthConfig;
+  obs: any;
 
-    constructor(private xrmService: XrmService) { }
+    constructor(private xrmConfigService: XrmConfigService, private xrmService: XrmService ) { }
 
     authenticate(): Observable<boolean> {
         if (window["AuthenticationContext"] == null) {
             throw "You must load adal.js to the page header scripts.";
         }
 
-        if (window["AuthenticationConfiguration"] == null) {
-            throw "You must define AuthenticationConfiguration before you call authenticate method";
-        }
+        this.authConfig = this.xrmConfigService.getConfig();
 
-        this.authConfig = window["AuthenticationConfiguration"] as AuthConfig;
-
-        let authCtx = new window["AuthenticationContext"](window["AuthenticationConfiguration"]) as AuthContext;
+        let authCtx = new window["AuthenticationContext"](this.authConfig) as AuthContext;
         let isCallback = authCtx.isCallback(window.location.hash);
 
         if (isCallback) {
@@ -64,13 +64,14 @@ export class AuthService {
         var loginError = authCtx.getLoginError();
 
         if (!loginError && isCallback) {
+          var x = Observable.create(_obs => {
+            this.obs = _obs;
+          });
 
             setTimeout(() => {
                 authCtx.acquireToken(this.authConfig.endpoints.orgUri, this.getToken);
             }, 1);
-
-            return Observable.create(obs => {
-            });
+            return x;
         }
 
         if (loginError) {
@@ -101,5 +102,7 @@ export class AuthService {
         if (this.xrmService.debug) {
             console.log(token);
         }
+        this.xrmService.token = token;
+        this.obs.next(true);
     }
 }

@@ -21,6 +21,65 @@ export class Entity {
     }
 }
 
+export class Entities<T extends Entity> extends Array<T> {
+  constructor(fType: string, tType: string, refName: string, leftToRight: boolean, t: T) {
+    super(0);
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.parentType = fType;
+    this.childType = tType;
+    this.refName = refName;
+    this.leftToRight = leftToRight;
+    this.push(t);
+  }
+
+  private parentType: string;
+  private parentId: string;
+  private childType: string;
+  private refName: string;
+  private leftToRight: boolean;
+  private xrmService: XrmService;
+
+  add(entity: Entity): Observable<null> {
+    let fromType = this.parentType;
+    let fromId = this.parentId;
+    let toType = this.childType;
+    let toId = entity.id;
+
+    if (!this.leftToRight) {
+      fromType = this.childType;
+      fromId = entity.id;
+      toType = this.parentType;
+      toId = this.parentId;
+    }
+    return this.xrmService.associate(fromType, fromId, toType, toId, this.refName).map(r => {
+        this.push(entity as T);
+        return null;
+    });
+  }
+
+  remove(entity: Entity): Observable<null> {
+    let fromType = this.parentType;
+    let fromId = this.parentId;
+    let toType = this.childType;
+    let toId = entity.id;
+
+    if (!this.leftToRight) {
+      fromType = this.childType;
+      fromId = entity.id;
+      toType = this.parentType;
+      toId = this.parentId;
+    }
+
+    return this.xrmService.disassociate(fromType, fromId, toType, toId, this.refName).map(r => {
+      var index = this.indexOf(entity as T);
+      if (index >= 0) {
+        this.splice(index, 1);
+      }
+      return null;
+    });
+  }
+}
+
 export class EntityReference {
     constructor();
     constructor(id: string);
@@ -365,6 +424,7 @@ class ExpandProperty {
     name: string;
     entity: Entity;
     isArray: boolean;
+    value: any;
 }
 
 @Injectable()
@@ -911,7 +971,15 @@ export class XrmContextService {
     }
 
     private resolveAccess(prototype: Entity, instance: Entity) {
-        this.mapAccess(prototype, instance).subscribe(r => { });
+      var user = this.getContext().getUserId();
+      if (user == null || user == '') {
+        setTimeout(() => {
+          this.resolveAccess(prototype, instance);
+        }, 200);
+        return;
+      }
+
+      this.mapAccess(prototype, instance).subscribe(r => { });
     }
 
     private mapAccess(prototype: Entity, instance: Entity): Observable<Entity> {
@@ -927,6 +995,9 @@ export class XrmContextService {
                 return;
             }
         }
+
+        var user = this.getContext().getUserId();
+
         let r = instance['access'] as XrmAccess;
         r.resolved = false;
 
@@ -940,7 +1011,7 @@ export class XrmContextService {
         headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
         headers = headers.append("Cache-Control", "no-cache");
 
-        let url = this.getContext().getClientUrl() + this.xrmService.apiUrl + "systemusers(" + this.getContext().getUserId() + ")/Microsoft.Dynamics.CRM.RetrievePrincipalAccess(Target=@tid)?@tid={\"@odata.id\":\"" + prototype._pluralName + "(" + instance.id + ")\"}";
+        let url = this.getContext().getClientUrl() + this.xrmService.apiUrl + "systemusers(" + user + ")/Microsoft.Dynamics.CRM.RetrievePrincipalAccess(Target=@tid)?@tid={\"@odata.id\":\"" + prototype._pluralName + "(" + instance.id + ")\"}";
         this.xrmService.log(url);
 
         return this.http.get(url, { headers: headers })
@@ -1251,6 +1322,16 @@ export class XrmContextService {
                     _tmp.push(me.resolve(ep.entity, _r, false));
                   });
                   result[ep.name] = _tmp;
+                  if (ep.value instanceof Entities) {
+                    _tmp["add"] = ep.value["add"];
+                    _tmp["remove"] = ep.value["remove"];
+                    _tmp["xrmService"] = this.xrmService;
+                    _tmp["parentType"] = prototype._pluralName;
+                    _tmp["parentId"] = result["id"];
+                    _tmp["childType"] = ep.value["childType"];
+                    _tmp["refName"] = ep.value["refName"];
+                    _tmp["leftToRight"] = ep.value["leftToRight"];
+                  }
                 }
               } else {
                 let _v = instance[ep.name];
@@ -1366,7 +1447,8 @@ export class XrmContextService {
                   result.push({
                     name: prop,
                     entity: pt,
-                    isArray: true
+                    isArray: true,
+                    value: _v
                   });
                 }
             } else {
@@ -1374,7 +1456,8 @@ export class XrmContextService {
                 result.push({
                   name: prop,
                   entity: _v,
-                  isArray: false
+                  isArray: false,
+                  value: _v
                 });
                 }
             }
