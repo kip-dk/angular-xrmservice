@@ -295,7 +295,7 @@ export class Account extends Entity {
 
 ### expand
 The GET method of the dynamics 365 Web API supports expanding a related entity. This means, that you can get the entity it self + data from a related entity in a single query.
-You can use this to get  values from a lookup table, ex getting information about the primary contact while getting an account, or you can get a list of realted entities, ex. getting
+You can use this to get  values from a lookup table, ex. getting information about the primary contact while getting an account, or you can get a list of realted entities, ex. getting
 all contact that has this account as parentcustomerid.
 
 The XrmContext service supports this by adding a navigation property of the related entitytype on your entity prototype.
@@ -334,6 +334,32 @@ able to expand the related data, so a get on the contact using the prototype ret
 
 Be aware that expand is only supported on GET. If you have worked with the old Dynamics 2015 Odata interface, you might remember that you could do this on multiRetreive (query) as well, but that
 is NOT the case for Web API. If you need that level of complexity in your query, you must go with FetchXML.
+
+#### M:M properties
+You can define navigation properties for M:M relations with extended functionality, namely for add and remove relations between the two object types representated by the relation. 
+
+```typescript
+export class Opportunity extends Entity {
+	constructor() {
+		super('opportunities','opportunityid', true);
+	}
+	opportunitycompetitors_association:  Entities<Competitor>;
+
+	meta():Opportunity {
+		opportunitycompetitors_association = new Entities<Competitor>('opportunities','competitors','opportunitycompetitors_association',true, new Competitor().meta());
+		 return this;
+	}
+}
+```
+As you can see in above example, the opportunitycompetitors_association property has been defined as a Entities<Competitor> rater than a simple Competitor[] array.
+Entities<T> is also an array, but when you define it as shown in above example, the opportunitycompetitors_association property will have add(competitor) and remove(competitor)
+method to make it easy to add and remove relations between the two entities. 
+
+This functionality works because the meta() methods is defining the details on the relationship. The XrmContextServiceGenerator solution, that you can download from this page can
+generate these properties for you, so you do not need to have the hassel of finding out the correct schema names and directions on the relationships.
+
+Be aware that the add and remove method of an Entities<T> will only work when initialized through the get method of the xrmContextService. This is due to the fact that it requires
+an instance of the xrmService that is automatically set by the resolve object mechanism in the xrmContextService.
 
 
 ## Inject your EntityService into a component and use it
