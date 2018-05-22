@@ -324,7 +324,7 @@ try swith around from and to.
 fromEntityType and toEntityType must be the plural name of the entity. 
 Refname is the schema name of the reference. 
 
-### action(name: string, data: any, boundType: string = null, boundId: string = null)
+#### action(name: string, data: any, boundType: string = null, boundId: string = null)
 Enable you to perform WebAPI actions, for unbound actions, just parse the full name of the action and a json object with the data to be parsed
 with the action.
 
