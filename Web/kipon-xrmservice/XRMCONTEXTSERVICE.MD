@@ -208,6 +208,13 @@ This might have impact if you are working with calculated fields. Then they will
 For API later than 8.0, create and update will use the Prefer: return=representation to make sure that the client object is updated according to new values on the server,
 even on create and update methods.
 
+## actions
+You can perform unbounded and bounded actions directly from the xrmContextService
+
+```typescript
+xrmContextService.action(name: string, data: any, entity: Entity = null)
+```
+For unbounded actions, just parse the full name, and the data to be parsed. For bounded actions, also parse the entity instance to be bounded to the action.
 
 ## Advanced use-cases in your prototype object.
 As stated, the prototype you defined is telling the XrmContextService what to fetch on get and query, and what to update on update, and what to parse to

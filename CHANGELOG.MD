@@ -1,3 +1,6 @@
+### 1.3.0
+Support for action in xrmService and xrmContextService. For now, no support for action i transactions, but i will add that shortly.
+
 ### 1.2.11
 Include IsActivity in metadata.service EntityMeta and use the setting in the service-generator to set key name correct for entities of type activity when
 generating services.

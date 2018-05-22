@@ -677,6 +677,16 @@ export class XrmContextService {
         throw 'you must parse at least one instance in the instances array';
     }
 
+    action(name: string, data: any): Observable<any>;
+    action(name: string, data: any, entity: Entity): Observable<any>;
+    action(name: string, data: any, entity: Entity = null): Observable<any> {
+      if (entity != null) {
+        return this.xrmService.action(name, data, entity._pluralName, entity.id);
+      } else {
+        return this.xrmService.action(name, data);
+      }
+    }
+
     commit(transaction: XrmTransaction): Observable<null> {
         let oprs = transaction["oprs"] as XrmTransactionItem[];
 

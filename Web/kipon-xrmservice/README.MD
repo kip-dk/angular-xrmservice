@@ -324,6 +324,12 @@ try swith around from and to.
 fromEntityType and toEntityType must be the plural name of the entity. 
 Refname is the schema name of the reference. 
 
+### action(name: string, data: any, boundType: string = null, boundId: string = null)
+Enable you to perform WebAPI actions, for unbound actions, just parse the full name of the action and a json object with the data to be parsed
+with the action.
+
+For bound actions, also parse the plural name and id of the entity the action should be bound to.
+
 
 ### XrmStateService
 The XrmStateService allow you to monitor if the XrmService is currently active, and the number of request successed and number of errors.

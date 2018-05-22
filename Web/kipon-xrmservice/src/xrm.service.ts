@@ -495,6 +495,31 @@ export class XrmService {
       });
     }
 
+    action(name: string, data: any): Observable<any>;
+    action(name: string, data: any, boundType: string, boundId: string): Observable<any>;
+    action(name: string, data: any, boundType: string = null, boundId: string = null): Observable<any> {
+      let headers = new HttpHeaders({ 'Accept': 'application/json' });
+      if (this.token != null) {
+        headers = headers.append("Authorization", "Bearer " + this.token);
+      }
+      headers = headers.append("OData-MaxVersion", "4.0");
+      headers = headers.append("OData-Version", "4.0");
+      let options = {
+        headers: headers
+      }
+
+      let url = this.getContext().getClientUrl() + this.apiUrl + name;
+      if (boundType != null) {
+        let url = this.getContext().getClientUrl() + this.apiUrl + boundType + "(" + this.toGuid(boundId) + ")/" + name;
+      }
+      this.log(url);
+
+      return this.http.post(url, data, options).map(response => {
+        this.log(response);
+        return response;
+      });
+    }
+
     log(message:any): void {
       if (this.debug) {
         if (typeof message == 'string') {
