@@ -1,4 +1,4 @@
-### 1.3.0
+### 1.3.1
 Support for action in xrmService and xrmContextService. For now, no support for action i transactions, but i will add that shortly.
 
 ### 1.2.11

@@ -510,7 +510,7 @@ export class XrmService {
 
       let url = this.getContext().getClientUrl() + this.apiUrl + name;
       if (boundType != null) {
-        let url = this.getContext().getClientUrl() + this.apiUrl + boundType + "(" + this.toGuid(boundId) + ")/" + name;
+        url = this.getContext().getClientUrl() + this.apiUrl + boundType + "(" + this.toGuid(boundId) + ")/" + name;
       }
       this.log(url);
 
