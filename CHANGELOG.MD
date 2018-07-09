@@ -1,3 +1,8 @@
+### 2.0.0
+upgrade to angular 6
+
+If you need support for angular 5 and below, do not take version higher than 1.3.x. Version 2.0.0 has been upgrade to use newest version of rxjs patterns.
+
 ### 1.3.1
 Support for action in xrmService and xrmContextService. For now, no support for action i transactions, but i will add that shortly.
 
