@@ -25,7 +25,7 @@ $ npm install kipon-xrmservice --save
 	* Transactions (do multi operations in one request, and guaranteed, all success or nothing done).
 	* Access user permission on objects
 * A simple Dynamics 365 solution you can use to generate initial entity services, easy to extend with real functionality.
-* Support for ng serve proxy access to Dynamics 365, enable you to develop and test, without prior deployment to a Dynamics 365 instance. Currently this function require that you have an onpremise development environment.
+* Support for ng serve proxy access to Dynamics 365, enable you to develop and test, without prior deployment to a Dynamics 365 instance. 
 
 
 ### Documentation
@@ -45,18 +45,16 @@ XrmContextService (a Web API programming model based on typescript prototypes): 
 ## The project
 This project contains three sub projects, all related to the XrmService implementation:
 
-### Web > kipon-xrmservice
-The code base for the npm module. This is the code repository for the reusable Dynamics 365 Web API angular service implementaton.
+### Web > v2
+The root folder for the applications and libraries, based on angular 6.
 
-### Web > poc
-This is an angular 5 demo application, testing most use-cases supported by the xrm-service library. It is a single page application, and it demonstrates both
-use of XrmService directly, and the use of the XrmContextService. It is demonstrating usecases based on the standard account > contact relationship in Dynamics 365.
+v2/kipon-xrmservice: This is the POC test application.<br />
+v2/kipon-xrmservice/projects/kiipon-xrmservice: This is the angular library, published to npm.<br />
 
-If you need details on setting up such application on your Dynamics 365 installation, you can fork this folder and follow my guide on builing Dynamics 365 pages
-with angular. Take a look at that guide here:
-[go to the angular dynamics 365 web resource guide](https://github.com/kip-dk/angular-xrm-webresource)
 
 ### Web > service-generator
+(the service generator has not yet been migrated to angular 6, but it still works, and the services generated will also work with version 2.0 of the kipon-xrmservice library)
+
 This source contains an angular 5 application that can generate a basic entity service, based on the XrmContextService. Below you find link to download a version 8.0 or 8.2 (will also work with 9.0)
 managed solution, containing the generator. Import the solution to your sandbox environment, and open the configuration page in the solution to start generate a service:<br />
 
@@ -67,6 +65,59 @@ managed solution, containing the generator. Import the solution to your sandbox 
 If you have an onpremise installation of Dynamics 365 for development purpose, and you wish to do development using ng serve, the only thing you need to do is enable basic authentication
 on your local Dynamics 365 installation, and then setup the proxy.config.json for your project. Look into the poc project for an example. You will find a "proxy.config.json" where you
 can see how to setup the proxy, and a "run.cmd" file to see how to start your project.
+
+You will need to enable basic authentication on your Dynamics 365 web service instance in the IIS Manager.
+
+If you are developing against an online installation, you have to configure the service url.
+
+This is done like this:
+
+```typescript
+import { XrmServiceModule, XrmStateService, XrmService, XrmContextService, XrmInterceptor, XrmConfigService } from 'kipon-service'
+
+const xrmInitializerFn = (appConfig: XrmConfigService) => {
+  return () => {
+    return appConfig.loadAppConfig('/assets/xrmConfig.json');
+  };
+};
+
+@NgModule({
+  declarations: [
+    AppComponent,
+  ],
+  imports: [
+      KiponXrmServiceModule
+  ],
+  providers: [
+      {  provide: APP_INITIALIZER, useFactory: xrmInitializerFn, multi: true, deps: [XrmConfigService] },
+      { provide: HTTP_INTERCEPTORS, useClass: XrmInterceptor, multi: true }
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+
+and the place a file xrmConfig.json in the assets folder:
+
+```json
+{
+  "tenant": "",
+  "clientId": "",
+  "postLogoutRedirectUri": "",
+  "endpoints": { "orgUri": https://yourinstance.crm.dynamics.com },
+  "cacheLocation": "",
+  "version":  "v8.2"
+}
+```
+
+Finally open a command prompt, and start you Chrome browser with the following command. (This will disable CORS and share the login token from another tab with your app.)<br />
+
+```bsh
+"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --user-data-dir="C://Chrome dev session" --disable-web-security
+```
+
+Now login to your Dynamics 365 instance - and when done - open a new tab, and navigate to your angular app in the new tab (typically http://localhost:4200).
+
 
 ### Deployment
 At some point, you will need to deploy your code to a Dynamics 365 instance. You can use tools like XrmToolBox for that, or your you can take a look at the tool i provided in:
