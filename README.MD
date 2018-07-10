@@ -63,7 +63,7 @@ managed solution, containing the generator. Import the solution to your sandbox 
 
 ### Local development
 If you have an onpremise installation of Dynamics 365 for development purpose, and you wish to do development using ng serve, the only thing you need to do is enable basic authentication
-on your local Dynamics 365 installation, and then setup the proxy.config.json for your project. Look into the poc project for an example. You will find a "proxy.config.json" where you
+on your local Dynamics 365 installation, and then setup the proxy.config.json for your project. Look into the v2/kipon-xrmservice project for an example. You will find a "proxy.config.json" where you
 can see how to setup the proxy, and a "run.cmd" file to see how to start your project.
 
 You will need to enable basic authentication on your Dynamics 365 web service instance in the IIS Manager.
