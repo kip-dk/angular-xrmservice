@@ -1,7 +1,13 @@
 ### 2.0.0
+
 upgrade to angular 6
 
-If you need support for angular 5 and below, do not take version higher than 1.3.x. Version 2.0.0 has been upgrade to use newest version of rxjs patterns.
+If you need old version use kipon-xrmservice@1.3.1
+
+If you need support for angular 5 and below, do not take version higher than 1.3.x. Version 2.0.x has been upgrade to use newest version of rxjs patterns.
+In the git repository, a new sub folder (v2) has been created that hosts the angular 6 version of the library. The library has been created from
+scratch, using the newest version on angular cli, and all Http activities has been changed to use the newest rxjs. This change is NOT compliant with
+angular below version 6.
 
 ### 1.3.1
 Support for action in xrmService and xrmContextService. For now, no support for action i transactions, but i will add that shortly.

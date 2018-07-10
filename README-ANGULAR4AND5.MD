@@ -1,7 +1,5 @@
 # xrmservice
-This is the git repository for a simple Dynamics 365 Web API wrapper for angular 6.
-
-If you need it to run under version 4 or 5 you must use npm version 1.3.x.
+This is the git repository for a simple Dynamics 365 Web API wrapper for angular 5.
 
 ## Installation
 

@@ -1,0 +1,62 @@
+<!--The content below is only a placeholder and can be replaced.-->
+<div style="text-align:center; border: solid; border-width: 0 0 1px 0; border-color: lightgray">
+  <h1>
+    Welcome to the XrmService POC Service URL: {{ url }}
+  </h1>
+</div>
+
+<div style="position: absolute; top: 60px; left: 0; right: 50%; bottom: 20%; padding: 20px 20px 20px 20px">
+  <h2>Demo of XrmService</h2>
+
+  <div *ngIf="account != null">
+    <h3>We have an account from the get method</h3>
+    <div>{{ account.name }}</div>
+
+
+    <h5>Contacts {{ countContacts }}</h5>
+    <ul *ngIf="contacts != null && contacts.length > 0">
+      <li *ngFor="let con of contacts">
+        <a (click)="select(con)">{{ con.server_fullname }}&nbsp;</a>
+        <button (click)="delete(con)">Delete</button>
+      </li>
+    </ul>
+  </div>
+
+  <div *ngIf="lastContactResult != null">
+    <button (click)="prev()" [disabled]="lastContactResult.prev == null">Prev</button>
+    {{ lastContactResult.pageIndex + 1 }}
+    <button (click)="next()" [disabled]="lastContactResult.next == null">Next</button>
+  </div>
+  <br />
+  <br />
+
+  <div *ngIf="contact != null">
+    <input [(ngModel)]="contact.fullname" /><br />
+    <button (click)="update()">Update {{ contact.server_fullname }}</button>
+    <br />
+    <br />
+    <input [(ngModel)]="contact.address1_line1" />
+    <button (click)="updateAddress()">Update address</button>
+  </div>
+
+  <br />
+  <br />
+
+  <div>
+    Create new contact<br />
+    <input [(ngModel)]="newContact" /><br />
+    <button (click)="createNew()">Create new</button>
+  </div>
+
+  <br />
+  <br />
+  Add parameter [testparam] to see result here: {{ testparam }}
+</div>
+
+<div style="position: absolute; top:80%; left: 0; right: 50%; bottom: 0; border: solid; border-width: 1px 1px 0 0; border-color: gray;">
+  <metadata></metadata>
+</div>
+
+<div style="position: absolute; top: 60px; left: 50%; right: 0; bottom: 0; padding: 20px 20px 20px 20px">
+  <ctx></ctx>
+</div>

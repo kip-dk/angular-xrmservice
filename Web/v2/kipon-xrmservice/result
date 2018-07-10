@@ -1,0 +1,30 @@
+Building Angular Package
+Building entry point 'kipon-xrmservice'
+Rendering Stylesheets
+Rendering Templates
+Compiling TypeScript sources through ngc
+
+BUILD ERROR
+projects/kipon-xrmservice/src/lib/xrmcontext.service.ts(575,33): error TS2365: Operator '!=' cannot be applied to types 'T[keyof T]' and 'string'.
+projects/kipon-xrmservice/src/lib/xrmcontext.service.ts(1028,9): error TS2322: Type 'Observable<{} | Entity>' is not assignable to type 'Observable<Entity>'.
+  Type '{} | Entity' is not assignable to type 'Entity'.
+    Type '{}' is not assignable to type 'Entity'.
+      Property '_pluralName' is missing in type '{}'.
+
+Error: projects/kipon-xrmservice/src/lib/xrmcontext.service.ts(575,33): error TS2365: Operator '!=' cannot be applied to types 'T[keyof T]' and 'string'.
+projects/kipon-xrmservice/src/lib/xrmcontext.service.ts(1028,9): error TS2322: Type 'Observable<{} | Entity>' is not assignable to type 'Observable<Entity>'.
+  Type '{} | Entity' is not assignable to type 'Entity'.
+    Type '{}' is not assignable to type 'Entity'.
+      Property '_pluralName' is missing in type '{}'.
+
+    at Object.<anonymous> (F:\Projects\OpenSource\Kipon.Angular.XrmService\Web\v2\kipon-xrmservice\node_modules\ng-packagr\lib\ngc\compile-source-files.js:53:68)
+    at Generator.next (<anonymous>)
+    at F:\Projects\OpenSource\Kipon.Angular.XrmService\Web\v2\kipon-xrmservice\node_modules\ng-packagr\lib\ngc\compile-source-files.js:7:71
+    at new Promise (<anonymous>)
+    at __awaiter (F:\Projects\OpenSource\Kipon.Angular.XrmService\Web\v2\kipon-xrmservice\node_modules\ng-packagr\lib\ngc\compile-source-files.js:3:12)
+    at Object.compileSourceFiles (F:\Projects\OpenSource\Kipon.Angular.XrmService\Web\v2\kipon-xrmservice\node_modules\ng-packagr\lib\ngc\compile-source-files.js:19:12)
+    at Object.<anonymous> (F:\Projects\OpenSource\Kipon.Angular.XrmService\Web\v2\kipon-xrmservice\node_modules\ng-packagr\lib\ng-v5\entry-point\ts\compile-ngc.transform.js:26:32)
+    at Generator.next (<anonymous>)
+    at F:\Projects\OpenSource\Kipon.Angular.XrmService\Web\v2\kipon-xrmservice\node_modules\ng-packagr\lib\ng-v5\entry-point\ts\compile-ngc.transform.js:7:71
+    at new Promise (<anonymous>)
+

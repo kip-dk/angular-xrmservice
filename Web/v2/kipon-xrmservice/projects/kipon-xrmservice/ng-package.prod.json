@@ -1,0 +1,7 @@
+{
+  "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
+  "dest": "../../dist/kipon-xrmservice",
+  "lib": {
+    "entryFile": "src/public_api.ts"
+  }
+}
