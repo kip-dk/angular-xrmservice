@@ -933,7 +933,9 @@ export class XrmContextService {
             let r = prototype[prop] as EntityReference;
             if (!EntityReference.same(prevValue, newValue)) {
               if (newValue != null && newValue["id"] != null && newValue["id"] != '') {
-                upd[prototype[prop]['associatednavigationpropertyname']()] = '/' + prototype[prop]['pluralName'] + '(' + newValue['id'] + ')';
+                let x = newValue["id"] as string;
+                x = x.replace('{', '').replace('}', '');
+                upd[prototype[prop]['associatednavigationpropertyname']()] = '/' + prototype[prop]['pluralName'] + '(' + x + ')';
               } else {
                 upd[prototype[prop]['associatednavigationpropertyname']()] = null;
               }
@@ -1095,7 +1097,7 @@ export class XrmContextService {
                     if (prototype[prop] instanceof EntityReference) {
                         let ref = instance[prop] as EntityReference;
                         if (ref != null && ref.id != null) {
-                            newr[prototype[prop]['associatednavigationpropertyname']()] = '/' + prototype[prop]['pluralName'] + '(' + ref.id + ')';
+                          newr[prototype[prop]['associatednavigationpropertyname']()] = '/' + prototype[prop]['pluralName'] + '(' + ref.id.replace('{', '').replace('}','') + ')';
                         }
                         continue;
                     }

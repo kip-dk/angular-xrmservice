@@ -1,3 +1,9 @@
+### 2.0.2
+
+Fixed removing {} on create / update record with entity reference. They will be removed automatically if they are there.
+
+npm documentation updated.
+
 ### 2.0.0
 
 upgrade to angular 6

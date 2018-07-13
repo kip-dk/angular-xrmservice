@@ -1,6 +1,6 @@
 {
   "name": "kipon-xrmservice",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "keywords": [ "angular", "dynamics 365", "web api", "webresource" ],
   "description": "Dynamics 365 web api wrapper for angular, making life easy when building angular based web resources",
   "homepage": "https://github.com/kip-dk/angular-xrmservice",
