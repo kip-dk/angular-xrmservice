@@ -1,7 +1,7 @@
 ### 2.0.4
 Fixed removing {} when entity refr. fields was added to condition, direclty with _FIELDNAME_value syntax.
 
-Fixed condition on entity key. If an tity is fetch with filter, directly on the key column, it will be parsed correctly.
+Fixed condition on entity key. If an entity is fetch with filter, directly on the key column, it will be parsed correctly.
 (it is always better to use get(..) in this situation, but now at least it works if you for some reason prefer to use query to fetch a unique record)
 
 ### 2.0.2
