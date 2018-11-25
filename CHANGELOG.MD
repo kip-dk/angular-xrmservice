@@ -1,3 +1,9 @@
+### 2.0.4
+Fixed removing {} when entity refr. fields was added to condition, direclty with _FIELDNAME_value syntax.
+
+Fixed condition on entity key. If an tity is fetch with filter, directly on the key column, it will be parsed correctly.
+(it is always better to use get(..) in this situation, but now at least it works if you for some reason prefer to use query to fetch a unique record)
+
 ### 2.0.2
 
 Fixed removing {} on create / update record with entity reference. They will be removed automatically if they are there.

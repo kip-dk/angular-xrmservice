@@ -13,27 +13,27 @@ var platform_browser_1 = require("@angular/platform-browser");
 var core_1 = require("@angular/core");
 var core_2 = require("@angular/core");
 var platform_browser_dynamic_1 = require("@angular/platform-browser-dynamic");
-var AppComponent = (function () {
+var AppComponent = /** @class */ (function () {
     function AppComponent() {
     }
+    AppComponent = __decorate([
+        core_2.Component({
+            selector: 'app',
+            template: "<sample-component></sample-component>"
+        })
+    ], AppComponent);
     return AppComponent;
 }());
-AppComponent = __decorate([
-    core_2.Component({
-        selector: 'app',
-        template: "<sample-component></sample-component>"
-    })
-], AppComponent);
-var AppModule = (function () {
+var AppModule = /** @class */ (function () {
     function AppModule() {
     }
+    AppModule = __decorate([
+        core_1.NgModule({
+            bootstrap: [AppComponent],
+            declarations: [AppComponent],
+            imports: [platform_browser_1.BrowserModule]
+        })
+    ], AppModule);
     return AppModule;
 }());
-AppModule = __decorate([
-    core_1.NgModule({
-        bootstrap: [AppComponent],
-        declarations: [AppComponent],
-        imports: [platform_browser_1.BrowserModule]
-    })
-], AppModule);
 platform_browser_dynamic_1.platformBrowserDynamic().bootstrapModule(AppModule);

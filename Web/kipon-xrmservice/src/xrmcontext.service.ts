@@ -572,7 +572,7 @@ export class XrmContextService {
                             if (this.ignoreColumn(prop)) continue;
 
                             let value = instance[prop];
-                            if (value !== 'undefined' && value !== null) {
+                            if (value !== null) {
                                 response[prop] = value;
                             }
                         }

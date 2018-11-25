@@ -234,7 +234,11 @@ export class Filter {
         }
 
         if (_f.startsWith('_') && _f.endsWith('_value') && _v != null) {
-            _v = _v.replace('{', '').replace('}', '');
+          _v = this.value.replace('{', '').replace('}', '');
+        }
+
+        if (_f == prototype._keyName) {
+          _v = this.value.replace('{', '').replace('}', '');
         }
 
        switch (this.operator) {
