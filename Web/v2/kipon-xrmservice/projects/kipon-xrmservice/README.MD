@@ -1,5 +1,8 @@
+# kipon-xrmservice 2.1.x
+With version 2.1.x of kipon-xrmservice the library now target angular 7.
+
 # kipon-xrmservice version 2
-With version 2.x of kipon-xrmservice the library now target angular 6. 
+With version 2.0.x of kipon-xrmservice the library now target angular 6. 
 
 If you need it to work with angular 4 or 5, please use version 1.3.1
 

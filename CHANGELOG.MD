@@ -1,3 +1,6 @@
+### 2.1.0
+Upgraded to angullar 7.
+
 ### 2.0.4
 Fixed removing {} when entity refr. fields was added to condition, direclty with _FIELDNAME_value syntax.
 
