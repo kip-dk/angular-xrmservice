@@ -1096,6 +1096,11 @@ export class XrmContextService {
         return { field: field, value: this.getContext().$devClientUrl() + t.pluralName + "(" + value.id + ")", propertyAs: '@odata.id', isdecimal: false };
       }
     }
+
+    if (value instanceof Date) {
+      return { field: field, value: value.toISOString(), propertyAs: 'value' };
+    }
+
     return { field: field, value: value, propertyAs: 'value' };
   }
 

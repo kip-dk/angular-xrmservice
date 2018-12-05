@@ -1,3 +1,6 @@
+### 2.1.2
+Handle Date in put
+
 ### 2.1.1
 Strip ref fields from {} when parsed as condition.
 
