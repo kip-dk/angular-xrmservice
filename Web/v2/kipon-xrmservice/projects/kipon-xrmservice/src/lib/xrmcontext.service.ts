@@ -231,9 +231,9 @@ export class Filter {
       _f = "_" + this.field + "_value";
       if (this.value != null) {
         if (typeof this.value == 'string') {
-          _v = this.value;
+          _v = this.value.replace('{', '').replace('}', '');
         } else {
-          _v = this.value.id;
+          _v = this.value.id.replace('{', '').replace('}', '');
         }
       }
       isEref = true;

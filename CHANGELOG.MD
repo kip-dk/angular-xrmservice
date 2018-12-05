@@ -1,3 +1,6 @@
+### 2.1.1
+Strip ref fields from {} when parsed as condition.
+
 ### 2.1.0
 Upgraded to angullar 7.
 

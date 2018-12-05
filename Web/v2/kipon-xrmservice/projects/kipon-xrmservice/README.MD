@@ -1,3 +1,6 @@
+# 2.1.1
+Strip ref fields from {} when parsed as condition.
+
 # kipon-xrmservice 2.1.x
 With version 2.1.x of kipon-xrmservice the library now target angular 7.
 
