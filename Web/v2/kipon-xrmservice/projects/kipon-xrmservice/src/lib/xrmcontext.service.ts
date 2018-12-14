@@ -466,6 +466,10 @@ export class XrmContextService {
     return this.getContext().getClientUrl() + this.xrmService.apiUrl;
   }
 
+  getCurrentUserId(): Observable<string> {
+    return this.xrmService.getCurrentUserId();
+  }
+
   get<T extends Entity>(prototype: T, id: string): Observable<T> {
     let me = this;
     let columnDef = this.columnBuilder(prototype);

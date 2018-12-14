@@ -5,7 +5,19 @@
   </h1>
 </div>
 
-<div style="position: absolute; top: 60px; left: 0; right: 50%; bottom: 20%; padding: 20px 20px 20px 20px">
+<div style="position: absolute; top:60px; height: 60px; left: 0; right: 0; padding: 20px 20px 20px 20px" *ngIf="user != null">
+  <ng-container *ngIf="user.roles != null">
+    Current user toles: 
+    <span *ngFor="let role of user.roles">{{ role.name }}&nbsp;</span>
+  </ng-container>
+  <br />
+  <ng-container *ngIf="user.teams != null">
+    Current user teams:
+    <span *ngFor="let team of user.teams">{{ team.name }}&nbsp;</span>
+  </ng-container>
+</div>
+
+<div style="position: absolute; top: 120px; left: 0; right: 50%; bottom: 20%; padding: 20px 20px 20px 20px">
   <h2>Demo of XrmService</h2>
 
   <div *ngIf="account != null">

@@ -89,7 +89,7 @@ export class XrmService {
         if (typeof window['GetGlobalContext'] != "undefined") {
             let x = window['GetGlobalContext']();
             if (x.getVersion == undefined) {
-                x.getVersion = (): string => "8.0.0.0"
+                x.getVersion = (): string => "8.2.0.0"
             }
             x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
             this.contextFallback = x;
@@ -101,7 +101,7 @@ export class XrmService {
             var x = window["Xrm"]["Page"]["context"] as XrmContext;
             if (x != null) {
                 if (x.getVersion == undefined) {
-                    x.getVersion = (): string => "8.0.0.0"
+                    x.getVersion = (): string => "8.2.0.0"
                 }
                 x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
                 this.contextFallback = x;
@@ -114,7 +114,7 @@ export class XrmService {
             var x = window.parent["Xrm"]["Page"]["context"] as XrmContext;
             if (x != null) {
                 if (x.getVersion == undefined) {
-                    x.getVersion = (): string => "8.0.0.0"
+                    x.getVersion = (): string => "8.2.0.0"
                 }
                 x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
                 this.contextFallback = x;
@@ -124,7 +124,7 @@ export class XrmService {
         }
 
         let baseUrl = "http://localhost:4200";
-        let version = 'v8.0';
+        let version = 'v8.2';
 
         try {
             var configService = this.injector.get(XrmConfigService) as XrmConfigService;
@@ -185,7 +185,19 @@ export class XrmService {
         });
 
         return this.contextFallback;
+  }
+
+  getCurrentUserId(): Observable<string> {
+    var ctx = this.getContext();
+    if (ctx.getUserId() == null || ctx.getUserId() == '') {
+
+      let baseUrl = "http://localhost:4200";
+      let version = 'v8.2';
+      return this.http.get(baseUrl + "/api/data/" + version + "/WhoAmI()").pipe(map(r => { return r["UserId"] } ));
+    } else {
+      return new Observable<string>(obs => obs.next(ctx.getUserId()));
     }
+  }
 
     getCurrenKey(): Observable<XrmEntityKey> {
         let params = this.getContext().getQueryStringParameters();
@@ -341,7 +353,7 @@ export class XrmService {
         headers = headers.append("Content-Type", "application/json; charset=utf-8");
         headers = headers.append("Prefer", "odata.include-annotations=*");
 
-        if (!this.getContext().getVersion().startsWith("8.0")) {
+        if (!this.getContext().getVersion().startsWith("8.2")) {
             headers = headers.append("Prefer", "return=representation");
         }
 
@@ -374,7 +386,7 @@ export class XrmService {
         headers = headers.append("Content-Type", "application/json; charset=utf-8");
         headers = headers.append("Prefer", "odata.include-annotations=*");
 
-        if (fields != null && !this.getContext().getVersion().startsWith("8.0")) {
+        if (fields != null && !this.getContext().getVersion().startsWith("8.2")) {
             headers = headers.append("Prefer", "return=representation");
         } 
 
@@ -387,7 +399,7 @@ export class XrmService {
             _f = '?$select=' + fields;
         }
         return this.http.patch<T>(this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")" + _f, entity, options).pipe(map(response => {
-            if (this.getContext().getVersion().startsWith("8.0")) {
+            if (this.getContext().getVersion().startsWith("8.2")) {
                 return entity;
             }
             return response;
@@ -532,7 +544,7 @@ export class XrmService {
     }
 
     private initializeVersion(_v: string): void {
-      if (_v == null) { _v = '8.0.0.0'; }
+      if (_v == null) { _v = '8.2.0.0'; }
       let v = _v.split('.');
       this.setVersion(v[0] + "." + v[1]);
       this.apiVersion = 'v' + v[0] + '.' + v[1];

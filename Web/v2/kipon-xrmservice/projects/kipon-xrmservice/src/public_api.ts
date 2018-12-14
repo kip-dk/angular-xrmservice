@@ -10,3 +10,6 @@ export * from './lib/xrmcontext.service';
 export * from './lib/xrmstate.service';
 export * from './lib/metadata.service';
 export * from './lib/kipon-xrmservice.module';
+
+export * from './lib/xrmsecurity.service';
+export * from './lib/kipon-xrmsecurity.module';

@@ -1,16 +1,8 @@
-# 2.1.1
-Strip ref fields from {} when parsed as condition.
-
-# kipon-xrmservice 2.1.x
-With version 2.1.x of kipon-xrmservice the library now target angular 7.
-
-# kipon-xrmservice version 2
-With version 2.0.x of kipon-xrmservice the library now target angular 6. 
-
-If you need it to work with angular 4 or 5, please use version 1.3.1
-
 ## What is kipon-xrmservice
-kipon-xrmservice is an angular 6 library that makes it easier to work with Microsoft Dynamics 365 web api. 
+kipon-xrmservice is an angular 7 library that makes it easier to work with Microsoft Dynamics 365 web api. 
+
+### Current version 2.1.3
+Changelog has been moved to the buttom of this page.
 
 ## Installation
 To install this library, run:
@@ -21,6 +13,8 @@ $ npm install kipon-xrmservice --save
 
 and then include the KiponXrmServiceModule and XrmService in your `AppModule`:
 
+(KiponXrmSecurityModule is optional. Only include it if you need it.)
+
 ```typescript
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
@@ -28,7 +22,7 @@ import { NgModule, APP_INITIALIZER } from '@angular/core';
 
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
-import { KiponXrmserviceModule, XrmInterceptor } from 'kipon-xrmservice';
+import { KiponXrmserviceModule, XrmInterceptor, KiponXrmSecurityModule } from 'kipon-xrmservice';
 
 import { AppComponent } from './app.component';
 
@@ -39,7 +33,8 @@ import { AppComponent } from './app.component';
   imports: [
     BrowserModule,
     FormsModule,
-    KiponXrmserviceModule
+    KiponXrmserviceModule,
+    KiponXrmSecurityModule
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: XrmInterceptor, multi: true }
@@ -473,6 +468,37 @@ xrmService.commit(trans).subscribe(r => {
 });
 
 ```
+
+### changelog
+# 2.1.3
+xrmService.getCurrentUserId() : Observable<string> method to get the current user observable.
+If you are running your application inside Dynamics 365 as as Web Resource, this method will always reutrn
+the current user id instantly (you still need to sbuscribe), because it is available synchronized from Dynamics api.
+
+If you on the other hand is running you app as a SPA outside CRM, the current user will not be available until it has
+been fetch by the api use whoami(). By using xrmService.getCurrentUserId().subscribe(r => r is not the userid), you can 
+await this operation by subscribing.
+
+KiponXrmSecurityModule and XrmSecurityService has been added as an optional module that allow you to work with user data,
+including role membership and team membership.
+
+The module is still kind-of experimental to see if it make sence to add real service functionality beyond simple http(s)
+map infrastructure in this library.
+
+The service has been added as a separate module that need to be imported separatly.
+
+# 2.1.1
+Strip ref fields from {} when parsed as condition.
+
+# kipon-xrmservice 2.1.x
+With version 2.1.x of kipon-xrmservice the library now target angular 7.
+
+# kipon-xrmservice version 2
+With version 2.0.x of kipon-xrmservice the library now target angular 6. 
+
+If you need it to work with angular 4 or 5, please use version 1.3.1
+
+
 
 ## Like this?
 If you like this library, please go to the git repository and give it a star. That will confirm for other potential developers that this could be a good track.
