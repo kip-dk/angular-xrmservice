@@ -84,9 +84,20 @@
       Edit current contact<br />
       {{ currentContact.fullname }}<br />
       <input [(ngModel)]="editCurrentName"/><button (click)="update()">Update</button>
+    </div>
 
+    <div *ngIf="currentContact != null">
+      <br />
+      <input type="text" [(ngModel)]="nextnote" /><button (click)="addNote()">Create note</button>
+    </div>
+
+    <div *ngIf="notes != null">
+      <div>Notes:</div>
+      <div *ngFor="let note of notes">{{ note.subject }}<button (click)="deleteNote(note)">Delete</button></div>
     </div>
   </div>
+
+
 
   <div>
     <br /><br />

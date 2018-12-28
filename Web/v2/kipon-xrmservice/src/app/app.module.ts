@@ -4,7 +4,7 @@ import { NgModule, APP_INITIALIZER } from '@angular/core';
 
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
-import { KiponXrmserviceModule, XrmInterceptor, KiponXrmSecurityModule } from 'kipon-xrmservice';
+import { KiponXrmserviceModule, XrmInterceptor, KiponXrmSecurityModule, KiponXrmAnnotationModule } from 'kipon-xrmservice';
 
 import { AppComponent } from './app.component';
 import { CtxComponent } from './ctx.component';
@@ -22,7 +22,8 @@ import { MetadataComponent } from './metadata.component';
     BrowserModule,
     FormsModule,
     KiponXrmserviceModule,
-    KiponXrmSecurityModule
+    KiponXrmSecurityModule,
+    KiponXrmAnnotationModule
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: XrmInterceptor, multi: true }

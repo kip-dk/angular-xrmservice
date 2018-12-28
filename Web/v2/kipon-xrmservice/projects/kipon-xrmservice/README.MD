@@ -1,7 +1,7 @@
 ## What is kipon-xrmservice
 kipon-xrmservice is an angular 7 library that makes it easier to work with Microsoft Dynamics 365 web api. 
 
-### Current version 2.1.3
+### Current version 2.1.4
 Changelog has been moved to the buttom of this page.
 
 ## Installation
@@ -470,6 +470,19 @@ xrmService.commit(trans).subscribe(r => {
 ```
 
 ### changelog
+# 2.1.4
+Entities now have a property _logicalName that is populated from query and get from the prototype definition. The logical name
+is assumed to be the keyname, where "id" is removed at the end. This might not always be the case. In such case, the correct name can be
+parsed to the constructor of the entity prototype definition. The code does render correct _logical name for standard activity entities
+such as email, appointment, letter and task.
+
+This value can come in handy when you need to query related entities such as notes, where you need the objecttypecode.
+
+A new module KiponXrmAnnotationModule has been added, including a very basic service for handling annotations. For now it only
+handles simple annotations, but the vision is to provide a full reusable service for all annotation related task, such as
+attach files and more. The _logicalName property on Entity has been added to support a nice and simple api on this service.
+
+
 # 2.1.3
 xrmService.getCurrentUserId() : Observable<string> method to get the current user observable.
 If you are running your application inside Dynamics 365 as as Web Resource, this method will always reutrn

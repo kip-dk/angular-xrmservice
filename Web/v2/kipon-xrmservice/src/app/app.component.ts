@@ -44,7 +44,6 @@ export class AppComponent {
 
   user: SystemUser;
 
-
   constructor(private xrmService: XrmService, private contextService: XrmContextService, private securityService: XrmSecurityService) {
     this.xrmService.debug = false;
     this.ctx = xrmService.getContext();
@@ -71,7 +70,6 @@ export class AppComponent {
     this.securityService.getCurrentUser().subscribe(r => {
       this.user = r;
     });
-
   }
 
   createNew() {

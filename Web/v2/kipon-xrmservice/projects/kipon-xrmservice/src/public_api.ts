@@ -13,3 +13,6 @@ export * from './lib/kipon-xrmservice.module';
 
 export * from './lib/xrmsecurity.service';
 export * from './lib/kipon-xrmsecurity.module';
+
+export * from './lib/xrmannotation.service';
+export * from './lib/kipon-xrmannotation.module';

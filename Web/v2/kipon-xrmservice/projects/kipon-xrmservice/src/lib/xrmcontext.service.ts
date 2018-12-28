@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest, HttpResponse, HttpErrorResponse, HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
-import { map, catchError } from 'rxjs/operators'
+import { map, catchError, startWith } from 'rxjs/operators'
 
 import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult, Expand } from './xrm.service';
 
@@ -10,13 +10,31 @@ export class Entity {
   _pluralName: string;
   _keyName: string;
   _updateable: boolean = false;
+  _logicalName: string;
   id: string;
   constructor(pluralName: string, keyName: string);
   constructor(pluralName: string, keyName: string, updateable: boolean);
-  constructor(pluralName: string, keyName: string, updateable: boolean = false) {
+  constructor(pluralName: string, keyName: string, updateable: boolean, logicalname: string);
+  constructor(pluralName: string, keyName: string, updateable: boolean = false, logicalname: string = null) {
     this._pluralName = pluralName;
     this._keyName = keyName;
     this._updateable = updateable;
+
+    if (logicalname != null && logicalname != '') {
+      this._logicalName = logicalname;
+    } else {
+      switch (this._pluralName.toLowerCase()) {
+        case "emails": this._logicalName = "email"; break;
+        case "appointments": this._logicalName = "appointment"; break;
+        case "letters": this._logicalName = "letter"; break;
+        case "phonecalls": this._logicalName = "phonecall"; break;
+        case "tasks": this._logicalName = "task"; break;
+        default: {
+          this._logicalName = this._keyName.substr(0, (this._keyName.length - 2)).toLowerCase();
+          break;
+        }
+      }
+    }
   }
 }
 
@@ -578,6 +596,7 @@ export class XrmContextService {
       if (response != null) {
         if (response.hasOwnProperty('$keyonly')) {
           response._pluralName = prototype._pluralName;
+          response._logicalName = prototype._logicalName;
           response._keyName = prototype._keyName;
           response._updateable = false;
 
@@ -948,8 +967,23 @@ export class XrmContextService {
 
         if ((prevValue === 'undefined' || prevValue === null) && (newValue === 'undefined' || newValue === null)) continue;
 
+        if (instance[prop] instanceof EntityReference) {
+          if (instance[prop].associatednavigationproperty != null && instance[prop].associatednavigationproperty != '') {
+            if (!EntityReference.same(prevValue, newValue)) {
+              if (newValue != null && newValue["id"] != null && newValue["id"] != '') {
+                let x = newValue["id"] as string;
+                x = x.replace('{', '').replace('}', '');
+                upd[instance[prop]['associatednavigationpropertyname']()] = '/' + instance[prop]['pluralName'] + '(' + x + ')';
+              } else {
+                upd[instance[prop]['associatednavigationpropertyname']()] = null;
+              }
+              countFields++;
+            }
+            continue;
+          }
+        }
+
         if (prototype[prop] instanceof EntityReference) {
-          let r = prototype[prop] as EntityReference;
           if (!EntityReference.same(prevValue, newValue)) {
             if (newValue != null && newValue["id"] != null && newValue["id"] != '') {
               let x = newValue["id"] as string;
@@ -1118,6 +1152,16 @@ export class XrmContextService {
         let value = instance[prop];
         if (value !== 'undefined' && value !== null) {
 
+          if (instance[prop] instanceof EntityReference) {
+            if (instance[prop].associatednavigationproperty != null && instance[prop].associatednavigationproperty != '') {
+              let ref = instance[prop] as EntityReference;
+              if (ref != null && ref.id != null) {
+                newr[instance[prop]['associatednavigationpropertyname']()] = '/' + instance[prop]['pluralName'] + '(' + ref.id.replace('{', '').replace('}', '') + ')';
+              }
+              continue;
+            }
+          }
+
           if (prototype[prop] instanceof EntityReference) {
             let ref = instance[prop] as EntityReference;
             if (ref != null && ref.id != null) {
@@ -1281,6 +1325,7 @@ export class XrmContextService {
       this.context[key] = result;
       result["id"] = instance[prototype._keyName];
       result["_pluralName"] = prototype._pluralName;
+      result["_logicalName"] = prototype._logicalName;
       result["_keyName"] = prototype._keyName;
       delete result[prototype._keyName];
     }
@@ -1377,6 +1422,7 @@ export class XrmContextService {
               result[ep.name] = this.resolve(ep.entity, _v, false);
               result[ep.name]['_keyName'] = ep.entity._keyName;
               result[ep.name]['_pluralName'] = ep.entity._pluralName;
+              result[ep.name]['_logicalName'] = ep.entity._logicalName;
             }
           }
         }
@@ -1503,7 +1549,7 @@ export class XrmContextService {
   }
 
   private ignoreColumn(prop: string): boolean {
-    if (prop == "_pluralName" || prop == "_keyName" || prop == "id" || prop == '_updateable' || prop == '$expand' || prop == 'access') {
+    if (prop == "_pluralName" || prop == "_logicalName" || prop == "_keyName" || prop == "id" || prop == '_updateable' || prop == '$expand' || prop == 'access') {
       return true;
     }
     return false;
