@@ -1,5 +1,5 @@
 # xrmservice
-This is the git repository for a simple Dynamics 365 Web API wrapper for angular 6.
+This is the git repository for a simple Dynamics 365 Web API wrapper for angular 7.
 
 If you need it to run under version 4 or 5 you must use npm version 1.3.x.
 
@@ -127,4 +127,4 @@ The service-generator folder in this project has an example on how to setup depl
 
 ## License
 
-MIT © [Kipon ApS, 2018](mailto:kip@kipon.dk)
+MIT Â© [Kipon ApS, 2018](mailto:kip@kipon.dk)
