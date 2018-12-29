@@ -1,3 +1,16 @@
+### 2.1.4 
+Added KiponXrmAnnotationModule, a simple module with XrmAnnotationService to perform
+task related to notes.
+
+To support this module, Entity class has been extended with _logicalName. In most cases
+this variable is set correctly by the implementation from the keyname. In rare cases this
+will end up being the wrong name. In such case, the constructor of the entity used to
+create the prototype can include the correct logical name.
+
+### 2.1.3
+Added KiponXrmSecurityModule, a simple module with XrmSecurityService to perform simple
+security tasks. This module is optional.
+
 ### 2.1.2
 Handle Date in put
 

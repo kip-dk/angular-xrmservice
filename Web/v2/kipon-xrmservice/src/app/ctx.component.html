@@ -93,7 +93,11 @@
 
     <div *ngIf="notes != null">
       <div>Notes:</div>
-      <div *ngFor="let note of notes">{{ note.subject }}<button (click)="deleteNote(note)">Delete</button></div>
+      <div *ngFor="let note of notes">
+        <input type="text" [(ngModel)]="note.subject" />
+        <button (click)="updateNote(note)">Update</button>
+        <button (click)="deleteNote(note)">Delete</button>
+      </div>
     </div>
   </div>
 

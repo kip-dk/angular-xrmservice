@@ -230,6 +230,14 @@ export class CtxComponent {
     });
   }
 
+  updateNote(note: Annotation): void {
+    this.annoService.update(note).subscribe(r => {
+      this.click(this.currentContact);
+    });
+  }
+
+
+
   create(): void {
     let me = this;
     if (this.newContact != null && this.newContact != '') {
