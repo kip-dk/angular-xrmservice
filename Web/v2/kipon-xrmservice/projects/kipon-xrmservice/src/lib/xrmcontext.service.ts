@@ -641,13 +641,20 @@ export class XrmContextService {
       upd = {};
     }
 
+    this.xrmService.log(upd);
+
     let fields = this.columnBuilder(prototype).columns;
 
     return this.xrmService.update<T>(prototype._pluralName, upd as T, instance.id, fields).pipe(map(response => {
-      if (this.getContext().getVersion().startsWith("8.0")) {
+      var wasnull = response[prototype._keyName] == null || response[prototype._keyName] == '';
+
+      if (wasnull || this.getContext().getVersion().startsWith("8.0") || this.getContext().getVersion().startsWith("8.1")) {
+        this.xrmService.log('version 8.0 update');
         this.updateCM(prototype, instance);
         return instance;
       }
+
+      this.xrmService.log('version 8.2 or higher update');
       return me.resolve(prototype, response, true);
     }));
   }
@@ -963,7 +970,7 @@ export class XrmContextService {
         if ((prevValue === 'undefined' || prevValue === null) && (newValue === 'undefined' || newValue === null)) continue;
 
         if (instance[prop] instanceof EntityReference) {
-          if (instance[prop].associatednavigationproperty != null && instance[prop].associatednavigationproperty != '') {
+          if (instance[prop].associatednavigationproperty != null && instance[prop].associatednavigationproperty != '' && instance[prop]['pluralName'] != null && instance[prop]['pluralName'] != '') {
             if (!EntityReference.same(prevValue, newValue)) {
               if (newValue != null && newValue["id"] != null && newValue["id"] != '') {
                 let x = newValue["id"] as string;
@@ -1018,7 +1025,21 @@ export class XrmContextService {
           continue;
         }
 
+        if (prevValue === true && newValue === true) {
+          continue;
+        }
+
+        if (prevValue === false && newValue === false) {
+          continue;
+        }
+
         if (prevValue != newValue) {
+          this.xrmService.log('pre-value-update:' + prop);
+          this.xrmService.log(prevValue);
+
+          this.xrmService.log('new-value-update:' + prop);
+          this.xrmService.log(newValue);
+
           upd[prop.toString()] = instance[prop];
           countFields++;
         }
@@ -1148,7 +1169,7 @@ export class XrmContextService {
         if (value !== 'undefined' && value !== null) {
 
           if (instance[prop] instanceof EntityReference) {
-            if (instance[prop].associatednavigationproperty != null && instance[prop].associatednavigationproperty != '') {
+            if (instance[prop].associatednavigationproperty != null && instance[prop].associatednavigationproperty != '' && instance[prop]['pluralName'] != null && instance[prop]['pluralName'] != '') {
               let ref = instance[prop] as EntityReference;
               if (ref != null && ref.id != null) {
                 newr[instance[prop]['associatednavigationpropertyname']()] = '/' + instance[prop]['pluralName'] + '(' + ref.id.replace('{', '').replace('}', '') + ')';
@@ -1315,12 +1336,15 @@ export class XrmContextService {
     instance["_pluralName"] = prototype._pluralName;
     instance["_logicalName"] = prototype._logicalName;
     instance["_keyName"] = prototype._keyName;
-
     this.context[key] = instance;
   }
 
   private resolve<T extends Entity>(prototype: T, instance: any, updateable: boolean): T {
     let me = this;
+
+    this.xrmService.log("Result from update: ");
+    this.xrmService.log(instance);
+
     let key = prototype._pluralName + ':' + instance[prototype._keyName];
     let result = instance;
 
@@ -1392,10 +1416,6 @@ export class XrmContextService {
       }
     }
 
-    if (updateable) {
-      this.updateCM(prototype, result);
-    }
-
     let eps = this.getExpandProperties(prototype);
 
     if (eps != null && eps.length > 0) {
@@ -1438,11 +1458,14 @@ export class XrmContextService {
       result['onFetch']();
     }
 
-
     if (prototype.hasOwnProperty('access') && !prototype['access']['lazy']) {
       if (!result.hasOwnProperty('access') || result.access.resolved == null) {
         this.resolveAccess(prototype, result);
       }
+    }
+
+    if (updateable) {
+      this.updateCM(prototype, result);
     }
 
     return result as T;

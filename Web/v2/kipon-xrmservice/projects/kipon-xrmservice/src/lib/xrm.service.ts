@@ -397,12 +397,16 @@ export class XrmService {
         let _f = '';
         if (fields != null) {
             _f = '?$select=' + fields;
-        }
-        return this.http.patch<T>(this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")" + _f, entity, options).pipe(map(response => {
-            if (this.getContext().getVersion().startsWith("8.2")) {
+      }
+
+      let fUrl = this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")" + _f;
+      this.log(fUrl);
+
+        return this.http.patch(fUrl, entity, options).pipe(map(response => {
+          if (response == null || this.getContext().getVersion().startsWith("8.0") || this.getContext().getVersion().startsWith("8.1")) {
                 return entity;
             }
-            return response;
+            return response as T;
         }));
     }
 

@@ -470,6 +470,12 @@ xrmService.commit(trans).subscribe(r => {
 ```
 
 ### changelog
+# 2.1.7
+Ref. fix on update entity ref.
+
+# 2.1.6 
+log update before update to console if debug is enable.
+
 # 2.1.5
 When using xrmcontextservice create, the instance return in the observable will now be the same instance as parsed into the create, but now
 the id has been populated with the value from the server side create operation.
