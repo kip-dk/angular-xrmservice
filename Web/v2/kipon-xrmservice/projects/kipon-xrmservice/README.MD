@@ -1,7 +1,7 @@
 ## What is kipon-xrmservice
 kipon-xrmservice is an angular 7 library that makes it easier to work with Microsoft Dynamics 365 web api. 
 
-### Current version 2.1.4
+### Current version 2.1.5
 Changelog has been moved to the buttom of this page.
 
 ## Installation
@@ -470,6 +470,10 @@ xrmService.commit(trans).subscribe(r => {
 ```
 
 ### changelog
+# 2.1.5
+When using xrmcontextservice create, the instance return in the observable will now be the same instance as parsed into the create, but now
+the id has been populated with the value from the server side create operation.
+
 # 2.1.4
 Entities now have a property _logicalName that is populated from query and get from the prototype definition. The logical name
 is assumed to be the keyname, where "id" is removed at the end. This might not always be the case. In such case, the correct name can be

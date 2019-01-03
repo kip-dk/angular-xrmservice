@@ -595,10 +595,10 @@ export class XrmContextService {
 
       if (response != null) {
         if (response.hasOwnProperty('$keyonly')) {
-          response._pluralName = prototype._pluralName;
-          response._logicalName = prototype._logicalName;
-          response._keyName = prototype._keyName;
-          response._updateable = false;
+          instance._pluralName = prototype._pluralName;
+          instance._logicalName = prototype._logicalName;
+          instance._keyName = prototype._keyName;
+          instance._updateable = true;
 
           let key = response._pluralName + ':' + response.id;
           for (let prop in prototype) {
@@ -606,19 +606,14 @@ export class XrmContextService {
               response[prop] = prototype[prop];
               continue;
             }
-
-            if (prototype.hasOwnProperty(prop)) {
-              if (this.ignoreColumn(prop)) continue;
-
-              let value = instance[prop];
-              if (value as any !== 'undefined' && value !== null) {
-                response[prop] = value;
-              }
-            }
           }
-          this.context[key] = response;
-          return response;
+
+          this.context[key] = instance;
+          this.updateCM(prototype, instance);
+
+          return instance;
         } else {
+          this.resolveNewInstance(prototype, instance, response);
           return this.resolve(prototype, response, true);
         }
       }
@@ -1312,6 +1307,16 @@ export class XrmContextService {
       }
     }
     return result;
+  }
+
+  private resolveNewInstance<T extends Entity>(prototype: T, instance: any, result: any): void {
+    let key = prototype._pluralName + ':' + instance[prototype._keyName];
+    instance["id"] = result[prototype._keyName];
+    instance["_pluralName"] = prototype._pluralName;
+    instance["_logicalName"] = prototype._logicalName;
+    instance["_keyName"] = prototype._keyName;
+
+    this.context[key] = instance;
   }
 
   private resolve<T extends Entity>(prototype: T, instance: any, updateable: boolean): T {
