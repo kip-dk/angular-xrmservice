@@ -1,3 +1,7 @@
+### 2.1.14
+
+url encode values parsed to condtion in xrmcontext service
+
 ### 2.1.4 
 Added KiponXrmAnnotationModule, a simple module with XrmAnnotationService to perform
 task related to notes.

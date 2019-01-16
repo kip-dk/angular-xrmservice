@@ -271,6 +271,10 @@ export class Filter {
       _v = this.value.replace('{', '').replace('}', '');
     }
 
+    if (_v != null && _v != '') {
+      _v = encodeURIComponent(_v);
+    }
+
     switch (this.operator) {
       case Comparator.Equals: {
         return _f + ' eq ' + _v;

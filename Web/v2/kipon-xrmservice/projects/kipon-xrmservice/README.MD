@@ -470,6 +470,9 @@ xrmService.commit(trans).subscribe(r => {
 ```
 
 ### changelog
+# 2.1.14
+values parsed to condition in xrmcontext service are url encoded.
+
 # 2.1.7
 Ref. fix on update entity ref.
 
