@@ -123,6 +123,20 @@ export class XrmService {
             }
         }
 
+      if (window.opener != null && window.opener['Xrm'] != null) {
+        var x = window.opener["Xrm"]["Page"]["context"] as XrmContext;
+        if (x != null) {
+          if (x.getVersion == undefined) {
+            x.getVersion = (): string => "8.2.0.0"
+          }
+          x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
+          this.contextFallback = x;
+          this.initializeVersion(this.contextFallback.getVersion());
+          return x;
+        }
+      }
+
+
         let baseUrl = "http://localhost:4200";
         let version = 'v8.2';
 

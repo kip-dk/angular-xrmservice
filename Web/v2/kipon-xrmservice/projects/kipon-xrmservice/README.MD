@@ -470,6 +470,14 @@ xrmService.commit(trans).subscribe(r => {
 ```
 
 ### changelog
+
+#2.1.16
+xrmservice was unable to resolve connection url when running in a web resource popup window. This has been solved by trying to
+find the context through window.opener
+
+#2.1.15
+On CRM 8.2 or less, id was not set on new entities after create.
+
 # 2.1.14
 values parsed to condition in xrmcontext service are url encoded.
 

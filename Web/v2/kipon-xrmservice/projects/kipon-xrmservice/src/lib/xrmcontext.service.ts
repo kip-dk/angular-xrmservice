@@ -602,6 +602,7 @@ export class XrmContextService {
           instance._pluralName = prototype._pluralName;
           instance._logicalName = prototype._logicalName;
           instance._keyName = prototype._keyName;
+          instance.id = _response.id;
           instance._updateable = true;
 
           let key = response._pluralName + ':' + response.id;
