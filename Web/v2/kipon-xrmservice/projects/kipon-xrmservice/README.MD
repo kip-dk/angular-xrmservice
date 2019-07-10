@@ -1,7 +1,7 @@
 ## What is kipon-xrmservice
 kipon-xrmservice is an angular 7 library that makes it easier to work with Microsoft Dynamics 365 web api. 
 
-### Current version 2.1.5
+### Current version 2.2.0
 Changelog has been moved to the buttom of this page.
 
 ## Installation
@@ -472,6 +472,9 @@ xrmService.commit(trans).subscribe(r => {
 ### changelog
 
 #2.2.0
+
+Condition filter in XrmContextService now support Date
+
 MetadataService has been renamed to XrmMetadataService and moved to its own KiponXrmMetadataModule. The service is only needed
 in very special application that need metadata, and as such not needed as a 1. class memeber of the library. 
 

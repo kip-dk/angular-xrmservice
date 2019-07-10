@@ -267,6 +267,21 @@ export class Filter {
       }
     }
 
+    var isDate = false;
+    if (prototype[this.field] instanceof Date) {
+      if (this.value instanceof Date) {
+        _v = this.value.toISOString();
+      } else {
+        _v = this.value.toString();
+      }
+      isDate = true;
+    }
+
+    if (!isDate && this.value instanceof Date) {
+      _v = this.value.toISOString();
+      isDate = true;
+    }
+
     if (_f == prototype._keyName) {
       _v = this.value.replace('{', '').replace('}', '');
     }

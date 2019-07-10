@@ -396,8 +396,10 @@ export class CtxComponent {
     let me = this;
 
     if (this.account != null) {
-      let c = new Condition().where("parentcustomerid", Comparator.Equals, new EntityReference(me.account.id));
-      me.xrmContextService.query<CtxContact>(me.contactPrototype, c, "fullname", 4, true).subscribe(r => {
+      let c = new Condition()
+        .where("parentcustomerid", Comparator.Equals, new EntityReference(me.account.id))
+        .where("createdon", Comparator.LessThanOrEQual, new Date());
+      me.xrmContextService.query<CtxContact>(me.contactPrototype, c, "fullname", 4, true).toPromise().then(r => {
         me.contacts = r.value;
         me.contactResult = r;
       });

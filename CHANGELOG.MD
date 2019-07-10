@@ -1,3 +1,14 @@
+### 2.2.0
+
+Date in filter valuess are now supported.
+
+
+MetadataService, witch was an undocumented feature of KiponXrmserviceModule has been moved out of this module, and into its own module
+KiponXrmMetadataModule. If you are using the MetadataService, from the 2.1.x version of this library, you need to import KiponXrmMetadataModule
+explicit in your application, and replace MetadataService with XrmMetadataService. If you do not explicitly use this service on your code,
+everything should be fine.
+
+
 ### 2.1.14
 
 url encode values parsed to condtion in xrmcontext service

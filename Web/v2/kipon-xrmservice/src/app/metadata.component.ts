@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { MetadataService, EntityMeta } from 'kipon-xrmservice';
+import { XrmMetadataService, EntityMeta } from 'kipon-xrmservice';
 
 
 
@@ -11,15 +11,13 @@ import { MetadataService, EntityMeta } from 'kipon-xrmservice';
 export class MetadataComponent {
 
   oppMeta: EntityMeta;
-  constructor(private metadataService: MetadataService) {
+  constructor(private metadataService: XrmMetadataService) {
   }
 
   ngOnInit() {
-    console.log('init metadata component');
     this.metadataService.search("opportunity", true).subscribe(r => {
       this.oppMeta = r.value[0];
-      this.metadataService.getManyToManyRelationships(this.oppMeta).subscribe(r => {
-        console.log(r);
+      this.metadataService.getManyToManyRelationships(this.oppMeta).toPromise().then(r => {
       });
     });
   }
