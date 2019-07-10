@@ -1,7 +1,7 @@
 ## What is kipon-xrmservice
 kipon-xrmservice is an angular 7 library that makes it easier to work with Microsoft Dynamics 365 web api. 
 
-### Current version 2.2.0
+### Current version 2.2.1
 Changelog has been moved to the buttom of this page.
 
 ## Installation
@@ -470,6 +470,9 @@ xrmService.commit(trans).subscribe(r => {
 ```
 
 ### changelog
+
+#2.2.1
+Documentation only
 
 #2.2.0
 
