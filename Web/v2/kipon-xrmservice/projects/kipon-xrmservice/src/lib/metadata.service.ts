@@ -94,7 +94,7 @@ export class LookupAttribute {
 
 
 @Injectable()
-export class MetadataService {
+export class XrmMetadataService {
     private searchEntityMetaPrototype = new EntityMeta();
     private getEntityMetaPrototype = new EntityMeta().meta();
 

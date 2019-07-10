@@ -16,3 +16,6 @@ export * from './lib/kipon-xrmsecurity.module';
 
 export * from './lib/xrmannotation.service';
 export * from './lib/kipon-xrmannotation.module';
+
+export * from './lib/metadata.service';
+export * from './lib/kipon-xrmmetadata.module';

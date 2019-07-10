@@ -10,7 +10,6 @@ import { XrmService } from './xrm.service';
 import { XrmContextService } from './xrmcontext.service';
 import { XrmStateService } from './xrmstate.service';
 import { XrmConfigService } from './xrmconfig.service';
-import { MetadataService } from './metadata.service';
 
 @NgModule({
   imports: [
@@ -23,8 +22,7 @@ import { MetadataService } from './metadata.service';
     XrmService,
     XrmContextService,
     XrmStateService,
-    XrmConfigService,
-    MetadataService
+    XrmConfigService
   ]
 })
 export class KiponXrmserviceModule { }

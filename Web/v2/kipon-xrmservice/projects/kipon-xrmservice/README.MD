@@ -471,6 +471,10 @@ xrmService.commit(trans).subscribe(r => {
 
 ### changelog
 
+#2.2.0
+MetadataService has been renamed to XrmMetadataService and moved to its own KiponXrmMetadataModule. The service is only needed
+in very special application that need metadata, and as such not needed as a 1. class memeber of the library. 
+
 #2.1.16
 xrmservice was unable to resolve connection url when running in a web resource popup window. This has been solved by trying to
 find the context through window.opener
