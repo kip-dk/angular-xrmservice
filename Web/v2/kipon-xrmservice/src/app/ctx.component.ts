@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import { XrmStateService, XrmService, XrmContext, XrmEntityKey, XrmQueryResult, Expand, XrmContextService, Entity, Entities, EntityReference, OptionSetValue, Condition, Operator, Comparator, XrmTransaction, XrmAccess, XrmAnnotationService, Annotation } from 'kipon-xrmservice';
 
@@ -128,12 +128,13 @@ class industry {
   selector: 'ctx',
   templateUrl: './ctx.component.html'
 })
-export class CtxComponent {
+export class CtxComponent implements OnInit {
   private accountPrototype = new CtxAccount().meta();
   private contactPrototype = new CtxContact().meta();
   private opportunityPrototype = new CtxOpportunity().meta();
   private competitorPrototype = new CtxCompetitor().meta();
 
+  currentuserid: string = null;
   account: CtxAccount;
   contacts: CtxContact[];
   currentContact: CtxContact;
@@ -159,6 +160,9 @@ export class CtxComponent {
   ];
 
   constructor(private xrmContextService: XrmContextService, private xrmService: XrmService, public xrmState: XrmStateService, private annoService: XrmAnnotationService) {
+    this.xrmContextService.getCurrentUserId().toPromise().then(r => {
+      this.currentuserid = r;
+    });
   }
 
   ngOnInit() {

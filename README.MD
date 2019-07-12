@@ -1,5 +1,5 @@
 # xrmservice
-This is the git repository for a simple Dynamics 365 Web API wrapper for angular 7.
+This is the git repository for a simple Dynamics 365 Web API wrapper for angular 7+.
 
 If you need it to run under version 4 or 5 you must use npm version 1.3.x.
 
@@ -39,14 +39,14 @@ XrmContextService (a Web API programming model based on typescript prototypes): 
 
 [Go to the XrmContextService documentation page](https://github.com/kip-dk/angular-xrmservice/blob/master/Web/kipon-xrmservice/XRMCONTEXTSERVICE.MD)
 
-### Changelog - last update 2018-11-25
+### Changelog - last update 2019-12-07
 [Go to changelog](https://github.com/kip-dk/angular-xrmservice/blob/master/CHANGELOG.MD)
 
 ## The project
 This project contains three sub projects, all related to the XrmService implementation:
 
 ### Web > v2
-The root folder for the applications and libraries, based on angular 6.
+The root folder for the applications and libraries, based on angular 7+.
 
 v2/kipon-xrmservice: This is the POC test application.<br />
 v2/kipon-xrmservice/projects/kiipon-xrmservice: This is the angular library, published to npm.<br />
@@ -127,4 +127,4 @@ The service-generator folder in this project has an example on how to setup depl
 
 ## License
 
-MIT © [Kipon ApS, 2018](mailto:kip@kipon.dk)
+MIT © [Kipon ApS, 2018, 2019](mailto:kip@kipon.dk)
