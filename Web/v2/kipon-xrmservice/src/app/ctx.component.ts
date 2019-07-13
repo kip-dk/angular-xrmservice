@@ -124,6 +124,25 @@ class industry {
   name: string;
 }
 
+class User {
+  BusinessUnitId: string;
+  OrganizationId: string;
+  UserId: string;
+}
+
+
+class Address {
+  Line1: string;
+  City: string;
+  StateOrProvince: string;
+  PostalCode: string;
+  Country: string;
+}
+
+class FormatedAddress {
+  Address: string;
+}
+
 @Component({
   selector: 'ctx',
   templateUrl: './ctx.component.html'
@@ -395,6 +414,44 @@ export class CtxComponent implements OnInit {
       this.nextNameChanged();
     });
   }
+
+  // Test parameter less functions
+  testWhoAmI(): void {
+    this.xrmContextService["func"]("WhoAmI", null).toPromise().then(r => {
+      var result = r as User;
+      alert("UserId: " + result.UserId + " OrgId:" + result.OrganizationId + " BU:" + result.BusinessUnitId);
+    });
+  }
+
+
+  // time zone test from article
+  testTimezone(): void {
+    var data = {
+      LocalizedStandardName: "Pacific Standard Time",
+      localeId: 1033
+    }
+    this.xrmContextService["func"]("GetTimeZoneCodeByLocalizedName", data).toPromise().then(r => {
+      console.log(r);
+    });
+  }
+
+  // more complex parameter test
+  address: Address = {
+    Line1: "Carl møllers alle 38",
+    PostalCode: "2860",
+    City: "Søborg",
+    Country: "Denmark",
+    StateOrProvince: ""
+  }
+
+  // Test function with simple parameters
+  testFormatAddress(): void {
+    this.xrmContextService["func"]("Microsoft.Dynamics.CRM.FormatAddress", this.address).toPromise().then(r => {
+      var result = r as FormatedAddress;
+      alert(result.Address);
+    });
+  }
+
 
   private getContacts() {
     let me = this;

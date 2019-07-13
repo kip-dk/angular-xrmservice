@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators'
 
 import { XrmConfigService } from './xrmconfig.service';
+import { isNumber, isBoolean } from 'util';
 
 export interface XrmContext {
   getClientUrl(): string;
@@ -523,6 +524,38 @@ export class XrmService {
       return null;
     }));
   }
+
+  func(name: string, data: string): Observable<any>;
+  func(name: string, data: string, boundType: string, boundId: string): Observable<any>;
+  func(name: string, data: string, boundType: string = null, boundId: string = null): Observable<any> {
+    let headers = new HttpHeaders({ 'Accept': 'application/json' });
+    if (this.token != null) {
+      headers = headers.append("Authorization", "Bearer " + this.token);
+    }
+    headers = headers.append("OData-MaxVersion", "4.0");
+    headers = headers.append("OData-Version", "4.0");
+    let options = {
+      headers: headers
+    }
+
+    let url = this.getContext().getClientUrl() + this.apiUrl + name;
+    if (boundType != null) {
+      url = this.getContext().getClientUrl() + this.apiUrl + boundType + "(" + this.toGuid(boundId) + ")/" + name;
+    }
+
+    if (data != null && data.length > 0) {
+      url += data;
+    } else {
+      url += "()";
+    }
+
+    this.log(url);
+    return this.http.get(url, options).pipe(map(response => {
+      this.log(response);
+      return response;
+    }));
+  }
+
 
   action(name: string, data: any): Observable<any>;
   action(name: string, data: any, boundType: string, boundId: string): Observable<any>;

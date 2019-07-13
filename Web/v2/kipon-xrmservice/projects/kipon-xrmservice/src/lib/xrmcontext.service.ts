@@ -738,6 +738,23 @@ export class XrmContextService {
     throw 'you must parse at least one instance in the instances array';
   }
 
+  /* marked private becase the api is not well tested yet, to avoi */
+  private func(name: string, data: any): Observable<any>;
+  private func(name: string, data: any, entity: Entity): Observable<any>;
+  private func(name: string, data: any, entity: Entity = null): Observable<any> {
+    var parameters = data;
+    if (parameters != null) {
+      parameters = this.toFuncParameterString(data);
+    }
+
+    if (entity == null) {
+      return this.xrmService.func(name, parameters);
+    } else {
+      return this.xrmService.func(name, parameters, entity._pluralName, entity.id);
+    }
+  }
+
+
   action(name: string, data: any): Observable<any>;
   action(name: string, data: any, entity: Entity): Observable<any>;
   action(name: string, data: any, entity: Entity = null): Observable<any> {
@@ -1601,5 +1618,67 @@ export class XrmContextService {
       return true;
     }
     return false;
+  }
+
+  private toFuncParameterString(pam: any): string {
+
+    if (typeof pam === "string") return pam;
+
+    let r = '(';
+    var ix = 1;
+    var cm = '';
+    for (var p in pam) {
+      if (pam.hasOwnProperty(p) && pam[p] != null) {
+        r += cm + p + "=@p" + ix;
+        ix++;
+        cm = ',';
+      }
+    }
+    r += ')';
+
+    ix = 1;
+    cm = '?';
+    for (var p in pam) {
+      if (pam.hasOwnProperty(p) && pam[p] != null) {
+        r += cm + '@p' + ix + "=";
+
+        ix++;
+        cm = "&";
+
+        var v = pam[p];
+        if (v instanceof EntityReference) {
+          r += encodeURIComponent("{ @odata.id: '" + v.pluralName + "(" + v.id.replace("{", "").replace("}", "") + ")'}");
+          continue;
+        }
+
+        if (v instanceof Date) {
+          r += encodeURIComponent(v.toISOString());
+          continue;
+        }
+
+        if (v instanceof OptionSetValue) {
+          r += v.value;
+          continue;
+        }
+
+        if (isNaN(v) == false) {
+          r += v.toString();
+          continue;
+        }
+
+        if (typeof v === "boolean") {
+          r += v ? "true" : "false";
+          continue;
+        }
+
+        if (typeof v === "string") {
+          r += encodeURIComponent("'" + v + "'");
+          continue;
+        }
+
+        r += encodeURIComponent(JSON.stringify(v));
+      }
+    }
+    return r;
   }
 }

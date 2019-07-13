@@ -1,5 +1,11 @@
 <h2>Demo of XrmContextService</h2>
 
+<div>
+  Function test:
+  <button (click)="testWhoAmI()">Parameter less function</button>
+  <button (click)="testTimezone()">Simple func with parameters</button>
+</div>
+
 <h4>Statistic from xrmState</h4>
 <div>
   <span *ngIf="xrmState.running">TALKING&nbsp;</span>
@@ -110,6 +116,19 @@
     <br /><br />
     Create new contact<br />
     <input [(ngModel)]="newContact" />&nbsp;<button (click)="create()">Create</button>&nbsp;<button (click)="createTwo()">Create TWO!</button>
+  </div>
+
+
+  <div>
+    <h2>Simple parameters test</h2>
+
+    <input [(ngModel)]="address.Line1" /><br />
+    <input [(ngModel)]="address.PostalCode" /> <input [(ngModel)]="address.City" /><br />
+    <input [(ngModel)]="address.StateOrProvince" /><br />
+    <input [(ngModel)]="address.Country"/><br />
+    <br />
+    <button (click)="testFormatAddress()">Format address</button>
+
   </div>
 
 </div>
