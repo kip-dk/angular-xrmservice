@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { XrmStateService, XrmService, XrmContext, XrmEntityKey, XrmQueryResult, Expand, XrmContextService, Entity, Entities, EntityReference, OptionSetValue, Condition, Operator, Comparator, XrmTransaction, XrmAccess, XrmAnnotationService, Annotation } from 'kipon-xrmservice';
+import { XrmStateService, XrmService, XrmContext, XrmEntityKey, XrmQueryResult, Expand, XrmContextService, Entity, Entities, EntityReference, OptionSetValue, Condition, Operator, Comparator, XrmTransaction, XrmAccess, XrmAnnotationService, Annotation, FunctionPropertyValue } from 'kipon-xrmservice';
 
 
 export class List extends Entity {
@@ -143,6 +143,30 @@ class FormatedAddress {
   Address: string;
 }
 
+
+
+export class Calendar extends Entity {
+  constructor() {
+    super('calendars', 'calendarid', true);
+  }
+  name: string = null;
+
+  meta(): Calendar {
+    return this;
+  }
+}
+
+export class Team extends Entity {
+  constructor() {
+    super('teams', 'teamid', true);
+  }
+  name: string = null;
+
+  meta(): Team {
+    return this;
+  }
+}
+
 @Component({
   selector: 'ctx',
   templateUrl: './ctx.component.html'
@@ -152,8 +176,16 @@ export class CtxComponent implements OnInit {
   private contactPrototype = new CtxContact().meta();
   private opportunityPrototype = new CtxOpportunity().meta();
   private competitorPrototype = new CtxCompetitor().meta();
+  private calendarPrototype = new Calendar().meta();
+  private teamPrototype = new Team().meta();
 
   currentuserid: string = null;
+
+  team: Team;
+  calendar: Calendar;
+  calendarFromdate: Date = new Date(2019, 0, 1, 0, 0, 0);
+  calendarTodate: Date = new Date(2019, 11, 31, 23, 59, 59);
+
   account: CtxAccount;
   contacts: CtxContact[];
   currentContact: CtxContact;
@@ -198,6 +230,18 @@ export class CtxComponent implements OnInit {
         me.competitors = r.value;
       });
 
+
+      var calendarCondition = new Condition().where("name", Comparator.DoesNotContainsData)
+      me.xrmContextService.query(me.calendarPrototype, calendarCondition, "name", 1).toPromise().then(cs => {
+        if (cs.value.length > 0) {
+          this.calendar = cs.value[0];
+        }
+      });
+
+      me.xrmContextService.query(me.teamPrototype, null).toPromise().then(te => {
+        console.log(te);
+        this.team = te.value[0];
+      });
     });
   }
 
@@ -423,35 +467,48 @@ export class CtxComponent implements OnInit {
     });
   }
 
-
-  // time zone test from article
-  testTimezone(): void {
-    var data = {
-      LocalizedStandardName: "Pacific Standard Time",
-      localeId: 1033
-    }
-    this.xrmContextService["func"]("GetTimeZoneCodeByLocalizedName", data).toPromise().then(r => {
-      console.log(r);
-    });
-  }
-
   // more complex parameter test
   address: Address = {
     Line1: "Carl møllers alle 38",
     PostalCode: "2860",
     City: "Søborg",
     Country: "Denmark",
-    StateOrProvince: ""
+    StateOrProvince: null
   }
 
   // Test function with simple parameters
   testFormatAddress(): void {
-    this.xrmContextService["func"]("Microsoft.Dynamics.CRM.FormatAddress", this.address).toPromise().then(r => {
+    this.xrmContextService.setVersion("9.0");
+
+    this.xrmContextService["func"]("FormatAddress", this.address).toPromise().then(r => {
       var result = r as FormatedAddress;
       alert(result.Address);
     });
   }
 
+
+  // Test function bounded without parameters
+  testRetrieveTeamPrivileges(): void {
+
+    this.xrmContextService.setVersion("9.0");
+    this.xrmContextService.debug(true);
+    this.xrmContextService.func("Microsoft.Dynamics.CRM.RetrieveTeamPrivileges", null, this.team).toPromise().then(r => {
+      console.log(r);
+    });
+  }
+
+  // Test function bounded with parameters
+  testCalendarExpand(): void {
+    var data = {
+      Start: new FunctionPropertyValue(this.calendarFromdate.toISOString()),
+      End: new FunctionPropertyValue(this.calendarTodate.toISOString())
+    };  
+
+    this.xrmContextService.setVersion("9.0");
+    this.xrmContextService.debug(true);
+    this.xrmContextService.func("Microsoft.Dynamics.CRM.ExpandCalendar", data, this.calendar).toPromise().then(r => {
+    });
+  }
 
   private getContacts() {
     let me = this;

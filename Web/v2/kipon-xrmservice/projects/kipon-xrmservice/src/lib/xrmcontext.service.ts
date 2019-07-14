@@ -6,6 +6,21 @@ import { map, catchError, startWith } from 'rxjs/operators'
 
 import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult, Expand } from './xrm.service';
 
+export interface ToFunctionPropertyValue {
+  functionPropertyValueAsString(): string;
+}
+
+export class FunctionPropertyValue implements ToFunctionPropertyValue {
+  private v: string = '';
+  constructor(v: string) {
+    this.v = v;
+  }
+
+  functionPropertyValueAsString(): string {
+    return this.v;
+  }
+}
+
 export class Entity {
   _pluralName: string;
   _keyName: string;
@@ -144,6 +159,10 @@ export class EntityReference {
     return this.id == ref.id && this.logicalname == ref.logicalname;
   }
 
+  toJsonProperty(): any {
+    return { '@odata.id' : "'" + this.pluralName + "(" + this.id.replace("{", "").replace("}", "") + ")"  + "'"};
+  }
+
   static same(ref1: EntityReference, ref2: EntityReference): boolean {
     if (ref1 == null && ref2 == null) {
       return true;
@@ -179,6 +198,10 @@ export class OptionSetValue {
     r.name = this.name;
     r.value = this.value;
     return r;
+  }
+
+  toJsonProperty(): any {
+    return this.value;
   }
 
   static same(o1: OptionSetValue, o2: OptionSetValue): boolean {
@@ -739,9 +762,9 @@ export class XrmContextService {
   }
 
   /* marked private becase the api is not well tested yet, to avoi */
-  private func(name: string, data: any): Observable<any>;
-  private func(name: string, data: any, entity: Entity): Observable<any>;
-  private func(name: string, data: any, entity: Entity = null): Observable<any> {
+  func(name: string, data: any): Observable<any>;
+  func(name: string, data: any, entity: Entity): Observable<any>;
+  func(name: string, data: any, entity: Entity = null): Observable<any> {
     var parameters = data;
     if (parameters != null) {
       parameters = this.toFuncParameterString(data);
@@ -1621,14 +1644,13 @@ export class XrmContextService {
   }
 
   private toFuncParameterString(pam: any): string {
-
     if (typeof pam === "string") return pam;
 
     let r = '(';
     var ix = 1;
     var cm = '';
     for (var p in pam) {
-      if (pam.hasOwnProperty(p) && pam[p] != null) {
+      if (pam.hasOwnProperty(p)) {
         r += cm + p + "=@p" + ix;
         ix++;
         cm = ',';
@@ -1639,29 +1661,38 @@ export class XrmContextService {
     ix = 1;
     cm = '?';
     for (var p in pam) {
-      if (pam.hasOwnProperty(p) && pam[p] != null) {
+      if (pam.hasOwnProperty(p)) {
         r += cm + '@p' + ix + "=";
 
         ix++;
         cm = "&";
 
+
         var v = pam[p];
-        if (v instanceof EntityReference) {
-          r += encodeURIComponent("{ @odata.id: '" + v.pluralName + "(" + v.id.replace("{", "").replace("}", "") + ")'}");
+
+        if (v == null) {
+          v = '';
+          r += v;
           continue;
+        }
+
+
+        var valueWrapper = v["functionPropertyValueAsString"];
+        if (valueWrapper != null) {
+          r += valueWrapper.call(v);
+          continue;
+        }
+
+        if (v.hasOwnProperty("toJsonProperty")) {
+          v = v["toJsonProperty"]();
         }
 
         if (v instanceof Date) {
-          r += encodeURIComponent(v.toISOString());
+          r += v.toISOString();
           continue;
         }
 
-        if (v instanceof OptionSetValue) {
-          r += v.value;
-          continue;
-        }
-
-        if (isNaN(v) == false) {
+        if (typeof v === "number") {
           r += v.toString();
           continue;
         }
@@ -1672,13 +1703,36 @@ export class XrmContextService {
         }
 
         if (typeof v === "string") {
-          r += encodeURIComponent("'" + v + "'");
+          r += "'" + v + "'";
           continue;
         }
 
-        r += encodeURIComponent(JSON.stringify(v));
+        r += JSON.stringify(this.transform(v));
       }
     }
     return r;
+  }
+
+  private transform(input: any): any {
+    var transformed = false;
+    var result = {};
+
+    for (var pam in input) {
+      if (input.hasOwnProperty(pam)) {
+        var value = input[pam];
+        if (value != null && value.hasOwnProperty("toJsonProperty")) {
+          result[pam] = value["toJsonProperty"]();
+          transformed = true;
+        } else {
+          result[pam] = value;
+        }
+      }
+    }
+
+    if (!transformed) {
+      return input;
+    }
+
+    return result;
   }
 }
