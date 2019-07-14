@@ -1,7 +1,7 @@
 ## What is kipon-xrmservice
 kipon-xrmservice is an angular 7 library that makes it easier to work with Microsoft Dynamics 365 web api. 
 
-### Current version 2.2.2
+### Current version 2.2.3
 Changelog has been moved to the buttom of this page.
 
 ## Installation
@@ -285,6 +285,33 @@ This will commit a transaction. Please look below in dedicated paragraph how to 
 This method allow you to do unbounded and bounded actions. If you need to do an unbounded action, just pase the name, and the appropriate data structure according the the Web API. If you need to
 do a bounded action, also parse the instance you wish to bound the action to.
 
+#### XrmContextService.func(name: string, data: any, instance?: Entity): Observable<any> (added in version 2.2.3)
+This method allow you to do unbounded and bounded function calls. name is the name of the function, remember, many function require that you add Microsoft.Dynamics.CRM to the name, ex. Microsoft.Dynamics.CRM.ExpandCalendar.
+Data is a simple json object, mathing the input requirement of the api. instance is an instance of an entity, parse the instance if it is a bounded function. 
+
+Be aware that figuring out the name and the correct formating of the parameters (data) can be a process adding a lot of headeck, due to the lake of in dept documentation in the Dynamics 365 api. If you need
+to control how a parameter value is transform to a string value in the url, use the FunctionPropertyValue to hook in your method.
+
+```typescript
+ var data = {
+      Start: new FunctionPropertyValue('startResultValue'),
+      End: new FunctionPropertyValue('endResultValue')
+    };  
+```
+
+above example will generate a parameter list like this (Start=@p1,End=@p2)?@p1=startResultValue&@p2=endResultValue
+
+(the above example IS NOT a valid parameter url. Dynamics 365 cannot resolve startResultValue and endResultValue)
+
+For most needed datatypes, you do not need to consider above. They are already mapped correctly. This goes for
+
+string
+number
+boolean
+EntityReference
+OptionSetValue
+
+
 ##### XrmContextService.applyAccess(prototype: Entity, instance: Entity): Observable<Entity>
 If your object defines the XrmAccess property, and defines it to be loaded lazy (default setting if you are generating the property with the XrmContextService generator), this method will populate
 the access setting for the instance.
@@ -470,6 +497,14 @@ xrmService.commit(trans).subscribe(r => {
 ```
 
 ### changelog
+
+#2.2.3
+added support for functions. Dynamics 365 Web API has a number of functions that can be executed bounded or unbounded, with or without parameters.
+Please refere to the Dynamics 365 documentation for details. the xrmservice now supported a simple func(...) method to call a dynamics 365 function,
+while xrmcontext service has the same method, but taking more natural parameters, and streamline you entities an parameters into a well formatted
+url that follows the speficiation. Be aware that many functions are not supported until version 9.0, and the Microsoft documentation is very limited 
+and gives very few guidance on how to format parameters etc. This fact might leed to a situation where you end up having difficulties getting a function call to work.
+
 
 #2.2.2
 calling getCurrentUserId() in developermode, where ctx. was created from XrmConfigService used localhos as url regardless of setting given by xrmconfigservice.
