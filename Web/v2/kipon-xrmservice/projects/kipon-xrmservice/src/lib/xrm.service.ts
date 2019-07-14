@@ -5,7 +5,6 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators'
 
 import { XrmConfigService } from './xrmconfig.service';
-import { isNumber, isBoolean } from 'util';
 
 export interface XrmContext {
   getClientUrl(): string;
