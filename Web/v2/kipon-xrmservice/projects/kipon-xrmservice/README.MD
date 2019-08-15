@@ -1,7 +1,7 @@
 ## What is kipon-xrmservice
 kipon-xrmservice is an angular 7 library that makes it easier to work with Microsoft Dynamics 365 web api. 
 
-### Current version 2.2.3
+### Current version 2.2.4
 Changelog has been moved to the buttom of this page.
 
 ## Installation
@@ -497,6 +497,13 @@ xrmService.commit(trans).subscribe(r => {
 ```
 
 ### changelog
+
+#2.2.4
+all http operations is now adding headers to the crm dynamics 365 web api. This enable a very simple implementation of SPA running outside Dynamics 365. 
+
+The first draft of this, you can install MSAL.js alongside kipon-xrmservice, and then simply set token of the xrmservice according to the return from get token.
+
+Be aware that the api for this functionallity migh change in upcomming version, where a more smoot SPA outside dynamics 365 implementation will be provided.
 
 #2.2.3
 added support for functions. Dynamics 365 Web API has a number of functions that can be executed bounded or unbounded, with or without parameters.

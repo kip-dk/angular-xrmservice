@@ -184,8 +184,9 @@ export class XrmService {
       }
     };
 
+    var headers = this.getDefaultHeader();
 
-    this.http.get(baseUrl + "/api/data/" + version + "/WhoAmI()").subscribe(r => {
+    this.http.get(baseUrl + "/api/data/" + version + "/WhoAmI()", { headers: headers }).subscribe(r => {
       this.log(r);
       let url = r['@odata.context'] as string;
 
@@ -205,7 +206,9 @@ export class XrmService {
   getCurrentUserId(): Observable<string> {
     var ctx = this.getContext();
     if (ctx.getUserId() == null || ctx.getUserId() == '') {
-      return this.http.get(ctx.getClientUrl() + this.apiUrl + "/WhoAmI()").pipe(map(r => { return r["UserId"] }));
+
+      var headers = this.getDefaultHeader();
+      return this.http.get(ctx.getClientUrl() + this.apiUrl + "/WhoAmI()", { headers: headers }).pipe(map(r => { return r["UserId"] }));
     } else {
       return new Observable<string>(obs => obs.next(ctx.getUserId()));
     }
@@ -277,10 +280,6 @@ export class XrmService {
     headers = headers.append("Prefer", "odata.include-annotations=*");
     headers = headers.append("Cache-Control", "no-cache");
 
-    let options = {
-      headers: headers
-    }
-
     let addFields = '';
     let sep = '?';
 
@@ -296,7 +295,7 @@ export class XrmService {
     let url = this.getContext().getClientUrl() + this.apiUrl + entityTypes + "(" + _id + ")" + addFields + _ex;
     this.log(url);
 
-    return this.http.get<T>(url, options);
+    return this.http.get<T>(url, { headers: headers });
   }
 
   query<T>(entityTypes: string, fields: string, filter: string): Observable<XrmQueryResult<T>>;
@@ -318,10 +317,6 @@ export class XrmService {
     } else {
     }
     headers = headers.append("Cache-Control", "no-cache");
-
-    let options = {
-      headers: headers
-    }
 
     let url = this.getContext().getClientUrl() + this.apiUrl + entityTypes;
     if ((fields != null && fields != '') || (filter != null && filter != '') || (orderBy != null && orderBy != '') || top > 0) {
@@ -349,7 +344,7 @@ export class XrmService {
       sep = '&';
     }
 
-    return this.http.get(url, options).pipe(map(response => {
+    return this.http.get(url, { headers: headers }).pipe(map(response => {
       let result = me.resolveQueryResult<T>(response, top, [url], 0);
       return result;
     }));
@@ -402,10 +397,6 @@ export class XrmService {
       headers = headers.append("Prefer", "return=representation");
     }
 
-    let options = {
-      headers: headers
-    }
-
     let _f = '';
     if (fields != null) {
       _f = '?$select=' + fields;
@@ -414,7 +405,7 @@ export class XrmService {
     let fUrl = this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")" + _f;
     this.log(fUrl);
 
-    return this.http.patch(fUrl, entity, options).pipe(map(response => {
+    return this.http.patch(fUrl, entity, { headers: headers }).pipe(map(response => {
       if (response == null || this.getContext().getVersion().startsWith("8.0") || this.getContext().getVersion().startsWith("8.1")) {
         return entity;
       }
@@ -435,9 +426,7 @@ export class XrmService {
     headers = headers.append("OData-Version", "4.0");
     headers = headers.append("Content-Type", "application/json; charset=utf-8");
     headers = headers.append("Prefer", "odata.include-annotations=*");
-    let options = {
-      headers: headers
-    }
+
     let v = {
     };
 
@@ -449,9 +438,9 @@ export class XrmService {
     this.log(url);
 
     if (v[propertyValueAs] != null) {
-      return this.http.put(url, v, options).pipe(map(response => null));
+      return this.http.put(url, v, { headers: headers }).pipe(map(response => null));
     } else {
-      return this.http.delete(url, options).pipe(map(response => null));
+      return this.http.delete(url, { headers: headers }).pipe(map(response => null));
     }
   }
 
@@ -464,13 +453,10 @@ export class XrmService {
     headers = headers.append("OData-Version", "4.0");
     headers = headers.append("Content-Type", "application/json; charset=utf-8");
     headers = headers.append("Prefer", "odata.include-annotations=*");
-    let options = {
-      headers: headers
-    }
 
     let url = this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")";
     this.log(url);
-    return this.http.delete(url).pipe(map(response => null));
+    return this.http.delete(url, { headers: headers }).pipe(map(response => null));
   }
 
   getParameter(param: string): string {
@@ -486,9 +472,6 @@ export class XrmService {
     headers = headers.append("OData-Version", "4.0");
     headers = headers.append("Content-Type", "application/json; charset=utf-8");
     headers = headers.append("Prefer", "odata.include-annotations=*");
-    let options = {
-      headers: headers
-    }
 
     let url = this.getContext().getClientUrl() + this.apiUrl + fromType + "(" + this.toGuid(fromId) + ")/" + refname + "/$ref";
 
@@ -501,7 +484,7 @@ export class XrmService {
       this.log(data);
     }
 
-    return this.http.post(url, data, options).pipe(map(response => null));
+    return this.http.post(url, data, { headers: headers }).pipe(map(response => null));
   }
 
   disassociate(fromType: string, fromId: string, toType: string, toId: string, refname: string): Observable<null> {
@@ -511,14 +494,11 @@ export class XrmService {
     }
     headers = headers.append("OData-MaxVersion", "4.0");
     headers = headers.append("OData-Version", "4.0");
-    let options = {
-      headers: headers
-    }
 
     let url = this.getContext().getClientUrl() + this.apiUrl + fromType + "(" + this.toGuid(fromId) + ")/" + refname + "/$ref?$id=" + this.getContext().$devClientUrl() + toType + "(" + this.toGuid(toId) + ")";
     this.log(url);
 
-    return this.http.delete(url, options).pipe(map(response => {
+    return this.http.delete(url, { headers: headers }).pipe(map(response => {
       this.log(response);
       return null;
     }));
@@ -533,9 +513,6 @@ export class XrmService {
     }
     headers = headers.append("OData-MaxVersion", "4.0");
     headers = headers.append("OData-Version", "4.0");
-    let options = {
-      headers: headers
-    }
 
     let url = this.getContext().getClientUrl() + this.apiUrl + name;
     if (boundType != null) {
@@ -549,7 +526,7 @@ export class XrmService {
     }
 
     this.log(url);
-    return this.http.get(url, options).pipe(map(response => {
+    return this.http.get(url, { headers: headers }).pipe(map(response => {
       this.log(response);
       return response;
     }));
@@ -565,9 +542,6 @@ export class XrmService {
     }
     headers = headers.append("OData-MaxVersion", "4.0");
     headers = headers.append("OData-Version", "4.0");
-    let options = {
-      headers: headers
-    }
 
     let url = this.getContext().getClientUrl() + this.apiUrl + name;
     if (boundType != null) {
@@ -575,7 +549,7 @@ export class XrmService {
     }
     this.log(url);
 
-    return this.http.post(url, data, options).pipe(map(response => {
+    return this.http.post(url, data, { headers: headers }).pipe(map(response => {
       this.log(response);
       return response;
     }));
@@ -653,10 +627,7 @@ export class XrmService {
           }
           headers = headers.append("Cache-Control", "no-cache");
 
-          let options = {
-            headers: headers
-          }
-          return me.http.get(nextLink, options).pipe(map(r => {
+          return me.http.get(nextLink, { headers: headers }).pipe(map(r => {
             pages.push(nextLink);
             let pr = me.resolveQueryResult<T>(r, top, pages, pageIndex + 1);
             return pr;
@@ -681,12 +652,8 @@ export class XrmService {
         }
         headers = headers.append("Cache-Control", "no-cache");
 
-        let options = {
-          headers: headers
-        }
-
         let lastPage = result.pages[result.pageIndex - 1];
-        return me.http.get(lastPage, options).pipe(map(r => {
+        return me.http.get(lastPage, { headers: headers }).pipe(map(r => {
           result.pages.splice(result.pages.length - 1, 1);
           let pr = me.resolveQueryResult<T>(r, top, result.pages, result.pageIndex - 1);
           return pr;
@@ -719,5 +686,17 @@ export class XrmService {
       return v;
     }
     return v.substr(0, 8) + '-' + v.substr(8, 4) + '-' + v.substr(12, 4) + '-' + v.substr(16, 4) + '-' + v.substr(20);
+  }
+
+  private getDefaultHeader(): HttpHeaders {
+    let headers = new HttpHeaders({ 'Accept': 'application/json' });
+    if (this.token != null) {
+      headers = headers.append("Authorization", "Bearer " + this.token);
+    }
+    headers = headers.append("OData-MaxVersion", "4.0");
+    headers = headers.append("OData-Version", "4.0");
+    headers = headers.append("Content-Type", "application/json; charset=utf-8");
+    headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
+    return headers;
   }
 }

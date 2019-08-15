@@ -1,3 +1,10 @@
+#2.2.4
+all http operations is now adding headers to the crm dynamics 365 web api. This enable a very simple implementation of SPA running outside Dynamics 365. 
+
+The first draft of this, you can install MSAL.js alongside kipon-xrmservice, and then simply set token of the xrmservice according to the return from get token.
+
+Be aware that the api for this functionallity migh change in upcomming version, where a more smoot SPA outside dynamics 365 implementation will be provided.
+
 ### 2.2.0
 
 Date in filter valuess are now supported.
