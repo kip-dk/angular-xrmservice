@@ -691,6 +691,7 @@ export class XrmService {
   private getDefaultHeader(): HttpHeaders {
     let headers = new HttpHeaders({ 'Accept': 'application/json' });
     if (this.token != null) {
+      this.log('crmtoken used: ' + this.token);
       headers = headers.append("Authorization", "Bearer " + this.token);
     }
     headers = headers.append("OData-MaxVersion", "4.0");
