@@ -71,6 +71,7 @@ export class XrmService {
   apiVersion: string = 'v8.2';
   debug: boolean = false;
   token: string = null;
+  forceHttps: boolean = false;
   private loginObserver: any;
 
   constructor(private http: HttpClient, private injector: Injector) {
@@ -94,6 +95,7 @@ export class XrmService {
       x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
       this.contextFallback = x;
       this.initializeVersion(this.contextFallback.getVersion());
+      this.log('using real context from GetGlobalContext');
       return x;
     }
 
@@ -106,6 +108,7 @@ export class XrmService {
         x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
         this.contextFallback = x;
         this.initializeVersion(this.contextFallback.getVersion());
+        this.log('using real context from Xrm.Page.context');
         return x;
       }
     }
@@ -119,6 +122,8 @@ export class XrmService {
         x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
         this.contextFallback = x;
         this.initializeVersion(this.contextFallback.getVersion());
+        this.log('using real context from parent Xrm.Page.context');
+
         return x;
       }
     }
@@ -132,11 +137,12 @@ export class XrmService {
         x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
         this.contextFallback = x;
         this.initializeVersion(this.contextFallback.getVersion());
+        this.log('using real context from opener Xrm.Page.context');
         return x;
       }
     }
 
-
+    this.log('using fake context');
     let baseUrl = "http://localhost:4200";
     let version = 'v8.2';
 
@@ -186,7 +192,7 @@ export class XrmService {
 
     var headers = this.getDefaultHeader();
 
-    this.http.get(baseUrl + "/api/data/" + version + "/WhoAmI()", { headers: headers }).subscribe(r => {
+    this.http.get(this.forceHTTPS(baseUrl) + "/api/data/" + version + "/WhoAmI()", { headers: headers }).subscribe(r => {
       this.log(r);
       let url = r['@odata.context'] as string;
 
@@ -208,9 +214,17 @@ export class XrmService {
     if (ctx.getUserId() == null || ctx.getUserId() == '') {
 
       var headers = this.getDefaultHeader();
-      return this.http.get(ctx.getClientUrl() + this.apiUrl + "/WhoAmI()", { headers: headers }).pipe(map(r => { return r["UserId"] }));
+
+      var url = this.forceHTTPS(ctx.getClientUrl()) + this.apiUrl + "/WhoAmI()";
+      this.log(url);
+
+      return this.http.get(url, { headers: headers }).pipe(map(r => { return r["UserId"] }));
     } else {
-      return new Observable<string>(obs => obs.next(ctx.getUserId()));
+      this.log('get user from normal crm context');
+      this.log('should result in ' + ctx.getUserId());
+      return new Observable<string>(obs => {
+        setTimeout(() => obs.next(ctx.getUserId()), 1);
+      });
     }
   }
 
@@ -295,7 +309,7 @@ export class XrmService {
     let url = this.getContext().getClientUrl() + this.apiUrl + entityTypes + "(" + _id + ")" + addFields + _ex;
     this.log(url);
 
-    return this.http.get<T>(url, { headers: headers });
+    return this.http.get<T>(this.forceHTTPS(url), { headers: headers });
   }
 
   query<T>(entityTypes: string, fields: string, filter: string): Observable<XrmQueryResult<T>>;
@@ -344,7 +358,7 @@ export class XrmService {
       sep = '&';
     }
 
-    return this.http.get(url, { headers: headers }).pipe(map(response => {
+    return this.http.get(this.forceHTTPS(url), { headers: headers }).pipe(map(response => {
       let result = me.resolveQueryResult<T>(response, top, [url], 0);
       return result;
     }));
@@ -368,7 +382,7 @@ export class XrmService {
       headers: headers,
     }
 
-    return this.http.post(this.getContext().getClientUrl() + this.apiUrl + entityType, entity, { headers: headers, observe: "response" }).pipe(map(
+    return this.http.post(this.forceHTTPS(this.getContext().getClientUrl()) + this.apiUrl + entityType, entity, { headers: headers, observe: "response" }).pipe(map(
       (res: HttpResponse<any>) => {
         if (res.body == null) {
           let entityId = res.headers.get('OData-EntityId') as string;
@@ -405,7 +419,7 @@ export class XrmService {
     let fUrl = this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")" + _f;
     this.log(fUrl);
 
-    return this.http.patch(fUrl, entity, { headers: headers }).pipe(map(response => {
+    return this.http.patch(this.forceHTTPS(fUrl), entity, { headers: headers }).pipe(map(response => {
       if (response == null || this.getContext().getVersion().startsWith("8.0") || this.getContext().getVersion().startsWith("8.1")) {
         return entity;
       }
@@ -438,9 +452,9 @@ export class XrmService {
     this.log(url);
 
     if (v[propertyValueAs] != null) {
-      return this.http.put(url, v, { headers: headers }).pipe(map(response => null));
+      return this.http.put(this.forceHTTPS(url), v, { headers: headers }).pipe(map(response => null));
     } else {
-      return this.http.delete(url, { headers: headers }).pipe(map(response => null));
+      return this.http.delete(this.forceHTTPS(url), { headers: headers }).pipe(map(response => null));
     }
   }
 
@@ -456,7 +470,7 @@ export class XrmService {
 
     let url = this.getContext().getClientUrl() + this.apiUrl + entityType + "(" + id + ")";
     this.log(url);
-    return this.http.delete(url, { headers: headers }).pipe(map(response => null));
+    return this.http.delete(this.forceHTTPS(url), { headers: headers }).pipe(map(response => null));
   }
 
   getParameter(param: string): string {
@@ -484,7 +498,7 @@ export class XrmService {
       this.log(data);
     }
 
-    return this.http.post(url, data, { headers: headers }).pipe(map(response => null));
+    return this.http.post(this.forceHTTPS(url), data, { headers: headers }).pipe(map(response => null));
   }
 
   disassociate(fromType: string, fromId: string, toType: string, toId: string, refname: string): Observable<null> {
@@ -498,7 +512,7 @@ export class XrmService {
     let url = this.getContext().getClientUrl() + this.apiUrl + fromType + "(" + this.toGuid(fromId) + ")/" + refname + "/$ref?$id=" + this.getContext().$devClientUrl() + toType + "(" + this.toGuid(toId) + ")";
     this.log(url);
 
-    return this.http.delete(url, { headers: headers }).pipe(map(response => {
+    return this.http.delete(this.forceHTTPS(url), { headers: headers }).pipe(map(response => {
       this.log(response);
       return null;
     }));
@@ -526,7 +540,7 @@ export class XrmService {
     }
 
     this.log(url);
-    return this.http.get(url, { headers: headers }).pipe(map(response => {
+    return this.http.get(this.forceHTTPS(url), { headers: headers }).pipe(map(response => {
       this.log(response);
       return response;
     }));
@@ -549,7 +563,7 @@ export class XrmService {
     }
     this.log(url);
 
-    return this.http.post(url, data, { headers: headers }).pipe(map(response => {
+    return this.http.post(this.forceHTTPS(url), data, { headers: headers }).pipe(map(response => {
       this.log(response);
       return response;
     }));
@@ -627,7 +641,7 @@ export class XrmService {
           }
           headers = headers.append("Cache-Control", "no-cache");
 
-          return me.http.get(nextLink, { headers: headers }).pipe(map(r => {
+          return me.http.get(me.forceHTTPS(nextLink), { headers: headers }).pipe(map(r => {
             pages.push(nextLink);
             let pr = me.resolveQueryResult<T>(r, top, pages, pageIndex + 1);
             return pr;
@@ -653,7 +667,7 @@ export class XrmService {
         headers = headers.append("Cache-Control", "no-cache");
 
         let lastPage = result.pages[result.pageIndex - 1];
-        return me.http.get(lastPage, { headers: headers }).pipe(map(r => {
+        return me.http.get(me.forceHTTPS(lastPage), { headers: headers }).pipe(map(r => {
           result.pages.splice(result.pages.length - 1, 1);
           let pr = me.resolveQueryResult<T>(r, top, result.pages, result.pageIndex - 1);
           return pr;
@@ -699,5 +713,12 @@ export class XrmService {
     headers = headers.append("Content-Type", "application/json; charset=utf-8");
     headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
     return headers;
+  }
+
+  forceHTTPS(v: string): string {
+    if (this.forceHttps && v.startsWith("http://")) {
+      return v.replace("http://", "https://");
+    }
+    return v;
   }
 }

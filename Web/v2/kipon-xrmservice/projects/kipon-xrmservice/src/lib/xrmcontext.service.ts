@@ -621,7 +621,7 @@ export class XrmContextService {
 
     this.xrmService.log(url);
 
-    return this.http.get(url, options).pipe(map(response => {
+    return this.http.get(this.forceHTTPS(url), options).pipe(map(response => {
       let result = me.resolveQueryResult<T>(prototype, response, top, [url], 0);
       return result;
     }));
@@ -884,7 +884,7 @@ export class XrmContextService {
       this.xrmService.log(url);
 
 
-      return this.http.post(url, body, { headers: headers, responseType: "text" }).pipe(map(_txt => {
+      return this.http.post(this.forceHTTPS(url), body, { headers: headers, responseType: "text" }).pipe(map(_txt => {
         let txt = _txt as string;
         this.xrmService.log(txt);
 
@@ -1159,7 +1159,7 @@ export class XrmContextService {
     let _ta = instance['access'] as XrmAccess;
     _ta.resolved = null;
 
-    return this.http.get(url, { headers: headers }).pipe(
+    return this.http.get(this.forceHTTPS(url), { headers: headers }).pipe(
       map(r => {
         this.xrmService.log(r);
         let i = instance['access'] as XrmAccess;
@@ -1350,7 +1350,7 @@ export class XrmContextService {
           let options = {
             headers: headers
           }
-          return me.http.get(nextLink, options).pipe(map(r => {
+          return me.http.get(me.forceHTTPS(nextLink), options).pipe(map(r => {
             pages.push(nextLink);
             let pr = me.resolveQueryResult<T>(prototype, r, top, pages, pageIndex + 1);
             return pr;
@@ -1380,7 +1380,7 @@ export class XrmContextService {
         }
 
         let lastPage = result.pages[result.pageIndex - 1];
-        return me.http.get(lastPage, options).pipe(map(r => {
+        return me.http.get(me.forceHTTPS(lastPage), options).pipe(map(r => {
           result.pages.splice(result.pages.length - 1, 1);
           let pr = me.resolveQueryResult<T>(prototype, r, top, result.pages, result.pageIndex - 1);
           return pr;
@@ -1734,5 +1734,9 @@ export class XrmContextService {
     }
 
     return result;
+  }
+
+  private forceHTTPS(v: string): string {
+    return this.xrmService.forceHTTPS(v);
   }
 }
