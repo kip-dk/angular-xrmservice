@@ -4,7 +4,7 @@ would get a wrong context, and direct any call to localhost:4200 because it was 
 window["GetGlobalContext"] to be the context it is using it self. 
 
 Same level of sharing goes for getCurrentKey() because window["Xrm"] is also shared same way. If your inner iframe need to target another object than the outer, you MUST populate
-id and typename to be used in the inner frame on the url for the inner frame, oterwise the innerframe will use the same entity id as the outer.
+id and typename to be used in the inner frame on the url for the inner frame, oterwise the inner frame will use the same entity id as the outer.
 
 The misspelling of the getCurrentKey method on xrmService has been fixed, and the wrong spelling (getCurrenKey) as been deprecated.
 
