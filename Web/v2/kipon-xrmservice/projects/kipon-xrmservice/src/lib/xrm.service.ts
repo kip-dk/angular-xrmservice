@@ -226,6 +226,13 @@ export class XrmService {
     }
   }
 
+  getCurrentKey(): Observable<XrmEntityKey> {
+    return this.getCurrenKey();
+  }
+
+  /**
+  * @deprecated since version 2.2.9
+  */
   getCurrenKey(): Observable<XrmEntityKey> {
     this.linkXrmToPage();
 

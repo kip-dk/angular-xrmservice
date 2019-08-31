@@ -6,6 +6,8 @@ window["GetGlobalContext"] to be the context it is using it self.
 Same level of sharing goes for getCurrentKey() because window["Xrm"] is also shared same way. If your inner iframe need to target another object than the outer, you MUST populate
 id and typename to be used in the inner frame on the url for the inner frame, oterwise the innerframe will use the same entity id as the outer.
 
+The misspelling of the getCurrentKey method on xrmService has been fixed, and the wrong spelling (getCurrenKey) as been deprecated.
+
 #2.2.5 - 2.2.8 Force https and test token
 These two versions does not add any new. The api on xrmservice is exposing "token". If you set this, before any other call to xrmService or xrmContext service,
 this token will be put into any call in the Bearer authentication header. You can use ADAL.js or MSAL.js (there is an angular version for the later) to
