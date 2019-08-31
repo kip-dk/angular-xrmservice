@@ -74,6 +74,13 @@ export class XrmService {
   forceHttps: boolean = false;
   private loginObserver: any;
 
+  private searchIn = [
+    null,
+    ["parent"],
+    ["opener"]
+  ];
+
+
   constructor(private http: HttpClient, private injector: Injector) {
   }
 
@@ -89,55 +96,40 @@ export class XrmService {
 
     if (typeof window['GetGlobalContext'] != "undefined") {
       let x = window['GetGlobalContext']();
-      if (x.getVersion == undefined) {
+      if (typeof x.getVersion == 'undefined') {
         x.getVersion = (): string => "8.2.0.0"
       }
-      x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
-      this.contextFallback = x;
-      this.initializeVersion(this.contextFallback.getVersion());
+
+      if (typeof x.$devClientUrl == 'undefined') {
+        x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
+        this.contextFallback = x;
+        this.initializeVersion(this.contextFallback.getVersion());
+      }
       this.log('using real context from GetGlobalContext');
       return x;
     }
 
-    if (window['Xrm'] != null) {
-      var x = window["Xrm"]["Page"]["context"] as XrmContext;
+    for (var i = 0; i < this.searchIn.length; i++) {
+      var x = this.findContext(this.searchIn[i]);
       if (x != null) {
-        if (x.getVersion == undefined) {
+        if (typeof x.getVersion == 'undefined') {
           x.getVersion = (): string => "8.2.0.0"
         }
         x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
         this.contextFallback = x;
         this.initializeVersion(this.contextFallback.getVersion());
-        this.log('using real context from Xrm.Page.context');
-        return x;
-      }
-    }
 
-    if (window.parent != null && window.parent['Xrm'] != null) {
-      var x = window.parent["Xrm"]["Page"]["context"] as XrmContext;
-      if (x != null) {
-        if (x.getVersion == undefined) {
-          x.getVersion = (): string => "8.2.0.0"
+        if (this.searchIn[i] == null) {
+          this.log('using real context from Xrm.Page.context');
+        } else {
+          this.log('using real context from' + this.searchIn[i].join('.')  +'.Xrm.Page.context');
         }
-        x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
-        this.contextFallback = x;
-        this.initializeVersion(this.contextFallback.getVersion());
-        this.log('using real context from parent Xrm.Page.context');
 
-        return x;
-      }
-    }
-
-    if (window.opener != null && window.opener['Xrm'] != null) {
-      var x = window.opener["Xrm"]["Page"]["context"] as XrmContext;
-      if (x != null) {
-        if (x.getVersion == undefined) {
-          x.getVersion = (): string => "8.2.0.0"
+        // expose this context for parent or openers.
+        window["GetGlobalContext"] = function () {
+          return x;
         }
-        x.$devClientUrl = () => { return this.getContext().getClientUrl() + this.apiUrl };
-        this.contextFallback = x;
-        this.initializeVersion(this.contextFallback.getVersion());
-        this.log('using real context from opener Xrm.Page.context');
+
         return x;
       }
     }
@@ -160,7 +152,6 @@ export class XrmService {
     } catch (err) {
       // no worry, XrmConfigService is optional
     }
-
 
     this.contextFallback = {
       getClientUrl(): string {
@@ -206,6 +197,13 @@ export class XrmService {
       this.initializeVersion(this.contextFallback.getVersion());
     });
 
+    var x = this.contextFallback;
+
+    // expose this context for parent or openers.
+    window["GetGlobalContext"] = function () {
+      return x;
+    }
+
     return this.contextFallback;
   }
 
@@ -223,64 +221,60 @@ export class XrmService {
       this.log('get user from normal crm context');
       this.log('should result in ' + ctx.getUserId());
       return new Observable<string>(obs => {
-        setTimeout(() => obs.next(ctx.getUserId()), 1);
+        setTimeout(() => obs.next(ctx.getUserId()), 100);
       });
     }
   }
 
   getCurrenKey(): Observable<XrmEntityKey> {
-    let params = this.getContext().getQueryStringParameters();
+    this.linkXrmToPage();
+
+    // First we try to find id and type in the url, this allow forcing a specific entity, directly from standard url parameters
+    let params = this.getQueryStringParameters();
     let result = new XrmEntityKey();
     result.id = params["id"];
     result.entityType = params["typename"];
 
-    if (result.id != null) {
-      result.id = decodeURIComponent(result.id).replace('{', '').replace('}', '').toLowerCase();
-      if (result.entityType === 'undefined' || result.entityType == null || result.entityType == '') {
-        result.entityType = this.getQueryStringParameters()["typename"];
-      }
+    if (result.id != null && result.entityType != null) {
       result.id = this.toGuid(result.id);
       return new Observable<XrmEntityKey>(obs => obs.next(result));
     }
 
-    if (window.parent && window.parent["Xrm"] &&
-      window.parent["Xrm"]["Page"] &&
-      window.parent["Xrm"]["Page"]["ui"] &&
-      window.parent["Xrm"]["Page"]["ui"]["getFormType"] &&
-      window.parent["Xrm"]["Page"]["ui"]["getFormType"] != null &&
-      window.parent["Xrm"]["Page"]["ui"]["getFormType"]() == 2) {
-      result.id = window.parent["Xrm"]["Page"]["data"]["entity"]["getId"]();
-      result.entityType = window.parent["Xrm"]["Page"]["data"]["entity"]["getEntityName"]();
+    // the we search query parameters in the current context. That might be several leveals up in an iframe hirachy
+    params = this.getContext().getQueryStringParameters();
+    result.id = params["id"];
+    result.entityType = params["typename"];
 
-      if (result.id != null) {
-        result.id = decodeURIComponent(result.id).replace('{', '').replace('}', '').toLowerCase();
-        if (result.entityType === 'undefined' || result.entityType == null || result.entityType == '') {
-          result.entityType = this.getQueryStringParameters()["typename"];
-        }
+    if (result.id != null && result.entityType != null) {
+      result.id = this.toGuid(result.id);
+      return new Observable<XrmEntityKey>(obs => obs.next(result));
+    }
 
-        result.id = this.toGuid(result.id);
+    // finally we see if we can find an entity form, and take it from there if possible
+    var ftf = this.findFormTypeFunction();
+    if (ftf && ftf() == 2) {
+
+      result = this.findKeyByFormEntity();
+      if (result != null) {
         return new Observable<XrmEntityKey>(obs => obs.next(result));
       }
 
       return new Observable<XrmEntityKey>(obs => {
-        let intervalThread = setInterval(() => {
-          result.id = window.parent["Xrm"]["Page"]["data"]["entity"]["getId"]();
-          result.entityType = window.parent["Xrm"]["Page"]["data"]["entity"]["getEntityName"]();
-          if (result.id != null) {
-            clearInterval(intervalThread);
-            result.id = decodeURIComponent(result.id).replace('{', '').replace('}', '').toLowerCase();
-            if (result.entityType === 'undefined' || result.entityType == null || result.entityType == '') {
-              result.entityType = this.getQueryStringParameters()["typename"];
-            }
+        var iv = setInterval(() => {
+          result = this.findKeyByFormEntity();
+          if (result != null) {
+            clearInterval(iv);
             obs.next(result);
           }
         }, 800);
       });
     } else {
+      // it was not an entity form, or the entity form was not in edit mode.
       result.id = this.toGuid(result.id);
       return new Observable<XrmEntityKey>(obs => obs.next(result));
     }
   }
+
   get<T>(entityTypes: string, id: string, fields: string): Observable<T>;
   get<T>(entityTypes: string, id: string, fields: string, expand: Expand): Observable<T>;
   get<T>(entityTypes: string, id: string, fields: string, expand: Expand = null): Observable<T> {
@@ -677,6 +671,32 @@ export class XrmService {
     return result;
   }
 
+  private findKeyByFormEntity(): XrmEntityKey {
+    var ftf = this.findFormTypeFunction();
+    if (ftf != null && ftf() == 2) {
+      var _formEntity = this.findEntity();
+      if (_formEntity != null) {
+        let result = new XrmEntityKey();
+        result.id = _formEntity["getId"]();
+        result.entityType = _formEntity["getEntityName"]();
+
+        if (result.id != null && result.id != '') {
+          if (result.entityType === 'undefined' || result.entityType == null || result.entityType == '') {
+            result.entityType = this.getContext().getQueryStringParameters()["typename"];
+          }
+
+          if (result.entityType === 'undefined' || result.entityType == null || result.entityType == '') {
+            result.entityType = this.getQueryStringParameters()["typename"];
+          }
+
+          result.id = this.toGuid(result.id);
+          return result;
+        }
+      }
+    }
+    return null;
+  }
+
   private getQueryStringParameters(): any {
     let search = window.location.search;
     let hashes = search.slice(search.indexOf('?') + 1).split('&');
@@ -713,6 +733,102 @@ export class XrmService {
     headers = headers.append("Content-Type", "application/json; charset=utf-8");
     headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
     return headers;
+  }
+
+  private findContext(v: string[]): XrmContext {
+    let start: any = null;
+    if (v == null || v.length == 0) {
+      start = window["Xrm"];
+    } else {
+      for (var i = 0; i < v.length; i++) {
+        if (start == null) {
+          start = window[v[i]];
+        } else {
+          start = start[v[i]];
+        }
+
+        if (start != null && typeof start["GetGlobalContext"] != 'undefined') {
+          return start["GetGlobalContext"]();
+        }
+
+        if (start == null) {
+          return;
+        }
+      }
+      start = start["Xrm"];
+    }
+
+    if (start != null) {
+      start = start["Page"];
+    }
+    if (start != null) {
+      start = start["context"];
+    }
+    return start;
+  }
+
+  private findFormTypeFunction(): any {
+    for (var i = 0; i < this.searchIn.length; i++) {
+      var result = this.lookFor(this.searchIn[i], ["Xrm", "Page", "ui", "getFormType"]);
+      if (result != null) {
+        return result;
+      }
+    }
+    return null;
+  }
+
+  private findEntity(): any {
+    for (var i = 0; i < this.searchIn.length; i++) {
+      var result = this.lookFor(this.searchIn[i], ["Xrm", "Page", "data", "entity"]);
+      if (result != null) {
+        return result;
+      }
+    }
+    return null;
+  }
+
+
+  private lookFor(lookIn: string[], lookFor: string[]): any {
+    var start = null;
+    if (lookIn == null || lookIn.length == 0) {
+      start = window[lookFor[0]];
+    } else {
+      for (var i = 0; i < lookIn.length; i++) {
+        if (start == null) {
+          start = window[lookIn[i]];
+        } else {
+          start = start[lookIn[i]];
+        }
+        if (start == null) {
+          return null;
+        }
+      }
+      start = start[lookFor[0]];
+    }
+
+    if (start != null) {
+      for (var i = 1; i < lookFor.length; i++) {
+        start = start[lookFor[i]];
+        if (start == null) {
+          return null;
+        }
+      }
+    }
+    return start;
+  }
+
+  private linkXrmToPage(): void {
+    if (typeof window["Xrm"] === 'undefined') {
+      if (window.parent != null && typeof window.parent["Xrm"] != null) {
+        window["Xrm"] = window.parent["Xrm"];
+        return;
+      }
+
+      if (window.opener != null && typeof window.opener["Xrm"] != null) {
+        window["Xrm"] = window.opener["Xrm"];
+        return;
+      }
+    }
   }
 
   forceHTTPS(v: string): string {

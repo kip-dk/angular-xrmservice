@@ -1,3 +1,23 @@
+#2.2.9
+Support for deep iframing. If you have an angular app. populated as a webresources, and within such app creates another iframe, also running an app using the xrmservice, the later
+would get a wrong context, and direct any call to localhost:4200 because it was unable to resolve the context correctly. This has been solved by letting each page expose
+window["GetGlobalContext"] to be the context it is using it self. 
+
+Same level of sharing goes for getCurrentKey() because window["Xrm"] is also shared same way. If your inner iframe need to target another object than the outer, you MUST populate
+id and typename to be used in the inner frame on the url for the inner frame, oterwise the innerframe will use the same entity id as the outer.
+
+#2.2.5 - 2.2.8 Force https and test token
+These two versions does not add any new. The api on xrmservice is exposing "token". If you set this, before any other call to xrmService or xrmContext service,
+this token will be put into any call in the Bearer authentication header. You can use ADAL.js or MSAL.js (there is an angular version for the later) to
+get a token and parse it into your xrmContext. This allow you to do real SPA application that runs outside Dynamics 365. 
+
+The token has been there all the time, but now it is populated.
+
+Secondly you now have a foceHttps method on the xrmService. This is convinient if you have an onprem. dev environment running http, but for some reason, you need it to
+run https even though the installation has been installed with http. This has been proven to work, where i needed to test integration between Graph api and Dynamics 365.
+Call it before any other method on the service, and http:// will be changed to https:// before any call to CRM.
+
+
 #2.2.4
 all http operations is now adding headers to the crm dynamics 365 web api. This enable a very simple implementation of SPA running outside Dynamics 365. 
 
