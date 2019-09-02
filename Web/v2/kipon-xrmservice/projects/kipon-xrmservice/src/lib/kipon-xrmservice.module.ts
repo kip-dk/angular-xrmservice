@@ -4,6 +4,7 @@ import { HttpClientModule, HttpClient, HttpHeaders, HttpResponse } from '@angula
 import { Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators'
 
+import { XrmFormService } from './xrmform.service';
 import { XrmAuthService } from './auth.service';
 import { XrmInterceptor } from './xrm.interceptor';
 import { XrmService } from './xrm.service';
@@ -22,7 +23,8 @@ import { XrmConfigService } from './xrmconfig.service';
     XrmService,
     XrmContextService,
     XrmStateService,
-    XrmConfigService
+    XrmConfigService,
+    XrmFormService
   ]
 })
 export class KiponXrmserviceModule { }

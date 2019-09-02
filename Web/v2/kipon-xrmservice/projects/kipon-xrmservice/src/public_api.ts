@@ -4,6 +4,7 @@
 
 export * from './lib/auth.service';
 export * from './lib/xrm.interceptor';
+export * from './lib/xrmform.service';
 export * from './lib/xrm.service';
 export * from './lib/xrmconfig.service';
 export * from './lib/xrmcontext.service';

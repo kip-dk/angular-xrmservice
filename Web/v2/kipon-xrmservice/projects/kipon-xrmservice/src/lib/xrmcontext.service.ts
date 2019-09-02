@@ -4,7 +4,8 @@ import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest, HttpResponse, Htt
 import { Observable } from 'rxjs';
 import { map, catchError, startWith } from 'rxjs/operators'
 
-import { XrmService, XrmContext, XrmEntityKey, XrmQueryResult, Expand } from './xrm.service';
+import { XrmService, XrmEntityKey, XrmQueryResult, Expand } from './xrm.service';
+import { XrmContext } from './xrmform.service';
 
 export interface ToFunctionPropertyValue {
   functionPropertyValueAsString(): string;
