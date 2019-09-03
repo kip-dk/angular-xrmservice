@@ -191,26 +191,25 @@ export class XrmService {
     // First we try to find id and type in the url, this allow forcing a specific entity, directly from standard url parameters
     let params = this.getQueryStringParameters();
     let result = new XrmEntityKey();
-    result.id = params["id"];
-    result.entityType = params["typename"];
 
-    if (result.id != null && result.entityType != null) {
-      result.id = this.toGuid(result.id);
-      return new Observable<XrmEntityKey>(obs => obs.next(result));
+    let id = params["id"];
+    let type = params["typename"];
+
+    if (id == null || id == '') {
+      params = this.getContext().getQueryStringParameters();
+      id = params["id"];
+      type = params["typename"];
     }
 
-    // then we search query parameters in the current context. That might be several leveals up in an iframe hirachy
-    params = this.getContext().getQueryStringParameters();
-    result.id = params["id"];
-    result.entityType = params["typename"];
-
-    if (result.id != null && result.entityType != null) {
-      result.id = this.toGuid(result.id);
-      return new Observable<XrmEntityKey>(obs => obs.next(result));
+    let key: XrmFormKey = this.xrmForm.getFormKey(id, type);
+    if (key != null && key.id != null) {
+      result.id = this.toGuid(key.id);
+      result.entityType = key.type;
+      return new Observable(obs => obs.next(result));
     }
 
     if (this.xrmForm.getFormType() == 2) {
-      var key = this.xrmForm.getFormKey();
+      key = this.xrmForm.getFormKey(id, type);
       if (key != null) {
         result.id = this.toGuid(key.id);
         result.entityType = key.type;
@@ -218,7 +217,7 @@ export class XrmService {
       } else {
         return new Observable(obs => {
           var iv = setInterval(() => {
-            let key = this.xrmForm.getFormKey();
+            let key = this.xrmForm.getFormKey(id, type);
             if (key != null) {
               clearInterval(iv);
               result.id = this.toGuid(key.id);

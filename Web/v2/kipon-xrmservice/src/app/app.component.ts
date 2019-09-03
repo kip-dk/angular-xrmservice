@@ -44,6 +44,8 @@ export class AppComponent {
 
   user: SystemUser;
 
+  tab: number = 0;
+
   constructor(private xrmService: XrmService, private contextService: XrmContextService, private securityService: XrmSecurityService) {
     this.xrmService.debug = false;
     this.ctx = xrmService.getContext();
@@ -56,6 +58,7 @@ export class AppComponent {
     let me = this;
     this.testparam = this.xrmService.getParameter('testparam');
     this.xrmService.getCurrenKey().subscribe(r => {
+      console.log(r);
       if (r.id != null && r.entityType === 'account') {
         let expand = new Expand();
         expand.name = "primarycontactid";
@@ -70,6 +73,10 @@ export class AppComponent {
     this.securityService.getCurrentUser().subscribe(r => {
       this.user = r;
     });
+  }
+
+  setTab(n: number): void {
+    this.tab = n;
   }
 
   createNew() {

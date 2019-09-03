@@ -1,74 +1,93 @@
-<!--The content below is only a placeholder and can be replaced.-->
-<div style="text-align:center; border: solid; border-width: 0 0 1px 0; border-color: lightgray">
-  <h1>
-    Welcome to the XrmService POC Service URL: {{ url }}
-  </h1>
+<div>
+  <ul style="list-style: none">
+    <li style="float: left; padding: 10px 10px 10px 10px; cursor: pointer" [ngClass]="{ current: tab == 0 }" (click)="setTab(0)">NORMAL VIEW</li>
+    <li style="float: left; padding: 10px 10px 10px 10px; cursor: pointer" [ngClass]="{ current: tab == 1 }" (click)="setTab(1)">IFRAME VIEW</li>
+    <li style="float: left; padding: 10px 10px 10px 10px; cursor: pointer">
+      <a href="index.html" target="_blank">New page</a>
+    </li>
+    <li style="float: left; padding: 10px 10px 10px 10px; cursor: pointer">
+      <a href="javascript: window.open('index.html')" target="_blank">Popup</a>
+    </li>
+  </ul>
 </div>
 
-<div style="position: absolute; top:60px; height: 60px; left: 0; right: 0; padding: 20px 20px 20px 20px" *ngIf="user != null">
-  <ng-container *ngIf="user.roles != null">
-    Current user toles: 
-    <span *ngFor="let role of user.roles">{{ role.name }}&nbsp;</span>
-  </ng-container>
-  <br />
-  <ng-container *ngIf="user.teams != null">
-    Current user teams:
-    <span *ngFor="let team of user.teams">{{ team.name }}&nbsp;</span>
-  </ng-container>
-</div>
-
-<div style="position: absolute; top: 120px; left: 0; right: 50%; bottom: 20%; padding: 20px 20px 20px 20px">
-  <h2>Demo of XrmService</h2>
-
-  <div *ngIf="account != null">
-    <h3>We have an account from the get method</h3>
-    <div>{{ account.name }}</div>
-
-
-    <h5>Contacts {{ countContacts }}</h5>
-    <ul *ngIf="contacts != null && contacts.length > 0">
-      <li *ngFor="let con of contacts">
-        <a (click)="select(con)">{{ con.server_fullname }}&nbsp;</a>
-        <button (click)="delete(con)">Delete</button>
-      </li>
-    </ul>
+<div *ngIf="tab == 0" style="position: absolute; top: 60px; left: 0; right: 0; bottom: 0">
+  <!--The content below is only a placeholder and can be replaced.-->
+  <div style="text-align:center; border: solid; border-width: 0 0 1px 0; border-color: lightgray">
+    <h1>
+      Welcome to the XrmService POC Service URL: {{ url }}
+    </h1>
   </div>
 
-  <div *ngIf="lastContactResult != null">
-    <button (click)="prev()" [disabled]="lastContactResult.prev == null">Prev</button>
-    {{ lastContactResult.pageIndex + 1 }}
-    <button (click)="next()" [disabled]="lastContactResult.next == null">Next</button>
+  <div style="position: absolute; top:60px; height: 60px; left: 0; right: 0; padding: 20px 20px 20px 20px" *ngIf="user != null">
+    <ng-container *ngIf="user.roles != null">
+      Current user toles:
+      <span *ngFor="let role of user.roles">{{ role.name }}&nbsp;</span>
+    </ng-container>
+    <br />
+    <ng-container *ngIf="user.teams != null">
+      Current user teams:
+      <span *ngFor="let team of user.teams">{{ team.name }}&nbsp;</span>
+    </ng-container>
   </div>
-  <br />
-  <br />
 
-  <div *ngIf="contact != null">
-    <input [(ngModel)]="contact.fullname" /><br />
-    <button (click)="update()">Update {{ contact.server_fullname }}</button>
+  <div style="position: absolute; top: 120px; left: 0; right: 50%; bottom: 20%; padding: 20px 20px 20px 20px">
+    <h2>Demo of XrmService</h2>
+
+    <div *ngIf="account != null">
+      <h3>We have an account from the get method</h3>
+      <div>{{ account.name }}</div>
+
+
+      <h5>Contacts {{ countContacts }}</h5>
+      <ul *ngIf="contacts != null && contacts.length > 0">
+        <li *ngFor="let con of contacts">
+          <a (click)="select(con)">{{ con.server_fullname }}&nbsp;</a>
+          <button (click)="delete(con)">Delete</button>
+        </li>
+      </ul>
+    </div>
+
+    <div *ngIf="lastContactResult != null">
+      <button (click)="prev()" [disabled]="lastContactResult.prev == null">Prev</button>
+      {{ lastContactResult.pageIndex + 1 }}
+      <button (click)="next()" [disabled]="lastContactResult.next == null">Next</button>
+    </div>
     <br />
     <br />
-    <input [(ngModel)]="contact.address1_line1" />
-    <button (click)="updateAddress()">Update address</button>
+
+    <div *ngIf="contact != null">
+      <input [(ngModel)]="contact.fullname" /><br />
+      <button (click)="update()">Update {{ contact.server_fullname }}</button>
+      <br />
+      <br />
+      <input [(ngModel)]="contact.address1_line1" />
+      <button (click)="updateAddress()">Update address</button>
+    </div>
+
+    <br />
+    <br />
+
+    <div>
+      Create new contact<br />
+      <input [(ngModel)]="newContact" /><br />
+      <button (click)="createNew()">Create new</button>
+    </div>
+
+    <br />
+    <br />
+    Add parameter [testparam] to see result here: {{ testparam }}
   </div>
 
-  <br />
-  <br />
-
-  <div>
-    Create new contact<br />
-    <input [(ngModel)]="newContact" /><br />
-    <button (click)="createNew()">Create new</button>
+  <div style="position: absolute; top:80%; left: 0; right: 50%; bottom: 0; border: solid; border-width: 1px 1px 0 0; border-color: gray;">
+    <metadata></metadata>
   </div>
 
-  <br />
-  <br />
-  Add parameter [testparam] to see result here: {{ testparam }}
+  <div style="position: absolute; top: 60px; left: 50%; right: 0; bottom: 0; padding: 20px 20px 20px 20px">
+    <ctx></ctx>
+  </div>
 </div>
 
-<div style="position: absolute; top:80%; left: 0; right: 50%; bottom: 0; border: solid; border-width: 1px 1px 0 0; border-color: gray;">
-  <metadata></metadata>
-</div>
-
-<div style="position: absolute; top: 60px; left: 50%; right: 0; bottom: 0; padding: 20px 20px 20px 20px">
-  <ctx></ctx>
+<div *ngIf="tab == 1"  style="position: absolute; top: 60px; left: 0; right: 0; bottom: 0">
+  <iframe src="index.html" style="width: 100%; height: 100%"></iframe>
 </div>

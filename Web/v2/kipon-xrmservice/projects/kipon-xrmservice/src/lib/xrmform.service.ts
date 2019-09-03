@@ -116,23 +116,33 @@ export class XrmFormService {
   }
 
   // "Xrm", "Page", "data", "entity"
-  getFormKey(): XrmFormKey {
+  getFormKey(id: string, type: string): XrmFormKey {
     if (window[KiponXrmLOCAL_formentityr]) {
       return window[KiponXrmLOCAL_formentityr]();
+    }
+
+    if (typeof id != 'undefined' && id != null && id != '' && typeof type != 'undefined' && type != null && type != '') {
+      window[KiponXrmLOCAL_formentityr] = function () {
+        let result = new XrmFormKey();
+        result.id = id;
+        result.type = type;
+        return result;
+      }
+      return this.getFormKey(id, type);
     }
 
     if (window.parent && window.parent[KiponXrmLOCAL_formentityr]) {
       window[KiponXrmLOCAL_formentityr] = function () {
         return window.parent[KiponXrmLOCAL_formentityr]();
       }
-      return this.getFormKey();
+      return this.getFormKey(id, type);
     }
 
     if (window.opener && window.opener[KiponXrmLOCAL_formentityr]) {
       window[KiponXrmLOCAL_formentityr] = function () {
         return window.opener[KiponXrmLOCAL_formentityr]();
       }
-      return this.getFormKey();
+      return this.getFormKey(id, type);
     }
 
     if (window["Xrm"] && window["Xrm"]["Page"] && window["Xrm"]["Page"]["data"] && window["Xrm"]["Page"]["data"]["entity"]) {
@@ -142,7 +152,7 @@ export class XrmFormService {
         result.type = window["Xrm"]["Page"]["data"]["entity"]["getEntityName"]();
         return result;
       }
-      return this.getFormKey();
+      return this.getFormKey(id, type);
     }
 
     if (window.parent && window.parent["Xrm"] && window.parent["Xrm"]["Page"] && window.parent["Xrm"]["Page"]["data"] && window.parent["Xrm"]["Page"]["data"]["entity"]) {
@@ -152,7 +162,7 @@ export class XrmFormService {
         result.type = window.parent["Xrm"]["Page"]["data"]["entity"]["getEntityName"]();
         return result;
       }
-      return this.getFormKey();
+      return this.getFormKey(id, type);
     }
 
     if (window.opener && window.opener["Xrm"] && window.opener["Xrm"]["Page"] && window.opener["Xrm"]["Page"]["data"] && window.opener["Xrm"]["Page"]["data"]["entity"]) {
@@ -162,9 +172,8 @@ export class XrmFormService {
         result.type = window.opener["Xrm"]["Page"]["data"]["entity"]["getEntityName"]();
         return result;
       }
-      return this.getFormKey();
+      return this.getFormKey(id, type);
     }
-
     return null;
   }
 }

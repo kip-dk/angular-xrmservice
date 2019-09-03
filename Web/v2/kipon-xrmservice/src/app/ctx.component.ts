@@ -239,7 +239,6 @@ export class CtxComponent implements OnInit {
       });
 
       me.xrmContextService.query(me.teamPrototype, null).toPromise().then(te => {
-        console.log(te);
         this.team = te.value[0];
       });
     });

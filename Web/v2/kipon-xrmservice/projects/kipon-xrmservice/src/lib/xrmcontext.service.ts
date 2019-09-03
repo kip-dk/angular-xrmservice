@@ -1139,7 +1139,7 @@ export class XrmContextService {
       }
     }
 
-    var user = this.getContext().getUserId();
+    var user = this.getContext().getUserId().replace('{', '').replace('}','');
 
     let r = instance['access'] as XrmAccess;
     r.resolved = false;

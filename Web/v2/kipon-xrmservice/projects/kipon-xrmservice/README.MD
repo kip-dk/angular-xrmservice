@@ -1,6 +1,8 @@
 ## What is kipon-xrmservice
 kipon-xrmservice is an angular 7 library that makes it easier to work with Microsoft Dynamics 365 web api. 
 
+### Current version 2.2.11
+
 ### Current version 2.2.9
 Changelog has been moved to the buttom of this page.
 
@@ -497,6 +499,19 @@ xrmService.commit(trans).subscribe(r => {
 ```
 
 ### changelog
+
+#2.2.11
+Deep iframing took a couple of tries to get to work within dynamics 365. It is now tested and works as expected.
+
+First of all, the context will be found in the parent or opener, and expose there, for any sub-iframe loading. This allow deployment angular aplication within each other using iframes.
+I do not encourage the use of this pattern. Having multi components in a single angular application is a better pattern, but in some rare situations it might be relevant to take this approach,
+and now it works.
+
+As for getCurrentKey() that will also look up the link of iframes to find the key, but you must call the method in each iframe, because that will populate the needed methods to be available for child iframes.
+
+If you need a child to work on another key than the parent, you must parse id and typename as url parameters.
+
+Beside this, some minors and getting access level, did not work, when running as a webresource from CRM has been solved.
 
 #2.2.9
 Support for deep iframing. If you have an angular app. populated as a webresources, and within such app creates another iframe, also running an app using the xrmservice, the later
