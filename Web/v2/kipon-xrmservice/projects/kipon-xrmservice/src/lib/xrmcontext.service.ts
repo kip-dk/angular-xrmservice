@@ -248,7 +248,15 @@ export class Filter {
   operator: Comparator;
   value: any;
 
+  constructor() {
+    this["raw"] = false;
+  }
+
   toQueryString(prototype: Entity): string {
+    if (this["raw"] == true) {
+      return this.field;
+    }
+
     let result = '';
     let _f = this.field;
     let _v = "'" + this.value + "'";
@@ -401,6 +409,14 @@ export class Condition {
 
   isInactive(): Condition {
     return this.where("statecode", Comparator.Equals, 1);
+  }
+
+
+  raw(filter: string): Condition {
+    let result = new Filter();
+    result.field = filter;
+    result["raw"] = true;
+    return this;
   }
 
   toQueryString(prototype: Entity): string {

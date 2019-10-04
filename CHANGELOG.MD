@@ -1,3 +1,9 @@
+#2.2.12
+Condition for XrmContextService now support "raw filtering". This means that you can add any filter to the condition using a simple string. The advantage is that this will
+allow you to add filters that are not directly supported by the XrmContextService, but is supported by the Webapi.
+
+The disadvantage of this method is obviously that you have to concatenate the string values into a valid condition your self. You can combine raw with supported conditions.
+
 #2.2.11
 Deep iframing took a couple of tries to get to work within dynamics 365. It is now tested and works as expected.
 

@@ -1,7 +1,7 @@
 ## What is kipon-xrmservice
 kipon-xrmservice is an angular 7 library that makes it easier to work with Microsoft Dynamics 365 web api. 
 
-### Current version 2.2.11
+### Current version 2.2.12
 
 ### Current version 2.2.9
 Changelog has been moved to the buttom of this page.
@@ -499,6 +499,12 @@ xrmService.commit(trans).subscribe(r => {
 ```
 
 ### changelog
+
+#2.2.12
+Condition for XrmContextService now support "raw filtering". This means that you can add any filter to the condition using a simple string. The advantage is that this will
+allow you to add filters that are not directly supported by the XrmContextService, but is supported by the Webapi.
+
+The disadvantage of this method is obviously that you have to concatenate the string values into a valid condition your self. You can combine raw with supported conditions.
 
 #2.2.11
 Deep iframing took a couple of tries to get to work within dynamics 365. It is now tested and works as expected.
