@@ -1,4 +1,4 @@
-#2.2.12
+#2.2.13
 Condition for XrmContextService now support "raw filtering". This means that you can add any filter to the condition using a simple string. The advantage is that this will
 allow you to add filters that are not directly supported by the XrmContextService, but is supported by the Webapi.
 

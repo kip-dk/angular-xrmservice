@@ -416,6 +416,7 @@ export class Condition {
     let result = new Filter();
     result.field = filter;
     result["raw"] = true;
+    this.filter.push(result);
     return this;
   }
 
