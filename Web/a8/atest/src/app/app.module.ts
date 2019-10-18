@@ -4,29 +4,22 @@ import { NgModule, APP_INITIALIZER } from '@angular/core';
 
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
-import { KiponXrmserviceModule, XrmInterceptor, KiponXrmSecurityModule, KiponXrmAnnotationModule, KiponXrmMetadataModule } from 'kipon-xrmservice';
+import { KiponXrmserviceModule, XrmInterceptor, KiponXrmSecurityModule } from 'kipon-xrmservice';
 
 import { AccountService } from './services/account.service';
 
 import { AppComponent } from './app.component';
-import { CtxComponent } from './ctx.component';
-import { AccessViewComponent } from './accessView.component';
-import { MetadataComponent } from './metadata.component';
+
 
 @NgModule({
   declarations: [
-    AppComponent,
-    CtxComponent,
-    AccessViewComponent,
-    MetadataComponent
+    AppComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
     KiponXrmserviceModule,
-    KiponXrmSecurityModule,
-    KiponXrmAnnotationModule,
-    KiponXrmMetadataModule
+    KiponXrmSecurityModule
   ],
   providers: [
     AccountService,

@@ -2,6 +2,25 @@ import { Component, OnInit } from '@angular/core';
 
 import { XrmStateService, XrmService, XrmContext, XrmEntityKey, XrmQueryResult, Expand, XrmContextService, Entity, Entities, EntityReference, OptionSetValue, Condition, Operator, Comparator, XrmTransaction, XrmAccess, XrmAnnotationService, Annotation, FunctionPropertyValue } from 'kipon-xrmservice';
 
+import { AccountService } from './services/account.service';
+
+export class QuoteDetail extends Entity {
+  constructor() {
+    super('crmdqe_quoteproductlines', 'crmdqe_quoteproductlineid', false);
+  }
+
+  public QuantityRemaining: number;
+
+
+  onFetch(): void {
+    console.log('test');
+  }
+
+  meta(): QuoteDetail {
+    return this;
+  }
+}
+
 
 export class List extends Entity {
   constructor() {
@@ -19,19 +38,20 @@ export class CtxAccount extends Entity {
     super("accounts", "accountid", true);
   }
 
-  accountnumber: string = null;
-  accountratingcode: string = null;
-  name: string = null;
-  lastonholdtime: Date = new Date();
-  donotemail: boolean = null;
-  creditlimit: number = null;
-  transactioncurrencyid: EntityReference = new EntityReference().meta("transactioncurrencies", "transactioncurrencyid@odata.bind");
-  industrycode: OptionSetValue = new OptionSetValue();
-  primarycontactid: CtxContact = new CtxContact();
+  public accountnumber: string = null;
+  public accountratingcode: string = null;
+  public name: string = null;
+  public lastonholdtime: Date = new Date();
+  public donotemail: boolean = null;
+  public creditlimit: number = null;
+  public transactioncurrencyid: EntityReference = new EntityReference().meta("transactioncurrencies", "transactioncurrencyid@odata.bind");
+  public industrycode: OptionSetValue = new OptionSetValue();
+  public primarycontactid: CtxContact = new CtxContact();
 
   ignoreMe: string;
 
-  onFetch(): void {
+  public onFetch(): void {
+    console.log('account fetched ' + this.id);
     this.ignoreMe = 'ignore me was initialized by onFetch';
   }
 
@@ -59,6 +79,10 @@ export class CtxOpportunity extends Entity {
   hasCompetitor(com: CtxCompetitor) {
     return this.opportunitycompetitors_association != null && this.opportunitycompetitors_association.find(r => r.id == com.id) != null;
   }
+
+  onFetch(): void {
+    console.log('opportunity fetched ' + this.id);
+  }
 }
 
 export class CtxCompetitor extends Entity {
@@ -70,6 +94,11 @@ export class CtxCompetitor extends Entity {
   meta(): CtxCompetitor {
     return this;
   }
+
+  onFetch(): void {
+    console.log('competitor fetched ' + this.id);
+  }
+
 }
 
 
@@ -96,6 +125,7 @@ export class CtxContact extends Entity {
   access: XrmAccess = new XrmAccess(true);
 
   onFetch(): void {
+    console.log('contact fetched ' + this.id);
     this.server_fullname = this.fullname;
     if (this.views == null) {
       this.views = 1;
@@ -210,7 +240,7 @@ export class CtxComponent implements OnInit {
     new industry(5, "Building Supply Retail")
   ];
 
-  constructor(private xrmContextService: XrmContextService, private xrmService: XrmService, public xrmState: XrmStateService, private annoService: XrmAnnotationService) {
+  constructor(private xrmContextService: XrmContextService, private xrmService: XrmService, public xrmState: XrmStateService, private annoService: XrmAnnotationService, private accountService: AccountService) {
     this.xrmContextService.getCurrentUserId().toPromise().then(r => {
       this.currentuserid = r;
     });
@@ -413,6 +443,7 @@ export class CtxComponent implements OnInit {
   }
 
   resolveCompetitors(opp: CtxOpportunity) {
+    console.log(opp.opportunitycompetitors_association);
     if (opp.opportunitycompetitors_association == null) {
       this.xrmContextService.get(this.opportunityPrototype, opp.id).subscribe(r => {
         console.log(r);
@@ -506,6 +537,13 @@ export class CtxComponent implements OnInit {
     this.xrmContextService.setVersion("9.0");
     this.xrmContextService.debug(true);
     this.xrmContextService.func("Microsoft.Dynamics.CRM.ExpandCalendar", data, this.calendar).toPromise().then(r => {
+    });
+  }
+
+
+  callAccountService(): void {
+    this.accountService.query().subscribe(r => {
+      console.log(r);
     });
   }
 

@@ -1,9 +1,8 @@
 ## What is kipon-xrmservice
 kipon-xrmservice is an angular 7 library that makes it easier to work with Microsoft Dynamics 365 web api. 
 
-### Current version 2.2.12
+### Current version 2.2.14
 
-### Current version 2.2.9
 Changelog has been moved to the buttom of this page.
 
 ## Installation
@@ -499,6 +498,10 @@ xrmService.commit(trans).subscribe(r => {
 ```
 
 ### changelog
+#2.2.14
+onFetch (and other entity property methods) was not populated (and triggered) when using angular 8. The root cause is due to angular 8 running ES6 if the browser supports it
+and the return from for (var prop in obj) has different behavior in ES5 and ES6. This issue has been fixed in version 2.2.14
+
 
 #2.2.12
 Condition for XrmContextService now support "raw filtering". This means that you can add any filter to the condition using a simple string. The advantage is that this will

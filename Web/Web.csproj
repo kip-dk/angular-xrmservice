@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
@@ -51,6 +51,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="a8\atest\src\app\services\account.service.ts" />
     <None Remove="kipon-xrmservice\src\auth.service.ts" />
     <None Remove="kipon-xrmservice\src\xrmconfig.service.ts" />
     <None Remove="poc\src\app\metadata.component.ts" />
@@ -70,6 +71,7 @@
     <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrmsecurity.service.ts" />
     <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrmstate.service.ts" />
     <None Remove="v2\kipon-xrmservice\src\app\metadata.component.ts" />
+    <None Remove="v2\kipon-xrmservice\src\app\services\account.service.ts" />
     <None Remove="xrmservice\.travis.yml" />
     <None Remove="xrmservice\gulpfile.js" />
   </ItemGroup>
@@ -91,6 +93,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="a8\atest\src\app\services\account.service.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="kipon-xrmservice\src\auth.service.ts" />
     <TypeScriptCompile Include="kipon-xrmservice\src\xrmconfig.service.ts" />
     <TypeScriptCompile Include="poc\src\app\metadata.component.ts" />
@@ -109,6 +114,7 @@
     <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrmsecurity.service.ts" />
     <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrmstate.service.ts" />
     <TypeScriptCompile Include="v2\kipon-xrmservice\src\app\metadata.component.ts" />
+    <TypeScriptCompile Include="v2\kipon-xrmservice\src\app\services\account.service.ts" />
   </ItemGroup>
 
 </Project>

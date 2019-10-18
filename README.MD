@@ -3,6 +3,9 @@ This is the git repository for a simple Dynamics 365 Web API wrapper for angular
 
 If you need it to run under version 4 or 5 you must use npm version 1.3.x.
 
+For angular 8 and above, be sure to use version 2.2.14 or later. onFetch and other entity property methods might not be populated correct
+using earlier versions.
+
 ## Installation
 
 To install this library, run:

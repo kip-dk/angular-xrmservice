@@ -1488,11 +1488,14 @@ export class XrmContextService {
           done = true;
         }
       }
-
-      if (typeof prototype[prop] === 'function') {
-        result[prop] = prototype[prop];
-      }
     }
+
+    var names = Object.getOwnPropertyNames(Object.getPrototypeOf(prototype));
+    names.forEach(r => {
+      if (r != 'constructor' && typeof prototype[r] === 'function') {
+        result[r] = prototype[r];
+      }
+    });
 
     let eps = this.getExpandProperties(prototype);
 
