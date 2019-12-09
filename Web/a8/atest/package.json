@@ -19,7 +19,7 @@
     "@angular/platform-browser": "~8.2.11",
     "@angular/platform-browser-dynamic": "~8.2.11",
     "@angular/router": "~8.2.11",
-    "kipon-xrmservice": "^2.2.13",
+    "kipon-xrmservice": "^2.2.14",
     "rxjs": "~6.4.0",
     "tslib": "^1.10.0",
     "zone.js": "~0.9.1"

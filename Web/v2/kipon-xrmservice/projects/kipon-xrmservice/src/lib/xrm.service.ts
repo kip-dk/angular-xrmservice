@@ -97,6 +97,13 @@ export class XrmService {
     let baseUrl = "http://localhost:4200";
     let version = 'v8.2';
 
+    var comesfrom = window.location.href.toLowerCase();
+    if (comesfrom.indexOf("webresources") >= 0) {
+      var domain = window.location.href.split('/')[2];
+      var proto = comesfrom.startsWith("https://") ? "https://" : "http://";
+      baseUrl = proto + domain;
+    }
+
     try {
       var configService = this.injector.get(XrmConfigService) as XrmConfigService;
       if (configService != null) {

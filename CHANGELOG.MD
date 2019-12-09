@@ -1,3 +1,6 @@
+#2.2.15
+Resolve to same server url, if "webresources" is contained in the url.
+
 #2.2.14
 onFetch (and other entity property methods) was not populated (and triggered) when using angular 8. The root cause is due to angular 8 running ES6 if the browser supports it
 and the return from for (var prop in obj) has different behavior in ES5 and ES6. This issue has been fixed in version 2.2.14

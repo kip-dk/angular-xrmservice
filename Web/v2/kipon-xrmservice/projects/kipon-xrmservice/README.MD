@@ -1,7 +1,7 @@
 ## What is kipon-xrmservice
 kipon-xrmservice is an angular 7 library that makes it easier to work with Microsoft Dynamics 365 web api. 
 
-### Current version 2.2.14
+### Current version 2.2.15
 
 Changelog has been moved to the buttom of this page.
 
@@ -498,6 +498,10 @@ xrmService.commit(trans).subscribe(r => {
 ```
 
 ### changelog
+#2.2.15 Resolve url
+If the url (lowercased) contains the word webresources, it is assumed that the page is running from inside CRM, and instead of falling back to the angular developer url  http://localhost:4200, it will
+take the base url, from current url. That enables browsing CRM webresources directly, without having a context from the parent or opener.
+
 #2.2.14
 onFetch (and other entity property methods) was not populated (and triggered) when using angular 8. The root cause is due to angular 8 running ES6 if the browser supports it
 and the return from for (var prop in obj) has different behavior in ES5 and ES6. This issue has been fixed in version 2.2.14
