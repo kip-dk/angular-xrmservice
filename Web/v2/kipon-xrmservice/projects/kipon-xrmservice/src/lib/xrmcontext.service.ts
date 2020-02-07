@@ -256,9 +256,31 @@ export class Filter {
     if (this["raw"] == true) {
       return this.field;
     }
-
+    
     let result = '';
     let _f = this.field;
+
+    if (this.operator == Comparator.Equals && this.value == null) {
+      this.operator = Comparator.DoesNotContainsData;
+    }
+
+    if (this.operator == Comparator.NotEquals && this.value == null) {
+      this.operator = Comparator.ContainsData;
+    }
+
+    switch (this.operator) {
+      case Comparator.ContainsData: {
+        return _f + ' ne null';
+      }
+      case Comparator.DoesNotContainsData: {
+        return _f + ' eq null';
+      }
+    }
+
+    if (this.value == null) {
+      throw new Error("value is required for operation type " + this.operator);
+    }
+
     let _v = "'" + this.value + "'";
 
     if (typeof this.value == 'number') {
@@ -358,12 +380,6 @@ export class Filter {
       }
       case Comparator.NotEndsWith: {
         return "not endswith(" + _f + "," + _v + ")";
-      }
-      case Comparator.ContainsData: {
-        return _f + ' ne null';
-      }
-      case Comparator.DoesNotContainsData: {
-        return _f + ' eq null';
       }
     }
     return result;

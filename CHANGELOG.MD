@@ -1,3 +1,12 @@
+#2.2.17
+Comparator.DoesNotContainsData gave null ref exception for date fields.
+
+Below might give slightly different behavior on some conditions, due to "smart-convert" null values to natural conditions. The  former code would
+proberbly throw and an exception, so it is unlikely it will change anything.
+
+Auto convert Equals compareator with null value to DoesNotContainsData
+Auto convert NotEquals comparator with null value to ContainsData
+
 #2.2.15
 Resolve to same server url, if "webresources" is contained in the url.
 

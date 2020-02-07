@@ -1,7 +1,7 @@
 ## What is kipon-xrmservice
 kipon-xrmservice is an angular 7 library that makes it easier to work with Microsoft Dynamics 365 web api. 
 
-### Current version 2.2.15
+### Current version 2.2.17
 
 Changelog has been moved to the buttom of this page.
 
@@ -498,6 +498,18 @@ xrmService.commit(trans).subscribe(r => {
 ```
 
 ### changelog
+
+#2.2.17 Comparator.DoesNotContainsData
+Comparator.DoesNotContainsData gave null ref exception for date fields.
+
+Below might give slightly different behavior on some conditions, due to "smart-convert" null values to natural conditions. The  former code would
+proberbly throw and an exception, so it is unlikely it will change anything.
+
+Auto convert Equals compareator with null value to DoesNotContainsData
+Auto convert NotEquals comparator with null value to ContainsData
+
+
+
 #2.2.15 Resolve url
 If the url (lowercased) contains the word webresources, it is assumed that the page is running from inside CRM, and instead of falling back to the angular developer url  http://localhost:4200, it will
 take the base url, from current url. That enables browsing CRM webresources directly, without having a context from the parent or opener.

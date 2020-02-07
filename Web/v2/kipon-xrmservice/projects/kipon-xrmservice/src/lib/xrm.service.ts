@@ -102,9 +102,9 @@ export class XrmService {
       var domain = window.location.href.split('/')[2];
       var proto = comesfrom.startsWith("https://") ? "https://" : "http://";
 
-      // to-do, find a better way to render multi org sub url from the url. (never needed on online, therefore blank for https ... )
+      // to-do, find a better way to render multi org sub url from the url. (for now - never needed on online, therefore blank for https, but might be needed for onpre running https ... )
       var sub = comesfrom.startsWith("https://") ? "" : "/" + window.location.href.split('/')[3];
-      baseUrl = proto + domain;
+      baseUrl = proto + domain + sub;
     }
 
     try {
