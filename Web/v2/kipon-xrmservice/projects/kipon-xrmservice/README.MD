@@ -501,7 +501,7 @@ xrmService.commit(trans).subscribe(r => {
 
 #2.2.18
 Constructor on EntityReference has been extended to support creating full valid references through the constructor, so you do not need to manually assign pluralName and assocationnavigation property after
-creating the etityreference instance.
+creating the entityreference instance.
 
 ToEntityReference(associationnavigationproperty: string) has been added to Entity. The purpuse is to make it easy to assign an assosiationproperty a value from an instance of an entity.
 
