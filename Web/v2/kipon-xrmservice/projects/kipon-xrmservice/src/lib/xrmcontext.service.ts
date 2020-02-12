@@ -52,6 +52,11 @@ export class Entity {
       }
     }
   }
+
+  ToEntityReference(associatednavigationproperty: string): EntityReference;
+  ToEntityReference(associatednavigationproperty: string = null): EntityReference {
+    return new EntityReference(this.id, this._pluralName, associatednavigationproperty, this._logicalName);
+  }
 }
 
 export class Entities<T extends Entity> extends Array<T> {
@@ -116,8 +121,28 @@ export class Entities<T extends Entity> extends Array<T> {
 export class EntityReference {
   constructor();
   constructor(id: string);
-  constructor(id: string = null) {
+  constructor(id: string, pluralName: string);
+  constructor(id: string, pluralName: string, associatednavigationproperty: string);
+  constructor(id: string, pluralName: string, associatednavigationproperty: string, logicalname: string);
+  constructor(id: string = null, pluralName: string = null, associatednavigationproperty: string = null, logicalname: string = null) {
     this.id = id;
+    this.pluralName = pluralName;
+    this.associatednavigationproperty = associatednavigationproperty;
+    this.logicalname = logicalname;
+
+    if (this.pluralName != null && logicalname == null) {
+      switch (this.pluralName.toLowerCase()) {
+        case "emails": this.logicalname = "email"; break;
+        case "appointments": this.logicalname = "appointment"; break;
+        case "letters": this.logicalname = "letter"; break;
+        case "phonecalls": this.logicalname = "phonecall"; break;
+        case "tasks": this.logicalname = "task"; break;
+        default: {
+          this.logicalname = this.pluralName.substr(0, (this.pluralName.length - 1)).toLowerCase();
+          break;
+        }
+      }
+    }
   }
 
   id: string;

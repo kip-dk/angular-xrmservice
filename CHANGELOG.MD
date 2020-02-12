@@ -1,3 +1,15 @@
+#2.2.18
+Constructor on EntityReference has been extended to support creating full valid references through the constructor, so you do not need to manually assign pluralName and assocationnavigation property after
+creating the etityreference instance.
+
+ToEntityReference(associationnavigationproperty: string) has been added to Entity. The purpuse is to make it easy to assign an assosiationproperty a value from an instance of an entity.
+
+Be aware, if you assign a reference field on an entity with this method, you MUST parse
+the associationnavigationproperty related to that specific field, otherwise a create/update operation will fail. An entity reference must map to an OData navigation property on the form
+
+{associationnavigationproperty}@odata.bind = /{entity.pluralName}(entity.id), and the associationnavigationproperty is not the same name as the property name, so for the framework to create this map,
+the name of the associationnavigationproperty is needed.
+
 #2.2.17
 Comparator.DoesNotContainsData gave null ref exception for date fields.
 
