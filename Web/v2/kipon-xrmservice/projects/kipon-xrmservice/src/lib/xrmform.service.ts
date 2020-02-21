@@ -21,7 +21,7 @@ export class XrmFormKey {
 
 export class XrmContextInstance implements XrmContext {
   private clientUrl: string;
-  private queryStringParameters: string;
+  private queryStringParameters: any;
   private version: string;
   private userName: string;
   private userId: string;
@@ -29,7 +29,7 @@ export class XrmContextInstance implements XrmContext {
 
   constructor(ctx: XrmContext) {
     this.clientUrl = ctx.getClientUrl();
-    this.getQueryStringParameters = ctx.getQueryStringParameters();
+    this.queryStringParameters = ctx.getQueryStringParameters();
     this.version = ctx.getVersion();
     this.userName = ctx.getUserName();
     this.userId = ctx.getUserId();

@@ -205,6 +205,7 @@ export class XrmService {
     let id = params["id"];
     let type = params["typename"];
 
+
     if (id == null || id == '') {
       params = this.getContext().getQueryStringParameters();
       id = params["id"];
