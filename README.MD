@@ -42,7 +42,7 @@ XrmContextService (a Web API programming model based on typescript prototypes): 
 
 [Go to the XrmContextService documentation page](https://github.com/kip-dk/angular-xrmservice/blob/master/Web/kipon-xrmservice/XRMCONTEXTSERVICE.MD)
 
-### Changelog - last update 2019-12-07
+### Changelog - last update 2020-02-21
 [Go to changelog](https://github.com/kip-dk/angular-xrmservice/blob/master/CHANGELOG.MD)
 
 ## The project

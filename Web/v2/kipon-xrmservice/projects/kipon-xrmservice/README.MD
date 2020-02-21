@@ -1,7 +1,7 @@
 ## What is kipon-xrmservice
 kipon-xrmservice is an angular 7 library that makes it easier to work with Microsoft Dynamics 365 web api. 
 
-### Current version 2.2.17
+### Current version 2.2.19
 
 Changelog has been moved to the buttom of this page.
 
@@ -498,6 +498,13 @@ xrmService.commit(trans).subscribe(r => {
 ```
 
 ### changelog
+
+#2.2.19 - 2020-02-21
+IE and Edge is sometime giving cross script error "Can't execute code from a freed script". This issue is caused by the fact that the framework is keeping a long living reference to the
+initiating page Xrm instance to have access to clienturl, formtype and more. To solve this issue, the way xrmservice is communicating with its parent frame or opener is changed, so information
+is stored locally it its own "window"["variable"], and the occurance of cross frame/popup scripting is reduced to a minimum, and only occure once per function, and the parent/opener function is
+only used to initialize the corresponding values in the child/popup window.
+
 
 #2.2.18
 Constructor on EntityReference has been extended to support creating full valid references through the constructor, so you do not need to manually assign pluralName and assocationnavigation property after
