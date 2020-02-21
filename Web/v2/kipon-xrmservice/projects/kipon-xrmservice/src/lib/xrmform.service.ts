@@ -139,6 +139,7 @@ export class XrmFormService {
       let result = new XrmFormKey();
       result.id = id;
       result.type = type;
+      window[KiponXrmLOCAL_formentityr] = result;
       return result;
     }
 
