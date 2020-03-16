@@ -56,10 +56,10 @@ export class Expand {
 
 @Injectable()
 export class XrmService {
-  private defaultApiUrl: string = "/api/data/v8.2/";
+  private defaultApiUrl: string = "/api/data/v9.0/";
   private contextFallback: XrmContext = null;
-  apiUrl: string = '/api/data/v8.2/';
-  apiVersion: string = 'v8.2';
+  apiUrl: string = '/api/data/v9.0/';
+  apiVersion: string = 'v9.0';
   debug: boolean = false;
   token: string = null;
   forceHttps: boolean = false;
@@ -69,7 +69,7 @@ export class XrmService {
   }
 
   setVersion(v: string): void {
-    this.apiUrl = this.defaultApiUrl.replace("8.2", v);
+    this.apiUrl = this.defaultApiUrl.replace("9.0", v);
   }
 
 
@@ -82,7 +82,7 @@ export class XrmService {
 
     if (x != null) {
       if (typeof x.getVersion == 'undefined') {
-        x.getVersion = (): string => "8.2.0.0"
+        x.getVersion = (): string => "9.0.0.0"
       }
 
       if (typeof x.$devClientUrl == 'undefined') {
@@ -95,7 +95,7 @@ export class XrmService {
 
     this.log('using fake context');
     let baseUrl = "http://localhost:4200";
-    let version = 'v8.2';
+    let version = 'v9.0';
 
     var comesfrom = window.location.href.toLowerCase();
     if (comesfrom.indexOf("webresources") >= 0) {
@@ -337,10 +337,7 @@ export class XrmService {
     headers = headers.append("OData-Version", "4.0");
     headers = headers.append("Content-Type", "application/json; charset=utf-8");
     headers = headers.append("Prefer", "odata.include-annotations=*");
-
-    if (!this.getContext().getVersion().startsWith("8.2")) {
-      headers = headers.append("Prefer", "return=representation");
-    }
+    headers = headers.append("Prefer", "return=representation");
 
     let options = {
       headers: headers,
@@ -370,10 +367,7 @@ export class XrmService {
     headers = headers.append("OData-Version", "4.0");
     headers = headers.append("Content-Type", "application/json; charset=utf-8");
     headers = headers.append("Prefer", "odata.include-annotations=*");
-
-    if (fields != null && !this.getContext().getVersion().startsWith("8.2")) {
-      headers = headers.append("Prefer", "return=representation");
-    }
+    headers = headers.append("Prefer", "return=representation");
 
     let _f = '';
     if (fields != null) {
@@ -544,7 +538,7 @@ export class XrmService {
   }
 
   private initializeVersion(_v: string): void {
-    if (_v == null) { _v = '8.2.0.0'; }
+    if (_v == null) { _v = '9.0.0.0'; }
     let v = _v.split('.');
     this.setVersion(v[0] + "." + v[1]);
     this.apiVersion = 'v' + v[0] + '.' + v[1];

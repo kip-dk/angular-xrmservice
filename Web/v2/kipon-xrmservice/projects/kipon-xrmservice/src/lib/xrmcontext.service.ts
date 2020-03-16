@@ -756,7 +756,7 @@ export class XrmContextService {
         return instance;
       }
 
-      this.xrmService.log('version 8.2 or higher update');
+      this.xrmService.log('version 9.0 or higher update');
       return me.resolve(prototype, response, true);
     }));
   }

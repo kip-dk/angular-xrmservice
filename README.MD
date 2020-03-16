@@ -6,6 +6,8 @@ If you need it to run under version 4 or 5 you must use npm version 1.3.x.
 For angular 8 and above, be sure to use version 2.2.14 or later. onFetch and other entity property methods might not be populated correct
 using earlier versions.
 
+If you need to run against dynamics 8.2 or earlier, do not take later version than 1.2.19.  As of version 1.3.0, only version 9.0 and above will be supported.
+
 ## Installation
 
 To install this library, run:
@@ -42,7 +44,7 @@ XrmContextService (a Web API programming model based on typescript prototypes): 
 
 [Go to the XrmContextService documentation page](https://github.com/kip-dk/angular-xrmservice/blob/master/Web/kipon-xrmservice/XRMCONTEXTSERVICE.MD)
 
-### Changelog - last update 2020-02-21
+### Changelog - last update 2020-03-16
 [Go to changelog](https://github.com/kip-dk/angular-xrmservice/blob/master/CHANGELOG.MD)
 
 ## The project

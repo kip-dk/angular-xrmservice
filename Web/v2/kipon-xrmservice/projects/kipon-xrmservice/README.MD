@@ -1,7 +1,7 @@
 ## What is kipon-xrmservice
 kipon-xrmservice is an angular 7 library that makes it easier to work with Microsoft Dynamics 365 web api. 
 
-### Current version 2.2.19
+### Current version 2.3.0
 
 Changelog has been moved to the buttom of this page.
 
@@ -498,6 +498,12 @@ xrmService.commit(trans).subscribe(r => {
 ```
 
 ### changelog
+
+#2.3.0 - 2020-03-16
+Removed support for version 8.2 of CRM. The support for version 8.2 installation is complicating the version management between the url posted
+and the @odata.link fields, and is giving errors on earlier version of the framework on Dynamics 365 online 9.1 installation. Therefore we have decided to to stop
+the support for CRM 8.2 from the start of version 2.3.0. If you need support for Dynamics 365 version 8.2, do NOT update beyond version 2.2.19.
+
 
 #2.2.19 - 2020-02-21
 IE and Edge is sometime giving cross script error "Can't execute code from a freed script". This issue is caused by the fact that the framework is keeping a long living reference to the
