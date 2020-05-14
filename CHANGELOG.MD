@@ -1,3 +1,10 @@
+### Current version 2.3.3 - 2020-05-14
+Fetchxml support for sort(attrname, descending = false) to allow server side sort of the result. Multi sort can be added by calling sort multi time
+
+
+### Current version 2.3.2 - 2020-05-14
+Fetchxml support for count, page and distinct
+
 #2.3.1 - 2020-05-14
 Implemented EXPERIMENTAL support for fetchxml on xrmcontextservice. To support more advanced query, a fetchxml(entity: Entity, xml: string ) has been introduced. On top, a Fethxml class
 has been added to enable building the fetchxml using Condition etc. The api is experimental, and for now only smaller queries are supported (no fallback to to $batch for large has been implemented yet).

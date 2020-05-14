@@ -55,12 +55,25 @@ export class Link {
   }
 }
 
+class Fetchsort {
+  attribute: string;
+  descending: boolean;
+
+  toFetchXml(): string {
+    if (this.descending) {
+      return "<order attribute='" + this.attribute + "' descending='true' />";
+    }
+    return "<order attribute='" + this.attribute + "' />";
+  }
+}
+
 export class Fetchxml {
   private root: FetchEntity;
 
   count: number;
   page: number;
   distinct: boolean;
+  private sorts: Fetchsort[];
 
   constructor(prototype: Entity, condition: Condition) {
     this.root = new FetchEntity();
@@ -71,6 +84,18 @@ export class Fetchxml {
 
   entity(): FetchEntity {
     return this.root;
+  }
+
+  sort(attribname: string): void;
+  sort(attribname: string, descending: boolean): void;
+  sort(attribname: string, descending: boolean = false): void {
+    if (this.sorts == null) {
+      this.sorts = [] as Fetchsort[];
+    }
+    let nextsort = new Fetchsort();
+    nextsort.attribute = attribname;
+    nextsort.descending = descending;
+    this.sorts.push(nextsort);
   }
 
   toFetchXml(): string {
@@ -103,6 +128,12 @@ export class Fetchxml {
       this.root.linkedentities.forEach(l => {
         result += l.toFetchXml();
       })
+    }
+
+    if (this.sorts != null && this.sorts.length > 0) {
+      this.sorts.forEach(s => {
+        result += s.toFetchXml();
+      });
     }
     result += "</entity>";
     result += "</fetch>"
