@@ -1,4 +1,4 @@
-### Current version 2.3.6 - 2020-05-14
+### Current version 2.3.7 - 2020-05-14
 outerjoin support on Fetchxml object and alias condition, only supported for fetchxml
 
 ### version 2.3.5 - 2020-05-14

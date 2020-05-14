@@ -507,9 +507,9 @@ export class Filter {
     }
 
     if (_v != null) {
-      result += "<condition" + this.alias + " attribute='" + this.field + "' operator='" + op + "' value='" + _v + "' />";
+      result += "<condition" + aliasString + " attribute='" + this.field + "' operator='" + op + "' value='" + _v + "' />";
     } else {
-      result += "<condition" + this.alias + " attribute='" + this.field + "' operator='" + op + "' />";
+      result += "<condition" + aliasString + " attribute='" + this.field + "' operator='" + op + "' />";
     }
     return result;
   }
