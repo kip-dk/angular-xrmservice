@@ -26,15 +26,47 @@ export class FetchEntity {
     this.linkedentities.push(next);
     return res;
   }
+
+  innerjoin(prototype: Entity, alias: string, from: string, property: string, condition: Condition): FetchEntity;
+  innerjoin(prototype: Entity, alias: string, from: string, property: string, condition: Condition, attributes: string[]): FetchEntity;
+  innerjoin(prototype: Entity, alias: string, from: string, property: string, condition: Condition, attributes: string[] = null): FetchEntity {
+    var res = new FetchEntity();
+    res.name = prototype._logicalName;
+    res.condition = condition;
+    res.attributes = attributes
+    res.parent = res;
+
+    if (this.linkedentities == null) {
+      this.linkedentities = [];
+    }
+    var next = new Link();
+    next.entity = res;
+    next.to = property;
+    next.alias = alias;
+    next.from = from;
+    next.type = "inner";
+
+    this.linkedentities.push(next);
+    return res;
+  }
 }
 
 export class Link {
+  from: string;
+  alias: string;
+  type: string;
   to: string;
+
   entity: FetchEntity;
 
   toFetchXml(): string {
     var result: string = "";
-    result += "<link-entity name='" + this.entity.name + "' to='" + this.to + "'>";
+
+    var fromString = "";
+    if (this.from != null) {
+      fromString = " alias='" + this.alias + "' from='" + this.from + "' link-type='" + this.type + "'";
+    }
+    result += "<link-entity name='" + this.entity.name + "' to='" + this.to + "'" + fromString + ">";
     if (this.entity.attributes != null && this.entity.attributes.length > 0) {
       this.entity.attributes.forEach(a => {
         result += "<attribute name='" + a + "'/>"

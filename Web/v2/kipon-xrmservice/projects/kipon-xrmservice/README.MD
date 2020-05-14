@@ -1,8 +1,8 @@
 ## What is kipon-xrmservice
 kipon-xrmservice is an angular 7 library that makes it easier to work with Microsoft Dynamics 365 web api. 
 
-### Current version 2.3.4 - 2020-05-14
-keyname was not auto included in list of attributes
+### Current version 2.3.5 - 2020-05-14
+innerjoin support on Fetchxml object
 
 Changelog has been moved to the buttom of this page.
 
@@ -515,28 +515,40 @@ xrmService.commit(trans).subscribe(r => {
 
 ```
 
-### changelog
+## changelog
 
-#2.3.1 - 2020-05-14
+### Current version 2.3.5 - 2020-05-14
+innerjoin support on Fetchxml object
+
+### Version 2.3.4 - 2020-05-14
+keyname was not auto included in list of attributes
+
+### Version 2.3.3 - 2020-05-14
+Fetchxml support for sort(attrname, descending = false) to allow server side sort of the result. Multi sort can be added by calling sort multi time
+
+### Version 2.3.2 - 2020-05-14
+Fetchxml support for count, page and distinct
+
+### 2.3.1 - 2020-05-14
 Implemented EXPERIMENTAL support for fetchxml on xrmcontextservice. To support more advanced query, a fetchxml(entity: Entity, xml: string ) has been introduced. On top, a Fethxml class
 has been added to enable building the fetchxml using Condition etc. The api is experimental, and for now only smaller queries are supported (no fallback to to $batch for large has been implemented yet).
 Entities received from fetchxml has same nature as received by normal api, and all patterns applied by the query(..) method is also applied on result from fetchxml, including object caching on id.
 
 
-#2.3.0 - 2020-03-16
+### 2.3.0 - 2020-03-16
 Removed support for version 8.2 of CRM. The support for version 8.2 installation is complicating the version management between the url posted
 and the @odata.link fields, and is giving errors on earlier version of the framework on Dynamics 365 online 9.1 installation. Therefore we have decided to to stop
 the support for CRM 8.2 from the start of version 2.3.0. If you need support for Dynamics 365 version 8.2, do NOT update beyond version 2.2.19.
 
 
-#2.2.19 - 2020-02-21
+### 2.2.19 - 2020-02-21
 IE and Edge is sometime giving cross script error "Can't execute code from a freed script". This issue is caused by the fact that the framework is keeping a long living reference to the
 initiating page Xrm instance to have access to clienturl, formtype and more. To solve this issue, the way xrmservice is communicating with its parent frame or opener is changed, so information
 is stored locally it its own "window"["variable"], and the occurance of cross frame/popup scripting is reduced to a minimum, and only occure once per function, and the parent/opener function is
 only used to initialize the corresponding values in the child/popup window.
 
 
-#2.2.18
+### 2.2.18
 Constructor on EntityReference has been extended to support creating full valid references through the constructor, so you do not need to manually assign pluralName and assocationnavigation property after
 creating the entityreference instance.
 
@@ -549,7 +561,7 @@ the associationnavigationproperty related to that specific field, otherwise a cr
 the name of the associationnavigationproperty is needed.
 
 
-#2.2.17 Comparator.DoesNotContainsData
+### 2.2.17 Comparator.DoesNotContainsData
 Comparator.DoesNotContainsData gave null ref exception for date fields.
 
 Below might give slightly different behavior on some conditions, due to "smart-convert" null values to natural conditions. The  former code would
@@ -560,22 +572,22 @@ Auto convert NotEquals comparator with null value to ContainsData
 
 
 
-#2.2.15 Resolve url
+### 2.2.15 Resolve url
 If the url (lowercased) contains the word webresources, it is assumed that the page is running from inside CRM, and instead of falling back to the angular developer url  http://localhost:4200, it will
 take the base url, from current url. That enables browsing CRM webresources directly, without having a context from the parent or opener.
 
-#2.2.14
+### 2.2.14
 onFetch (and other entity property methods) was not populated (and triggered) when using angular 8. The root cause is due to angular 8 running ES6 if the browser supports it
 and the return from for (var prop in obj) has different behavior in ES5 and ES6. This issue has been fixed in version 2.2.14
 
 
-#2.2.12
+### 2.2.12
 Condition for XrmContextService now support "raw filtering". This means that you can add any filter to the condition using a simple string. The advantage is that this will
 allow you to add filters that are not directly supported by the XrmContextService, but is supported by the Webapi.
 
 The disadvantage of this method is obviously that you have to concatenate the string values into a valid condition your self. You can combine raw with supported conditions.
 
-#2.2.11
+### 2.2.11
 Deep iframing took a couple of tries to get to work within dynamics 365. It is now tested and works as expected.
 
 First of all, the context will be found in the parent or opener, and expose there, for any sub-iframe loading. This allow deployment angular aplication within each other using iframes.
@@ -588,7 +600,7 @@ If you need a child to work on another key than the parent, you must parse id an
 
 Beside this, some minors and getting access level, did not work, when running as a webresource from CRM has been solved.
 
-#2.2.9
+### 2.2.9
 Support for deep iframing. If you have an angular app. populated as a webresources, and within such app creates another iframe, also running an app using the xrmservice, the later
 would get a wrong context, and direct any call to localhost:4200 because it was unable to resolve the context correctly. This has been solved by letting each page expose
 window["GetGlobalContext"] to be the context it is using it self. 
@@ -598,7 +610,7 @@ id and typename to be used in the inner frame on the url for the inner frame, ot
 
 The misspelling of the getCurrentKey method on xrmService has been fixed, and the wrong spelling (getCurrenKey) as been deprecated.
 
-#2.2.5 - 2.2.8 Force https and test token
+### 2.2.5 - 2.2.8 Force https and test token
 These three versions does not add any new. The api on xrmservice is exposing "token". If you set this, before any other call to xrmService or xrmContext service,
 this token will be put into any call in the Bearer authentication header. You can use ADAL.js or MSAL.js (there is an angular version for the later) to
 get a token and parse it into your xrmContext. This allow you to do real SPA application that runs outside Dynamics 365. 
@@ -609,14 +621,14 @@ Secondly you now have a foceHttps method on the xrmService. This is convinient i
 run https even though the installation has been installed with http. This has been proven to work, where i needed to test integration between Graph api and Dynamics 365.
 Call it before any other method on the service, and http:// will be changed to https:// before any call to CRM.
 
-#2.2.4
+### 2.2.4
 all http operations is now adding headers to the crm dynamics 365 web api. This enable a very simple implementation of SPA running outside Dynamics 365. 
 
 The first draft of this, you can install MSAL.js alongside kipon-xrmservice, and then simply set token of the xrmservice according to the return from get token.
 
 Be aware that the api for this functionallity migh change in upcomming version, where a more smoot SPA outside dynamics 365 implementation will be provided.
 
-#2.2.3
+### 2.2.3
 added support for functions. Dynamics 365 Web API has a number of functions that can be executed bounded or unbounded, with or without parameters.
 Please refere to the Dynamics 365 documentation for details. the xrmservice now supported a simple func(...) method to call a dynamics 365 function,
 while xrmcontext service has the same method, but taking more natural parameters, and streamline you entities an parameters into a well formatted
@@ -624,41 +636,41 @@ url that follows the speficiation. Be aware that many functions are not supporte
 and gives very few guidance on how to format parameters etc. This fact might leed to a situation where you end up having difficulties getting a function call to work.
 
 
-#2.2.2
+### 2.2.2
 calling getCurrentUserId() in developermode, where ctx. was created from XrmConfigService used localhos as url regardless of setting given by xrmconfigservice.
 This has been fixed with version 2.2.2
 
-#2.2.1
+### 2.2.1
 Documentation only
 
-#2.2.0
+### 2.2.0
 
 Condition filter in XrmContextService now support Date
 
 MetadataService has been renamed to XrmMetadataService and moved to its own KiponXrmMetadataModule. The service is only needed
 in very special application that need metadata, and as such not needed as a 1. class memeber of the library. 
 
-#2.1.16
+### 2.1.16
 xrmservice was unable to resolve connection url when running in a web resource popup window. This has been solved by trying to
 find the context through window.opener
 
-#2.1.15
+### 2.1.15
 On CRM 8.2 or less, id was not set on new entities after create.
 
-# 2.1.14
+### 2.1.14
 values parsed to condition in xrmcontext service are url encoded.
 
-# 2.1.7
+### 2.1.7
 Ref. fix on update entity ref.
 
-# 2.1.6 
+### 2.1.6 
 log update before update to console if debug is enable.
 
-# 2.1.5
+### 2.1.5
 When using xrmcontextservice create, the instance return in the observable will now be the same instance as parsed into the create, but now
 the id has been populated with the value from the server side create operation.
 
-# 2.1.4
+### 2.1.4
 Entities now have a property _logicalName that is populated from query and get from the prototype definition. The logical name
 is assumed to be the keyname, where "id" is removed at the end. This might not always be the case. In such case, the correct name can be
 parsed to the constructor of the entity prototype definition. The code does render correct _logical name for standard activity entities
@@ -671,7 +683,7 @@ handles simple annotations, but the vision is to provide a full reusable service
 attach files and more. The _logicalName property on Entity has been added to support a nice and simple api on this service.
 
 
-# 2.1.3
+### 2.1.3
 xrmService.getCurrentUserId() : Observable<string> method to get the current user observable.
 If you are running your application inside Dynamics 365 as as Web Resource, this method will always reutrn
 the current user id instantly (you still need to sbuscribe), because it is available synchronized from Dynamics api.
@@ -688,13 +700,13 @@ map infrastructure in this library.
 
 The service has been added as a separate module that need to be imported separatly.
 
-# 2.1.1
+### 2.1.1
 Strip ref fields from {} when parsed as condition.
 
-# kipon-xrmservice 2.1.x
+### kipon-xrmservice 2.1.x
 With version 2.1.x of kipon-xrmservice the library now target angular 7.
 
-# kipon-xrmservice version 2
+### kipon-xrmservice version 2
 With version 2.0.x of kipon-xrmservice the library now target angular 6. 
 
 If you need it to work with angular 4 or 5, please use version 1.3.1

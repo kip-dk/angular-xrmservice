@@ -1,3 +1,6 @@
+### Current version 2.3.5 - 2020-05-14
+innerjoin support on Fetchxml object
+
 ### Current version 2.3.4 - 2020-05-14
 keyname was not auto included in list of attributes
 
