@@ -1,14 +1,17 @@
-### Current version 2.3.5 - 2020-05-14
+### Current version 2.3.6 - 2020-05-14
+outerjoin support on Fetchxml object and alias condition, only supported for fetchxml
+
+### version 2.3.5 - 2020-05-14
 innerjoin support on Fetchxml object
 
-### Current version 2.3.4 - 2020-05-14
+### version 2.3.4 - 2020-05-14
 keyname was not auto included in list of attributes
 
-### Current version 2.3.3 - 2020-05-14
+### version 2.3.3 - 2020-05-14
 Fetchxml support for sort(attrname, descending = false) to allow server side sort of the result. Multi sort can be added by calling sort multi time
 
 
-### Current version 2.3.2 - 2020-05-14
+### version 2.3.2 - 2020-05-14
 Fetchxml support for count, page and distinct
 
 #2.3.1 - 2020-05-14

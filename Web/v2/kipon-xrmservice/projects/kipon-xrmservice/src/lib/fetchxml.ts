@@ -49,6 +49,30 @@ export class FetchEntity {
     this.linkedentities.push(next);
     return res;
   }
+
+  outerjoin(prototype: Entity, alias: string, from: string, property: string, condition: Condition): FetchEntity;
+  outerjoin(prototype: Entity, alias: string, from: string, property: string, condition: Condition, attributes: string[]): FetchEntity;
+  outerjoin(prototype: Entity, alias: string, from: string, property: string, condition: Condition, attributes: string[] = null): FetchEntity {
+    var res = new FetchEntity();
+    res.name = prototype._logicalName;
+    res.condition = condition;
+    res.attributes = attributes
+    res.parent = res;
+
+    if (this.linkedentities == null) {
+      this.linkedentities = [];
+    }
+    var next = new Link();
+    next.entity = res;
+    next.to = property;
+    next.alias = alias;
+    next.from = from;
+    next.type = "outer";
+
+    this.linkedentities.push(next);
+    return res;
+  }
+
 }
 
 export class Link {

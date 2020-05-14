@@ -310,6 +310,7 @@ export class ColumnBuilder {
 export class Filter {
   field: string;
   operator: Comparator;
+  alias: string;
   value: any;
 
   constructor() {
@@ -500,10 +501,15 @@ export class Filter {
       default: throw "condition type not supported in fetch xml " + this.operator;
     }
 
+    var aliasString = "";
+    if (this.alias != null) {
+      aliasString = " entityname='"+this.alias+"'";
+    }
+
     if (_v != null) {
-      result += "<condition attribute='" + this.field + "' operator='"+op+"' value='" + _v + "' />";
+      result += "<condition" + this.alias + " attribute='" + this.field + "' operator='" + op + "' value='" + _v + "' />";
     } else {
-      result += "<condition attribute='" + this.field + "' operator='"+op+"' />";
+      result += "<condition" + this.alias + " attribute='" + this.field + "' operator='" + op + "' />";
     }
     return result;
   }
@@ -527,6 +533,18 @@ export class Condition {
   where(field: string, opr: Comparator, value: any): Condition;
   where(field: string, opr: Comparator, value: any = null): Condition {
     let f = new Filter();
+    f.field = field;
+    f.value = value;
+    f.operator = opr;
+    this.filter.push(f);
+    return this;
+  }
+
+  alias(alias: string, field: string, opr: Comparator): Condition;
+  alias(alias: string, field: string, opr: Comparator, value: any): Condition;
+  alias(alias: string, field: string, opr: Comparator, value: any = null): Condition {
+    let f = new Filter();
+    f.alias = alias;
     f.field = field;
     f.value = value;
     f.operator = opr;
