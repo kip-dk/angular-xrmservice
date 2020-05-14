@@ -1,14 +1,8 @@
 ## What is kipon-xrmservice
 kipon-xrmservice is an angular 7 library that makes it easier to work with Microsoft Dynamics 365 web api. 
 
-### Current version 2.3.3
-Fetchxml support for sort(attrname, descending = false) to allow server side sort of the result. Multi sort can be added by calling sort multi time
-
-
-### Current version 2.3.2
-Fetchxml support for count, page and distinct
-
-### Current version 2.3.1
+### Current version 2.3.4 - 2020-05-14
+keyname was not auto included in list of attributes
 
 Changelog has been moved to the buttom of this page.
 

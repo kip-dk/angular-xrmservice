@@ -69,6 +69,7 @@ class Fetchsort {
 
 export class Fetchxml {
   private root: FetchEntity;
+  private keyname: string;
 
   count: number;
   page: number;
@@ -77,6 +78,7 @@ export class Fetchxml {
 
   constructor(prototype: Entity, condition: Condition) {
     this.root = new FetchEntity();
+    this.keyname = prototype._keyName;
     this.root.name = prototype._logicalName;
     this.root.condition = condition;
     this.root.attributes = prototype.columns(false);
@@ -115,7 +117,8 @@ export class Fetchxml {
     }
 
     result += "<fetch mapping='logical'" + page + distinct + ">"
-    result += "<entity name='" + this.root.name + "'>"
+    result += "<entity name='" + this.root.name + "'>";
+    result += "<attribute name='" + this.keyname + "' />"
     this.root.attributes.forEach(a => {
       result += "<attribute name='"+a+"'/>"
     });

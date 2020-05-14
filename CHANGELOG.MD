@@ -1,3 +1,6 @@
+### Current version 2.3.4 - 2020-05-14
+keyname was not auto included in list of attributes
+
 ### Current version 2.3.3 - 2020-05-14
 Fetchxml support for sort(attrname, descending = false) to allow server side sort of the result. Multi sort can be added by calling sort multi time
 
