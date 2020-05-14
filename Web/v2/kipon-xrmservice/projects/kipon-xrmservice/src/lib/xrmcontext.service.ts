@@ -39,7 +39,8 @@ export class Entity {
     if (logicalname != null && logicalname != '') {
       this._logicalName = logicalname;
     } else {
-      switch (this._pluralName.toLowerCase()) {
+      let x = this._pluralName != null ? this._pluralName.toLowerCase() : null;
+      switch (x) {
         case "emails": this._logicalName = "email"; break;
         case "appointments": this._logicalName = "appointment"; break;
         case "letters": this._logicalName = "letter"; break;
@@ -56,6 +57,44 @@ export class Entity {
   ToEntityReference(associatednavigationproperty: string): EntityReference;
   ToEntityReference(associatednavigationproperty: string = null): EntityReference {
     return new EntityReference(this.id, this._pluralName, associatednavigationproperty, this._logicalName);
+  }
+
+  ignoreColumn(prop: string): boolean {
+    if (prop == "_pluralName" || prop == "_logicalName" || prop == "_keyName" || prop == "id" || prop == '_updateable' || prop == '$expand' || prop == 'access') {
+      return true;
+    }
+    return false;
+  }
+
+  columns(): string[];
+  columns(webapi: boolean): string[];
+  columns(webapi: boolean = false): string[] {
+    let result = [] as string[];
+
+    let columns: string = this._keyName;
+    for (var prop in this) {
+      if (prop == this._keyName) continue;
+      if (this.ignoreColumn(prop)) continue;
+
+      let v = this[prop];
+      if (typeof v !== 'undefined' && v != null) {
+        if (Array.isArray(v)) {
+          continue;
+        }
+        if (v instanceof Entity) {
+          continue;
+        }
+      }
+
+      if (this.hasOwnProperty(prop)) {
+        if (webapi && this[prop] instanceof EntityReference) {
+          result.push("_" + prop + "_value");
+        } else {
+          result.push(prop);
+        }
+      }
+    }
+    return result;
   }
 }
 
@@ -409,6 +448,65 @@ export class Filter {
     }
     return result;
   }
+
+  toFetcmXml(): string {
+    var result: string = "";
+
+    let _v = this.value;
+
+    if (this.value != null) {
+      if (typeof this.value == 'number') {
+        _v = this.value.toString();
+      }
+
+      if (typeof this.value == 'boolean') {
+        _v = this.value.valueOf() ? 'true' : 'false';
+      }
+
+      if (this.value != null && this.value.hasOwnProperty('value')) {
+        _v = this.value.value;
+      }
+    }
+
+    if (_v == null) {
+      if (this.operator == Comparator.Equals) {
+        this.operator = Comparator.DoesNotContainsData;
+      }
+      if (this.operator == Comparator.NotEquals) {
+        this.operator = Comparator.ContainsData;
+      }
+
+      if (this.operator != Comparator.DoesNotContainsData && this.operator != Comparator.ContainsData) {
+        throw "null in condition value is only supported for containsdata and doesnotdontainsdata";
+      }
+    }
+
+    var op = "eq";
+    switch (this.operator) {
+      case Comparator.Contains: op = "like"; _v = "%" + _v + "%"; break;
+      case Comparator.ContainsData: op = "not-null"; break;
+      case Comparator.DoesNotContainsData: op = "null"; break;
+      case Comparator.EndsWith: op = "like"; _v = "%" + _v; null;
+      case Comparator.Equals: op = "eq"; break;
+      case Comparator.GreaterThan: op = "gt"; break;
+      case Comparator.GreaterThanOrEqual: op = "ge"; break;
+      case Comparator.LessThan: op = "lt"; break;
+      case Comparator.LessThanOrEQual: op = "le"; break;
+      case Comparator.NotContains: op = "not-like"; "%" + _v + "%"; break;
+      case Comparator.NotEndsWith: op = "not-like"; "&" + _v; break;
+      case Comparator.NotEquals: op = "ne"; break;
+      case Comparator.NotStartsWith: op = "not-like"; _v = _v + "%"; break;
+      case Comparator.StartsWith: op = "like"; _v = _v + "%"; break;
+      default: throw "condition type not supported in fetch xml " + this.operator;
+    }
+
+    if (_v != null) {
+      result += "<condition attribute='" + this.field + "' operator='"+op+"' value='" + _v + "' />";
+    } else {
+      result += "<condition attribute='" + this.field + "' operator='"+op+"' />";
+    }
+    return result;
+  }
 }
 
 export class Condition {
@@ -491,6 +589,26 @@ export class Condition {
         }
       });
     }
+    return result;
+  }
+
+  toFetchXml(): string {
+    let result: string = "";
+
+    result += "<filter type='" + (this.operator == Operator.And ? "and" : "or") + "'>";
+    if (this.filter != null && this.filter.length > 0)
+      this.filter.forEach(f => {
+        result += f.toFetcmXml();
+      });
+
+    if (this.children != null && this.children.length > 0) {
+      this.children.forEach(c => {
+        result += c.toFetchXml();
+      });
+    }
+
+    result += "</filter>"
+
     return result;
   }
 }
@@ -617,6 +735,33 @@ export class XrmContextService {
 
   debug(setting: boolean): void {
     this.xrmService.debug = setting;
+  }
+
+  fetchxml<T extends Entity>(prototype: T, fetchxml: string): Observable<XrmQueryResult<T>> {
+    let me = this;
+    let headers = new HttpHeaders({ 'Accept': 'application/json' });
+    if (this.xrmService.token != null) {
+      headers = headers.append("Authorization", "Bearer " + this.xrmService.token);
+    }
+    headers = headers.append("OData-MaxVersion", "4.0");
+    headers = headers.append("OData-Version", "4.0");
+    headers = headers.append("Content-Type", "application/json; charset=utf-8");
+    headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
+    headers = headers.append("Cache-Control", "no-cache");
+
+    let options = {
+      headers: headers
+    }
+
+    let url = this.getContext().getClientUrl() + this.xrmService.apiUrl + prototype._pluralName + "?fetchXml=" + encodeURIComponent(fetchxml);
+
+    this.xrmService.log(fetchxml);
+    this.xrmService.log(url);
+
+    return this.http.get(this.forceHTTPS(url), options).pipe(map(response => {
+      let result = me.resolveQueryResult<T>(prototype, response, 0, [url], 0);
+      return result;
+    }));
   }
 
   query<T extends Entity>(prototype: T, condition: Condition): Observable<XrmQueryResult<T>>;
@@ -1016,7 +1161,7 @@ export class XrmContextService {
   clone(prototype: Entity, instance: Entity): Entity {
     let r = new Entity(prototype._pluralName, prototype._keyName);
     for (let prop in prototype) {
-      if (this.ignoreColumn(prop)) continue;
+      if (prototype.ignoreColumn(prop)) continue;
 
       let pv = prototype[prop];
       if (typeof pv == 'function') {
@@ -1082,7 +1227,7 @@ export class XrmContextService {
 
     for (let prop in prototype) {
       if (prototype.hasOwnProperty(prop) && typeof prototype[prop] != 'function') {
-        if (this.ignoreColumn(prop)) continue;
+        if (prototype.ignoreColumn(prop)) continue;
         let prevValue = cm[prop];
         let newValue = instance[prop];
 
@@ -1282,7 +1427,7 @@ export class XrmContextService {
 
     for (let prop in prototype) {
       if (prototype.hasOwnProperty(prop) && typeof prototype[prop] !== 'function') {
-        if (this.ignoreColumn(prop)) continue;
+        if (prototype.ignoreColumn(prop)) continue;
 
         let value = instance[prop];
         if (value !== 'undefined' && value !== null) {
@@ -1481,7 +1626,7 @@ export class XrmContextService {
     result['_updateable'] = updateable;
 
     for (let prop in prototype) {
-      if (this.ignoreColumn(prop)) continue;
+      if (prototype.ignoreColumn(prop)) continue;
 
       if (prototype.hasOwnProperty(prop) && typeof prototype[prop] != 'function') {
         let done = false;
@@ -1603,7 +1748,7 @@ export class XrmContextService {
     this.changemanager[key] = change;
 
     for (let prop in prototype) {
-      if (this.ignoreColumn(prop)) continue;
+      if (prototype.ignoreColumn(prop)) continue;
       if (prototype.hasOwnProperty(prop) && typeof prototype[prop] != 'function') {
         let v = instance[prop];
         if (v == null) continue;
@@ -1636,34 +1781,10 @@ export class XrmContextService {
   }
 
   private columnBuilder(entity: Entity): ColumnBuilder {
-    let hasEntityReference: boolean = false;
-    let columns: string = entity._keyName;
-    for (var prop in entity) {
-      if (prop == entity._keyName) continue;
-      if (this.ignoreColumn(prop)) continue;
-
-      let v = entity[prop];
-      if (typeof v !== 'undefined' && v != null) {
-        if (Array.isArray(v)) {
-          continue;
-        }
-        if (v instanceof Entity) {
-          continue;
-        }
-      }
-
-      if (entity.hasOwnProperty(prop) && typeof (entity[prop] != 'function')) {
-        if (entity[prop] instanceof EntityReference) {
-          columns += "," + "_" + prop + "_value";
-          hasEntityReference = true;
-        } else {
-          columns += "," + prop;
-        }
-      }
-    }
     let result = new ColumnBuilder();
-    result.hasEntityReference = hasEntityReference;
-    result.columns = columns;
+    var columns = entity.columns(true);
+    result.columns = columns.join(",")
+    result.hasEntityReference = columns.filter(r => r.startsWith("_") && r.endsWith("_value")).length > 0;
     return result;
   }
 
@@ -1671,7 +1792,7 @@ export class XrmContextService {
     var result = [];
     for (var prop in entity) {
       if (prop == entity._keyName) continue;
-      if (this.ignoreColumn(prop)) continue;
+      if (entity.ignoreColumn(prop)) continue;
 
       let _v = entity[prop];
       if (Array.isArray(_v)) {
@@ -1696,13 +1817,6 @@ export class XrmContextService {
       }
     }
     return result;
-  }
-
-  private ignoreColumn(prop: string): boolean {
-    if (prop == "_pluralName" || prop == "_logicalName" || prop == "_keyName" || prop == "id" || prop == '_updateable' || prop == '$expand' || prop == 'access') {
-      return true;
-    }
-    return false;
   }
 
   private toFuncParameterString(pam: any): string {

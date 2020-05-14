@@ -247,10 +247,18 @@ export class CtxComponent implements OnInit {
   }
 
   ngOnInit() {
+
+    this.accountService.queryByXml().toPromise().then(r => {
+      console.log('fetchxml result');
+      console.log(r);
+    });
+
     let me = this;
     this.xrmContextService.getCurrentKey().subscribe(r => {
       if (r.id != null && r.id != '') {
         me.xrmContextService.get<CtxAccount>(me.accountPrototype, r.id).subscribe(a => {
+          console.log('normal result');
+          console.log(a);
           me.account = a;
           me.getContacts();
         });

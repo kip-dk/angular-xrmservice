@@ -59,6 +59,7 @@
     <None Remove="poc\src\app\xrm\xrmconfig.service.ts" />
     <None Remove="service-generator\.editorconfig" />
     <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\auth.service.ts" />
+    <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\fetchxml.ts" />
     <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\kipon-xrmannotation.module.ts" />
     <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\kipon-xrmmetadata.module.ts" />
     <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\metadata.service.ts" />
@@ -102,6 +103,7 @@
     <TypeScriptCompile Include="poc\src\app\xrm\auth.service.ts" />
     <TypeScriptCompile Include="poc\src\app\xrm\xrmconfig.service.ts" />
     <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\auth.service.ts" />
+    <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\fetchxml.ts" />
     <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\kipon-xrmmetadata.module.ts" />
     <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\kipon-xrmannotation.module.ts" />
     <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\metadata.service.ts" />

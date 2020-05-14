@@ -1,3 +1,8 @@
+#2.3.1 - 2020-05-14
+Implemented EXPERIMENTAL support for fetchxml on xrmcontextservice. To support more advanced query, a fetchxml(entity: Entity, xml: string ) has been introduced. On top, a Fethxml class
+has been added to enable building the fetchxml using Condition etc. The api is experimental, and for now only smaller queries are supported (no fallback to to $batch for large has been implemented yet).
+Entities received from fetchxml has same nature as received by normal api, and all patterns applied by the query(..) method is also applied on result from fetchxml, including object caching on id.
+
 #2.3.0 - 2020-03-16
 Removed support for version 8.2 of CRM. The support for version 8.2 installation is complicating the version management between the url posted
 and the @odata.link fields, and is giving errors on earlier version of the framework on Dynamics 365 online 9.1 installation. Therefore we have decided to stop

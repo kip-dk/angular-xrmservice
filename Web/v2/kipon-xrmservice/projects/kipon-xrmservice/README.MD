@@ -1,7 +1,7 @@
 ## What is kipon-xrmservice
 kipon-xrmservice is an angular 7 library that makes it easier to work with Microsoft Dynamics 365 web api. 
 
-### Current version 2.3.0
+### Current version 2.3.1
 
 Changelog has been moved to the buttom of this page.
 
@@ -253,6 +253,23 @@ Query according to the filter. Remark, you are building a condition, based on th
 
 In addition, you can parse how to sort - name of field to sort on, pagesize, and wether to return total number of records.
 
+### fetchxml<T extends Entity>(prototype: T, fetchxml: string): Observable<XrmQueryResult<T>>
+Query according to the fetchxml. You can build your fetchxml manually or use new Fetchxml(entity, condition) to build the fetchxml:
+
+```typescript
+
+let query = new Fetchxml(myprototype, condition);
+let link1 = query.entity().link(mylinkentityprototype, navigationproperty, condition);
+let deeperlink = link1.link(....)
+
+xrmcontextservice.fetchxml(myprototype, query.toFetchXml()).toPromise().then( r => {
+  // do something with your objects
+});
+
+```
+
+Be aware, especially the Fetchxml class an signature is likely to change over time. For now it only support very simple lookup join scenario. 
+
 #### XrmContextService.create(prototype: Entity, instance: Entity): Observable<Entity>
 Create a new instance from the data in the instance based on the definition in the prototype, and return the result on subscribe. 
 Be aware that returning the result from the server is supported from version 8.2 only, so if you are using version 8.0 or 8.1, you will get your
@@ -498,6 +515,12 @@ xrmService.commit(trans).subscribe(r => {
 ```
 
 ### changelog
+
+#2.3.1 - 2020-05-14
+Implemented EXPERIMENTAL support for fetchxml on xrmcontextservice. To support more advanced query, a fetchxml(entity: Entity, xml: string ) has been introduced. On top, a Fethxml class
+has been added to enable building the fetchxml using Condition etc. The api is experimental, and for now only smaller queries are supported (no fallback to to $batch for large has been implemented yet).
+Entities received from fetchxml has same nature as received by normal api, and all patterns applied by the query(..) method is also applied on result from fetchxml, including object caching on id.
+
 
 #2.3.0 - 2020-03-16
 Removed support for version 8.2 of CRM. The support for version 8.2 installation is complicating the version management between the url posted

@@ -2,6 +2,7 @@
  * Public API Surface of kipon-xrmservice
  */
 
+export * from './lib/fetchxml';
 export * from './lib/auth.service';
 export * from './lib/xrm.interceptor';
 export * from './lib/xrmform.service';

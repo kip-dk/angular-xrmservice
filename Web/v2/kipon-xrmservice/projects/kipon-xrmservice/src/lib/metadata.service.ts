@@ -119,7 +119,7 @@ export class XrmMetadataService {
               let ma = [];
               // Metadata api does not support contains - therefore client site filter
               r.value.forEach(e => {
-                  if (e.LogicalName.toLowerCase().indexOf(_s) >= 0) {
+                  if (e != null && e.LogicalName != null && e.LogicalName.toLowerCase().indexOf(_s) >= 0) {
                       ma.push(e);
                   }
               });

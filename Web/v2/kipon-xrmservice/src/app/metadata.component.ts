@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { XrmMetadataService, EntityMeta } from 'kipon-xrmservice';
+import { XrmMetadataService, EntityMeta, XrmContextService } from 'kipon-xrmservice';
 
 
 
@@ -11,7 +11,7 @@ import { XrmMetadataService, EntityMeta } from 'kipon-xrmservice';
 export class MetadataComponent {
 
   oppMeta: EntityMeta;
-  constructor(private metadataService: XrmMetadataService) {
+  constructor(private metadataService: XrmMetadataService, private xrmService: XrmContextService) {
   }
 
   ngOnInit() {
