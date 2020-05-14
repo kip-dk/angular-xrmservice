@@ -46,6 +46,7 @@ export class Entity {
         case "letters": this._logicalName = "letter"; break;
         case "phonecalls": this._logicalName = "phonecall"; break;
         case "tasks": this._logicalName = "task"; break;
+        case "campaignresponses": this._logicalName = "campaignresponse"; break;
         default: {
           this._logicalName = this._keyName.substr(0, (this._keyName.length - 2)).toLowerCase();
           break;
