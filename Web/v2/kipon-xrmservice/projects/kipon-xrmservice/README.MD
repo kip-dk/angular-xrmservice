@@ -253,7 +253,7 @@ Query according to the filter. Remark, you are building a condition, based on th
 
 In addition, you can parse how to sort - name of field to sort on, pagesize, and wether to return total number of records.
 
-### fetchxml<T extends Entity>(prototype: T, fetchxml: string): Observable<XrmQueryResult<T>>
+#### fetchxml<T extends Entity>(prototype: T, fetchxml: string): Observable<XrmQueryResult<T>>
 Query according to the fetchxml. You can build your fetchxml manually or use new Fetchxml(entity, condition) to build the fetchxml:
 
 ```typescript
