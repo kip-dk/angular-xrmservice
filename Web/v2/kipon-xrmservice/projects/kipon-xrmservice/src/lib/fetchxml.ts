@@ -57,6 +57,11 @@ export class Link {
 
 export class Fetchxml {
   private root: FetchEntity;
+
+  count: number;
+  page: number;
+  distinct: boolean;
+
   constructor(prototype: Entity, condition: Condition) {
     this.root = new FetchEntity();
     this.root.name = prototype._logicalName;
@@ -70,7 +75,21 @@ export class Fetchxml {
 
   toFetchXml(): string {
     let result: string = "";
-    result += "<fetch mapping='logical'>"
+
+    var page = "";
+    if (this.count != null) {
+      if (this.page == null) {
+        this.page = 1;
+      }
+      page = " count='"+this.count+"' page='"+this.page+"' paging-cookie=''";
+    }
+
+    var distinct = "";
+    if (this.distinct != null) {
+      distinct = " distinct='" + this.distinct + "'"
+    }
+
+    result += "<fetch mapping='logical'" + page + distinct + ">"
     result += "<entity name='" + this.root.name + "'>"
     this.root.attributes.forEach(a => {
       result += "<attribute name='"+a+"'/>"
