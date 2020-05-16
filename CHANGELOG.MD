@@ -1,4 +1,12 @@
-### Current version 2.3.7 - 2020-05-14
+### Current version 2.3.8 - 2020-05-16
+xrm contextservice now supported paging fetch. Instead of calling fetchxml(...), you must call fetch(xml: Fetchxml):Obs..<..>.
+By parsing the Fetchxml builder, you allow the framework to manipulate the fetchxml to include correct paging, and therefore you can
+use the next()  and nextlink in the returned result. 
+
+The fetchxml(..) method will stay on xrmcontextservice to support execution of fetchxml build with other methods than the Fetchxml builder, however if
+you need paging here, you are on your own. The framework will not even try to set the next() method and nextlink property on the result.
+
+### version 2.3.7 - 2020-05-14
 outerjoin support on Fetchxml object and alias condition, only supported for fetchxml
 
 ### version 2.3.5 - 2020-05-14

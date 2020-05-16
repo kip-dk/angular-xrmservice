@@ -3,6 +3,7 @@ import { Entity, Condition } from "./xrmcontext.service";
 
 export class FetchEntity {
   name: string;
+  entityPrototype: Entity;
   attributes: string[];
   condition: Condition;
   linkedentities: Link[];
@@ -12,6 +13,7 @@ export class FetchEntity {
   link(prototype: Entity, property: string, condition: Condition, attributes: string[]): FetchEntity;
   link(prototype: Entity, property: string, condition: Condition, attributes: string[] = null): FetchEntity {
     var res = new FetchEntity();
+    res.entityPrototype = prototype;
     res.name = prototype._logicalName;
     res.condition = condition;
     res.attributes = attributes
@@ -31,6 +33,7 @@ export class FetchEntity {
   innerjoin(prototype: Entity, alias: string, from: string, property: string, condition: Condition, attributes: string[]): FetchEntity;
   innerjoin(prototype: Entity, alias: string, from: string, property: string, condition: Condition, attributes: string[] = null): FetchEntity {
     var res = new FetchEntity();
+    res.entityPrototype = prototype;
     res.name = prototype._logicalName;
     res.condition = condition;
     res.attributes = attributes
@@ -54,6 +57,7 @@ export class FetchEntity {
   outerjoin(prototype: Entity, alias: string, from: string, property: string, condition: Condition, attributes: string[]): FetchEntity;
   outerjoin(prototype: Entity, alias: string, from: string, property: string, condition: Condition, attributes: string[] = null): FetchEntity {
     var res = new FetchEntity();
+    res.entityPrototype = prototype;
     res.name = prototype._logicalName;
     res.condition = condition;
     res.attributes = attributes
@@ -90,6 +94,7 @@ export class Link {
     if (this.from != null) {
       fromString = " alias='" + this.alias + "' from='" + this.from + "' link-type='" + this.type + "'";
     }
+
     result += "<link-entity name='" + this.entity.name + "' to='" + this.to + "'" + fromString + ">";
     if (this.entity.attributes != null && this.entity.attributes.length > 0) {
       this.entity.attributes.forEach(a => {
@@ -134,6 +139,7 @@ export class Fetchxml {
 
   constructor(prototype: Entity, condition: Condition) {
     this.root = new FetchEntity();
+    this.root.entityPrototype = prototype;
     this.keyname = prototype._keyName;
     this.root.name = prototype._logicalName;
     this.root.condition = condition;
@@ -156,7 +162,10 @@ export class Fetchxml {
     this.sorts.push(nextsort);
   }
 
-  toFetchXml(): string {
+
+  toFetchXml(): string;
+  toFetchXml(pageCoocie: string, forPage: number): string;
+  toFetchXml(pageCoocie: string = null, forPage: number = null): string {
     let result: string = "";
 
     var page = "";
@@ -164,7 +173,18 @@ export class Fetchxml {
       if (this.page == null) {
         this.page = 1;
       }
-      page = " count='"+this.count+"' page='"+this.page+"' paging-cookie=''";
+
+      if (forPage == null) {
+        forPage = this.page;
+      }
+
+      page = " count='" + this.count + "' page='" + forPage + "'";
+    }
+
+    if (pageCoocie != null) {
+      page += " paging-cookie='" + pageCoocie + "'";
+    } else {
+      page += " paging-cookie=''";
     }
 
     var distinct = "";

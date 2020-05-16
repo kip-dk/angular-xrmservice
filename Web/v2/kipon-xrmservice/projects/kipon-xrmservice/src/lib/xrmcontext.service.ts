@@ -6,6 +6,7 @@ import { map, catchError, startWith } from 'rxjs/operators'
 
 import { XrmService, XrmEntityKey, XrmQueryResult, Expand } from './xrm.service';
 import { XrmContext } from './xrmform.service';
+import { Fetchxml } from './fetchxml';
 
 export interface ToFunctionPropertyValue {
   functionPropertyValueAsString(): string;
@@ -48,7 +49,11 @@ export class Entity {
         case "tasks": this._logicalName = "task"; break;
         case "campaignresponses": this._logicalName = "campaignresponse"; break;
         default: {
-          this._logicalName = this._keyName.substr(0, (this._keyName.length - 2)).toLowerCase();
+          if (this._keyName.toLowerCase() == "activityid" && x != null) {
+            this._logicalName = x.substr(0, x.length - 1);
+          } else {
+            this._logicalName = this._keyName.substr(0, (this._keyName.length - 2)).toLowerCase();
+          }
           break;
         }
       }
@@ -704,6 +709,8 @@ export class XrmContextService {
   private changemanager: any = {};
   private tick: number = new Date().valueOf();
 
+  pageCookieMatch = /(?<=pagingcookie=['"])[a-z,A-Z,%,0-9,-_.~]+/g;
+
   constructor(private http: HttpClient, private xrmService: XrmService) { }
 
   setVersion(v: string) {
@@ -754,6 +761,36 @@ export class XrmContextService {
 
   debug(setting: boolean): void {
     this.xrmService.debug = setting;
+  }
+
+  fetch<T extends Entity>(xml: Fetchxml): Observable<XrmQueryResult<T>> {
+    let me = this;
+    let headers = new HttpHeaders({ 'Accept': 'application/json' });
+    if (this.xrmService.token != null) {
+      headers = headers.append("Authorization", "Bearer " + this.xrmService.token);
+    }
+    headers = headers.append("OData-MaxVersion", "4.0");
+    headers = headers.append("OData-Version", "4.0");
+    headers = headers.append("Content-Type", "application/json; charset=utf-8");
+    headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
+    headers = headers.append("Cache-Control", "no-cache");
+
+    let options = {
+      headers: headers
+    }
+
+    let fetchxml = xml.toFetchXml();
+    let url = this.getContext().getClientUrl() + this.xrmService.apiUrl + xml.entity().entityPrototype._pluralName + "?fetchXml=" + encodeURIComponent(fetchxml);
+
+    this.xrmService.log(fetchxml);
+    this.xrmService.log(url);
+
+    let localPrototype = xml.entity().entityPrototype as T;
+
+    return this.http.get(this.forceHTTPS(url), options).pipe(map(response => {
+      let result = me.resolveFetchResult<T>(localPrototype, response, xml.count, [url], 0, xml);
+      return result;
+    }));
   }
 
   fetchxml<T extends Entity>(prototype: T, fetchxml: string): Observable<XrmQueryResult<T>> {
@@ -1520,6 +1557,68 @@ export class XrmContextService {
       return result;
     }
     return null;
+  }
+
+  private resolveFetchResult<T extends Entity>(prototype: T, response: any, top: number, pages: string[], pageIndex: number, fetchXml: Fetchxml): XrmQueryResult<T> {
+    let me = this;
+    var result = this.resolveQueryResult(prototype, response, top, pages, pageIndex);
+
+    var pageCookie = response["@Microsoft.Dynamics.CRM.fetchxmlpagingcookie"] as string;
+    if (pageCookie != null && pageCookie != '') {
+      var fragment = decodeURIComponent(decodeURIComponent(pageCookie.match(this.pageCookieMatch)[0]));
+      fragment = fragment.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;");
+
+      let fetchxml = fetchXml.toFetchXml(fragment, pageIndex + 2);
+      result.nextLink = this.getContext().getClientUrl() + this.xrmService.apiUrl + prototype._pluralName + "?fetchXml=" + encodeURIComponent(fetchxml);
+
+      result.next = (): Observable<XrmQueryResult<T>> => {
+        let headers = new HttpHeaders({ 'Accept': 'application/json' });
+        if (this.xrmService.token != null) {
+          headers = headers.append("Authorization", "Bearer " + this.xrmService.token);
+        }
+        headers = headers.append("OData-MaxVersion", "4.0");
+        headers = headers.append("OData-Version", "4.0");
+        headers = headers.append("Content-Type", "application/json; charset=utf-8");
+        headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
+        headers = headers.append("Cache-Control", "no-cache");
+
+        let options = {
+          headers: headers
+        }
+
+        return this.http.get(this.forceHTTPS(result.nextLink), options).pipe(map(response => {
+          pages.push(result.nextLink);
+          let re = me.resolveFetchResult<T>(prototype, response, top, pages, (pageIndex + 1), fetchXml);
+          return re;
+        }));
+      }
+
+      if (pageIndex >= 1) {
+        result.prev = (): Observable<XrmQueryResult<T>> => {
+          let headers = new HttpHeaders({ 'Accept': 'application/json' });
+          if (this.xrmService.token != null) {
+            headers = headers.append("Authorization", "Bearer " + this.xrmService.token);
+          }
+          headers = headers.append("OData-MaxVersion", "4.0");
+          headers = headers.append("OData-Version", "4.0");
+          headers = headers.append("Content-Type", "application/json; charset=utf-8");
+          headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
+          headers = headers.append("Cache-Control", "no-cache");
+
+          let options = {
+            headers: headers
+          }
+
+          let lastPage = result.pages[result.pageIndex - 1];
+          return me.http.get(me.forceHTTPS(lastPage), options).pipe(map(r => {
+            result.pages.splice(result.pages.length - 1, 1);
+            let pr = me.resolveFetchResult<T>(prototype, r, top, result.pages, result.pageIndex - 1, fetchXml);
+            return pr;
+          }));
+        }
+      }
+    }
+    return result;
   }
 
   private resolveQueryResult<T extends Entity>(prototype: T, response: any, top: number, pages: string[], pageIndex: number): XrmQueryResult<T> {

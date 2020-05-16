@@ -1,8 +1,7 @@
 ## What is kipon-xrmservice
 kipon-xrmservice is an angular 7 library that makes it easier to work with Microsoft Dynamics 365 web api. 
 
-### Current version 2.3.5 - 2020-05-14
-innerjoin support on Fetchxml object
+### Current version 2.3.8 - 2020-05-16
 
 Changelog has been moved to the buttom of this page.
 
@@ -253,6 +252,26 @@ This is the basic pattern used for all generated methods.
 Query according to the filter. Remark, you are building a condition, based on the Condition object. This makes it easier to setup the relevant filters.
 
 In addition, you can parse how to sort - name of field to sort on, pagesize, and wether to return total number of records.
+
+
+####
+#### fetch<T extends Entity>(fetxml: Fetchxml): Observable<XrmQueryResult<T>>
+Query according to the fetchxml. Fetchxml is a simple builder class that allow you to define
+your query with conditions, link, inner and outer joins:
+
+```typescript
+
+let query = new Fetchxml(myprototype, condition);
+let link1 = query.entity().link(mylinkentityprototype, navigationproperty, condition);
+let deeperlink = link1.link(....)
+
+xrmcontextservice.fetch(query).toPromise().then( r => {
+  // do something with your objects
+});
+
+```
+Fetch xml requests build with the Fetchxml builder class supports paging as with query method.
+
 
 #### fetchxml<T extends Entity>(prototype: T, fetchxml: string): Observable<XrmQueryResult<T>>
 Query according to the fetchxml. You can build your fetchxml manually or use new Fetchxml(entity, condition) to build the fetchxml:
@@ -517,7 +536,15 @@ xrmService.commit(trans).subscribe(r => {
 
 ## changelog
 
-### Current version 2.3.7 - 2020-05-14
+### version 2.3.8 - 2020-05-16
+xrm contextservice now supported paging fetch. Instead of calling fetchxml(...), you must call fetch(xml: Fetchxml):Obs..<..>.
+By parsing the Fetchxml builder, you allow the framework to manipulate the fetchxml to include correct paging, and therefore you can
+use the next()  and nextlink in the returned result. 
+
+The fetchxml(..) method will stay on xrmcontextservice to support execution of fetchxml build with other methods than the Fetchxml builder, however if
+you need paging here, you are on your own. The framework will not even try to set the next() method and nextlink property on the result.
+
+### version 2.3.7 - 2020-05-14
 outerjoin support on Fetchxml object and alias condition, only supported for fetchxml
 
 ### version 2.3.5 - 2020-05-14

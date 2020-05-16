@@ -47,13 +47,17 @@ export class AccountService {
   queryByXml(): Observable<XrmQueryResult<Account>> {
     let condition: Condition = new Condition().isActive();
     let fetchxml = new Fetchxml(this.localPrototype, condition);
+    fetchxml.count = 5;
+    fetchxml.page = 1;
 
+    /*
     let contactCondition: Condition = new Condition()
       .where("firstname", Comparator.StartsWith, "Mic");
 
     let link = fetchxml.entity().link(this.contactProto, "primarycontactid", contactCondition);
+    */
     var xml = fetchxml.toFetchXml();
     console.log(xml);
-    return this.xrmService.fetchxml(this.localPrototype, xml);
+    return this.xrmService.fetch(fetchxml)
   }
 }

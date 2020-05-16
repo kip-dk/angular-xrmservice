@@ -251,6 +251,12 @@ export class CtxComponent implements OnInit {
     this.accountService.queryByXml().toPromise().then(r => {
       console.log('fetchxml result');
       console.log(r);
+      if (r.nextLink != null) {
+        r.next().subscribe(p2 => {
+          console.log('page 2');
+          console.log(p2);
+        });
+      }
     });
 
     let me = this;
