@@ -709,7 +709,7 @@ export class XrmContextService {
   private changemanager: any = {};
   private tick: number = new Date().valueOf();
 
-  pageCookieMatch = /(?<=pagingcookie=['"])[a-z,A-Z,%,0-9,-_.~]+/g;
+  pageCookieMatch = /[-pagingcookie=\"][a-z,A-Z,0-9,%-_.~]+/g;
 
   constructor(private http: HttpClient, private xrmService: XrmService) { }
 
@@ -1565,8 +1565,15 @@ export class XrmContextService {
 
     var pageCookie = response["@Microsoft.Dynamics.CRM.fetchxmlpagingcookie"] as string;
     if (pageCookie != null && pageCookie != '') {
-      var fragment = decodeURIComponent(decodeURIComponent(pageCookie.match(this.pageCookieMatch)[0]));
-      fragment = fragment.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;");
+
+      this.xrmService.log('page-cookie');
+      this.xrmService.log(pageCookie);
+
+      var fragment = decodeURIComponent(decodeURIComponent(pageCookie.match(this.pageCookieMatch)[0].substring(14)));
+      fragment = fragment.replace(/&/g,"&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;");
+
+      this.xrmService.log("page-cookie-fragment");
+      this.xrmService.log(fragment);
 
       let fetchxml = fetchXml.toFetchXml(fragment, pageIndex + 2);
       result.nextLink = this.getContext().getClientUrl() + this.xrmService.apiUrl + prototype._pluralName + "?fetchXml=" + encodeURIComponent(fetchxml);

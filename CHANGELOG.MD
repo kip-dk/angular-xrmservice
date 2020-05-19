@@ -1,4 +1,8 @@
-### Current version 2.3.8 - 2020-05-16
+### current version  2.3.11 2020-05-19
+2.3.9  - 2.3.11
+Minor fixing in handling paging cookie for fetchxml, ex. & need to be encoded, and used reg expr. not working in IE 11, all fixed in version 2.3.11
+
+### version 2.3.8 - 2020-05-16
 xrm contextservice now supported paging fetch. Instead of calling fetchxml(...), you must call fetch(xml: Fetchxml):Obs..<..>.
 By parsing the Fetchxml builder, you allow the framework to manipulate the fetchxml to include correct paging, and therefore you can
 use the next()  and nextlink in the returned result. 
