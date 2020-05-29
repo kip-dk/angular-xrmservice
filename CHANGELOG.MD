@@ -1,4 +1,11 @@
-### current version  2.3.11 2020-05-19
+### Current version 3.4.0
+Deprecated misspelled method getCurrenKey has been removed. you need to use getCurrentKey()
+
+getCurrentKey(repeatForCreateForm: boolean = false)  repeatForCreateForm will monitor change of the parent form type, and when it is changed to formtype 2 (update) from 1(create), it will refresh the key.
+This allow a simple impl. where the state of an embeded resource is different for the entity in create and update form (typically if the embeded form need to attach or create sub entities to the parent, that cannot be done
+until the parent has been saved).
+
+### version  2.3.11 2020-05-19
 2.3.9  - 2.3.11
 Minor fixing in handling paging cookie for fetchxml, ex. & need to be encoded, and used reg expr. not working in IE 11, all fixed in version 2.3.11
 

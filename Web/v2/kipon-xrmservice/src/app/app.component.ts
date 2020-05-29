@@ -57,7 +57,7 @@ export class AppComponent {
   ngOnInit() {
     let me = this;
     this.testparam = this.xrmService.getParameter('testparam');
-    this.xrmService.getCurrenKey().subscribe(r => {
+    this.xrmService.getCurrentKey(true).subscribe(r => {
       console.log(r);
       if (r.id != null && r.entityType === 'account') {
         let expand = new Expand();

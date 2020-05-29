@@ -260,7 +260,7 @@ export class CtxComponent implements OnInit {
     });
 
     let me = this;
-    this.xrmContextService.getCurrentKey().subscribe(r => {
+    this.xrmContextService.getCurrentKey(true).subscribe(r => {
       if (r.id != null && r.id != '') {
         me.xrmContextService.get<CtxAccount>(me.accountPrototype, r.id).subscribe(a => {
           console.log('normal result');

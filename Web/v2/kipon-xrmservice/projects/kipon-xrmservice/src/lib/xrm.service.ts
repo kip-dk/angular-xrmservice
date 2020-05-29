@@ -1,7 +1,7 @@
 import { Injectable, Injector } from '@angular/core';
 
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subscriber } from 'rxjs';
 import { map } from 'rxjs/operators'
 
 import { XrmConfigService } from './xrmconfig.service';
@@ -64,8 +64,9 @@ export class XrmService {
   token: string = null;
   forceHttps: boolean = false;
   private loginObserver: any;
+  private keyTries: number = 0;
 
-  constructor(private http: HttpClient, private injector: Injector, private xrmForm: XrmFormService) {
+  constructor(private http: HttpClient, private injector: Injector, private xrmformService: XrmFormService) {
   }
 
   setVersion(v: string): void {
@@ -78,7 +79,7 @@ export class XrmService {
       return this.contextFallback;
     }
 
-    var x: XrmContext = this.xrmForm.getContext();
+    var x: XrmContext = this.xrmformService.getContext();
 
     if (x != null) {
       if (typeof x.getVersion == 'undefined') {
@@ -190,14 +191,9 @@ export class XrmService {
     }
   }
 
-  getCurrentKey(): Observable<XrmEntityKey> {
-    return this.getCurrenKey();
-  }
-
-  /**
-  * @deprecated since version 2.2.9
-  */
-  getCurrenKey(): Observable<XrmEntityKey> {
+  getCurrentKey(): Observable<XrmEntityKey>;
+  getCurrentKey(repeatForCreateForm: boolean): Observable<XrmEntityKey>;
+  getCurrentKey(repeatForCreateForm: boolean = false): Observable<XrmEntityKey> {
     // First we try to find id and type in the url, this allow forcing a specific entity, directly from standard url parameters
     let params = this.getQueryStringParameters();
     let result = new XrmEntityKey();
@@ -212,15 +208,23 @@ export class XrmService {
       type = params["typename"];
     }
 
-    let key: XrmFormKey = this.xrmForm.getFormKey(id, type);
+    if (this.xrmformService.getFormType() == 1 && repeatForCreateForm) {
+      var obs = new Observable<XrmEntityKey>(sub => {
+        this.tryGetKey(sub);
+      });
+      return obs;
+    }
+
+
+    let key: XrmFormKey = this.xrmformService.getFormKey(id, type);
     if (key != null && key.id != null) {
       result.id = this.toGuid(key.id);
       result.entityType = key.type;
       return new Observable(obs => obs.next(result));
     }
 
-    if (this.xrmForm.getFormType() == 2) {
-      key = this.xrmForm.getFormKey(id, type);
+    if (this.xrmformService.getFormType() == 2) {
+      key = this.xrmformService.getFormKey(id, type);
       if (key != null) {
         result.id = this.toGuid(key.id);
         result.entityType = key.type;
@@ -228,7 +232,7 @@ export class XrmService {
       } else {
         return new Observable(obs => {
           var iv = setInterval(() => {
-            let key = this.xrmForm.getFormKey(id, type);
+            let key = this.xrmformService.getFormKey(id, type);
             if (key != null) {
               clearInterval(iv);
               result.id = this.toGuid(key.id);
@@ -535,6 +539,21 @@ export class XrmService {
         console.log(message);
       }
     }
+  }
+
+
+  private tryGetKey(sub: Subscriber<XrmEntityKey>): void {
+    setTimeout(() => {
+      var key = this.xrmformService.getFormKey(null, null, true);
+      if (key.id != null && key.id != '' && key.type != null && key.type != '') {
+        let result = new XrmEntityKey();
+        result.entityType = key.type;
+        result.id = key.id;
+        sub.next(result);
+      } else {
+        this.tryGetKey(sub);
+      }
+    }, 2000);
   }
 
   private initializeVersion(_v: string): void {

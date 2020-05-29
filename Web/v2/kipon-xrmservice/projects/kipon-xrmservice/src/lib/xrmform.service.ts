@@ -101,17 +101,23 @@ export class XrmFormService {
   }
 
   // "Xrm", "Page", "ui", "getFormType"
-  getFormType(): number {
+
+
+  getFormType();
+  getFormType(clear: boolean);
+  getFormType(clear: boolean = false): number {
+
+    if (!clear && window[KiponXrmLOCAL_getFormType]) delete window[KiponXrmLOCAL_getFormType];
     if (window[KiponXrmLOCAL_getFormType]) {
       return window[KiponXrmLOCAL_getFormType];
     }
 
-    if (window.parent && window.parent[KiponXrmLOCAL_getFormType]) {
+    if (!clear && window.parent && window.parent[KiponXrmLOCAL_getFormType]) {
       window[KiponXrmLOCAL_getFormType] = window.parent[KiponXrmLOCAL_getFormType];
       return window[KiponXrmLOCAL_getFormType];
     }
 
-    if (window.opener && window.opener[KiponXrmLOCAL_getFormType]) {
+    if (!clear && window.opener && window.opener[KiponXrmLOCAL_getFormType]) {
       window[KiponXrmLOCAL_getFormType] = window.opener[KiponXrmLOCAL_getFormType];
       return window[KiponXrmLOCAL_getFormType];
     }
@@ -130,11 +136,14 @@ export class XrmFormService {
       window[KiponXrmLOCAL_getFormType] = window.opener["Xrm"]["Page"]["ui"]["getFormType"]();
       return window[KiponXrmLOCAL_getFormType];
     }
+
     return null;
   }
 
   // "Xrm", "Page", "data", "entity"
-  getFormKey(id: string, type: string): XrmFormKey {
+  getFormKey(id: string, type: string): XrmFormKey;
+  getFormKey(id: string, type: string, clear: boolean): XrmFormKey;
+  getFormKey(id: string, type: string, clear: boolean = false): XrmFormKey {
     if (typeof id != 'undefined' && id != null && id != '' && typeof type != 'undefined' && type != null && type != '') {
       let result = new XrmFormKey();
       result.id = id;
@@ -143,17 +152,18 @@ export class XrmFormService {
       return result;
     }
 
+    if (clear && window[KiponXrmLOCAL_formentityr]) delete window[KiponXrmLOCAL_formentityr];
     if (window[KiponXrmLOCAL_formentityr]) {
       return window[KiponXrmLOCAL_formentityr];
     }
 
 
-    if (window.parent && window.parent[KiponXrmLOCAL_formentityr]) {
+    if (!clear && window.parent && window.parent[KiponXrmLOCAL_formentityr]) {
       window[KiponXrmLOCAL_formentityr] = window.parent[KiponXrmLOCAL_formentityr];
       return window[KiponXrmLOCAL_formentityr];
     }
 
-    if (window.opener && window.opener[KiponXrmLOCAL_formentityr]) {
+    if (!clear && window.opener && window.opener[KiponXrmLOCAL_formentityr]) {
       window[KiponXrmLOCAL_formentityr] = window.opener[KiponXrmLOCAL_formentityr];
       return window[KiponXrmLOCAL_formentityr];
     }

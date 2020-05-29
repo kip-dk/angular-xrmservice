@@ -484,7 +484,7 @@ export class Filter {
       }
 
       if (this.operator != Comparator.DoesNotContainsData && this.operator != Comparator.ContainsData) {
-        throw "null in condition value is only supported for containsdata and doesnotdontainsdata";
+        throw "null in condition value is only supported for containsdata and doesnotdontainsdata:" + this.field + "/" + (this.alias != null ? "alias:" + this.alias : "") + "/" + this.operator;
       }
     }
 
@@ -721,8 +721,10 @@ export class XrmContextService {
     return this.xrmService.getContext();
   }
 
-  getCurrentKey(): Observable<XrmEntityKey> {
-    return this.xrmService.getCurrenKey();
+  getCurrentKey(): Observable<XrmEntityKey>;
+  getCurrentKey(repeatForCreateForm: boolean): Observable<XrmEntityKey>;
+  getCurrentKey(repeatForCreateForm: boolean = false): Observable<XrmEntityKey> {
+    return this.xrmService.getCurrentKey(repeatForCreateForm);
   }
 
   getServiceUrl(): string {
