@@ -63,7 +63,6 @@ export class XrmService {
   debug: boolean = false;
   token: string = null;
   forceHttps: boolean = false;
-  private loginObserver: any;
   private keyTries: number = 0;
 
   constructor(private http: HttpClient, private injector: Injector, private xrmformService: XrmFormService) {
@@ -551,7 +550,11 @@ export class XrmService {
         result.id = key.id;
         sub.next(result);
       } else {
-        this.tryGetKey(sub);
+        this.keyTries++;
+        if (this.keyTries < 900) {
+          // continue try for 1/2 hour at most
+          this.tryGetKey(sub);
+        }
       }
     }, 2000);
   }
