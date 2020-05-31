@@ -1,5 +1,5 @@
-### Version 3.4.1
-Condition.ownerIsUser() and Condition.ownerIsTeam() allow you to filter on the ownertype on entities having ownership (not orginizational entities)
+### Version 3.4.2
+Condition.OwningUserIsCurrentUserOrHirachy() and Condition.CurrentUserIsMemberOfOwningTeam() allow you to filter on the ownertype on entities having ownership (not orginizational entities)
 
 ### version 3.4.0
 Deprecated misspelled method getCurrenKey has been removed. you need to use getCurrentKey()

@@ -590,11 +590,11 @@ export class Condition {
     return this.where("statecode", Comparator.Equals, 1);
   }
 
-  ownerIsUser(): Condition {
+  owningUserIsCurrentUserOrHirachy(): Condition {
     return this.where("ownerid", 100)
   }
 
-  ownerIsTeam(): Condition {
+  currentUserIsMemberOfOwningTeam(): Condition {
     return this.where("ownerid", 101)
   }
 
