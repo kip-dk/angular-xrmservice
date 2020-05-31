@@ -40,12 +40,12 @@ export class AccountService {
   constructor(private xrmService: XrmContextService) { }
 
   query(): Observable<XrmQueryResult<Account>> {
-    let condition: Condition = new Condition().isActive();
+    let condition: Condition = new Condition().isActive().ownerIsUser();
     return this.xrmService.query<Account>(this.localPrototype, condition);
   }
 
   queryByXml(): Observable<XrmQueryResult<Account>> {
-    let condition: Condition = new Condition().isActive();
+    let condition: Condition = new Condition().isActive().ownerIsUser();
     let fetchxml = new Fetchxml(this.localPrototype, condition);
     fetchxml.count = 5;
     fetchxml.page = 1;

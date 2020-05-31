@@ -1,4 +1,7 @@
-### Current version 3.4.0
+### Version 3.4.1
+Condition.ownerIsUser() and Condition.ownerIsTeam() allow you to filter on the ownertype on entities having ownership (not orginizational entities)
+
+### version 3.4.0
 Deprecated misspelled method getCurrenKey has been removed. you need to use getCurrentKey()
 
 getCurrentKey(repeatForCreateForm: boolean = false)  repeatForCreateForm will monitor change of the parent form type, and when it is changed to formtype 2 (update) from 1(create), it will refresh the key.

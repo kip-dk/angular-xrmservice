@@ -292,20 +292,20 @@ export enum Operator {
 }
 
 export enum Comparator {
-  Equals,
-  NotEquals,
-  Contains,
-  NotContains,
-  DoesNotContainsData,
-  ContainsData,
-  StartsWith,
-  NotStartsWith,
-  EndsWith,
-  NotEndsWith,
-  GreaterThan,
-  GreaterThanOrEqual,
-  LessThan,
-  LessThanOrEQual
+  Equals = 1,
+  NotEquals = 2,
+  Contains = 3,
+  NotContains = 4,
+  DoesNotContainsData = 5,
+  ContainsData = 6,
+  StartsWith = 7,
+  NotStartsWith = 8,
+  EndsWith = 9,
+  NotEndsWith = 10,
+  GreaterThan = 11,
+  GreaterThanOrEqual = 12,
+  LessThan = 13,
+  LessThanOrEQual = 14
 }
 
 export class ColumnBuilder {
@@ -327,7 +327,15 @@ export class Filter {
     if (this["raw"] == true) {
       return this.field;
     }
-    
+
+    if (this.operator == 100) {
+      return 'ownerid eq-useroruserhierarchy';
+    }
+
+    if (this.operator == 101) {
+      return 'ownerid eq-userteams';
+    }
+
     let result = '';
     let _f = this.field;
 
@@ -457,6 +465,14 @@ export class Filter {
   }
 
   toFetcmXml(): string {
+    if (this.operator == 100) {
+      return '<condition attribute="ownerid" operator="eq-useroruserhierarchy" />';
+    }
+
+    if (this.operator == 101) {
+      return '<condition attribute="ownerid" operator="eq-userteams" />';
+    }
+
     var result: string = "";
 
     let _v = this.value;
@@ -572,6 +588,14 @@ export class Condition {
 
   isInactive(): Condition {
     return this.where("statecode", Comparator.Equals, 1);
+  }
+
+  ownerIsUser(): Condition {
+    return this.where("ownerid", 100)
+  }
+
+  ownerIsTeam(): Condition {
+    return this.where("ownerid", 101)
   }
 
 
