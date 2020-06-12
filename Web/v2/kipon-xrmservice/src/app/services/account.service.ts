@@ -50,6 +50,10 @@ export class AccountService {
     fetchxml.count = 5;
     fetchxml.page = 1;
 
+    this.xrmService.count(fetchxml).toPromise().then(r => {
+      console.log("fetch count is " + r);
+    });
+
     /*
     let contactCondition: Condition = new Condition()
       .where("firstname", Comparator.StartsWith, "Mic");

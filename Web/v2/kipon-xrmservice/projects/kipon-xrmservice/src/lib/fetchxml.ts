@@ -163,6 +163,40 @@ export class Fetchxml {
   }
 
 
+  toCountFetchXml(): string {
+    let result: string = "";
+
+    var distinct = "";
+    if (this.distinct != null) {
+      distinct = " distinct='" + this.distinct + "'"
+    }
+
+    result += "<fetch mapping='logical'" + distinct + " aggregate='true'>"
+    result += "<entity name='" + this.root.name + "'>";
+    result += "<attribute name='" + this.keyname + "' aggregate='count' alias='count' />";
+
+    if (this.root.condition != null) {
+      result += this.root.condition.toFetchXml();
+    }
+
+    if (this.root.linkedentities != null && this.root.linkedentities.length > 0) {
+      this.root.linkedentities.forEach(l => {
+        result += l.toFetchXml();
+      })
+    }
+
+    if (this.sorts != null && this.sorts.length > 0) {
+      this.sorts.forEach(s => {
+        result += s.toFetchXml();
+      });
+    }
+
+    result += "</entity>";
+    result += "</fetch>";
+
+    return result;
+  }
+
   toFetchXml(): string;
   toFetchXml(pageCoocie: string, forPage: number): string;
   toFetchXml(pageCoocie: string = null, forPage: number = null): string {
@@ -214,6 +248,7 @@ export class Fetchxml {
         result += s.toFetchXml();
       });
     }
+
     result += "</entity>";
     result += "</fetch>"
     return result;

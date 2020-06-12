@@ -534,6 +534,10 @@ xrmService.commit(trans).subscribe(r => {
 
 ## changelog
 
+### Version 3.4.3
+xrmcontextservice now has a count(fetchxml) method returning number of mathing records for the fetchxml
+
+
 ### Version 3.4.2
 Condition.OwningUserIsCurrentUserOrHirachy() and Condition.CurrentUserIsMemberOfOwningTeam() allow you to filter on the ownertype on entities having ownership (not orginizational entities)
 

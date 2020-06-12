@@ -789,6 +789,36 @@ export class XrmContextService {
     this.xrmService.debug = setting;
   }
 
+  count(xml: Fetchxml): Observable<number> {
+    let me = this;
+    let headers = new HttpHeaders({ 'Accept': 'application/json' });
+    if (this.xrmService.token != null) {
+      headers = headers.append("Authorization", "Bearer " + this.xrmService.token);
+    }
+    headers = headers.append("OData-MaxVersion", "4.0");
+    headers = headers.append("OData-Version", "4.0");
+    headers = headers.append("Content-Type", "application/json; charset=utf-8");
+    headers = headers.append("Prefer", "odata.include-annotations=\"*\"");
+    headers = headers.append("Cache-Control", "no-cache");
+
+    let options = {
+      headers: headers
+    }
+
+    let fetchxml = xml.toCountFetchXml();
+    let url = this.getContext().getClientUrl() + this.xrmService.apiUrl + xml.entity().entityPrototype._pluralName + "?fetchXml=" + encodeURIComponent(fetchxml);
+
+    this.xrmService.log(fetchxml);
+    this.xrmService.log(url);
+
+    return this.http.get<any>(this.forceHTTPS(url), options).pipe(map(response => {
+      if (response.value && response.value.length && response.value.length == 1) {
+        return response.value[0].count;
+      }
+      return 0;
+    }));
+  }
+
   fetch<T extends Entity>(xml: Fetchxml): Observable<XrmQueryResult<T>> {
     let me = this;
     let headers = new HttpHeaders({ 'Accept': 'application/json' });
