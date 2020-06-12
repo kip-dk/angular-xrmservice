@@ -87,7 +87,9 @@ export class Link {
 
   entity: FetchEntity;
 
-  toFetchXml(): string {
+  toFetchXml(): string;
+  toFetchXml(populateAttrib: boolean): string;
+  toFetchXml(populateAttrib: boolean = true): string {
     var result: string = "";
 
     var fromString = "";
@@ -96,10 +98,13 @@ export class Link {
     }
 
     result += "<link-entity name='" + this.entity.name + "' to='" + this.to + "'" + fromString + ">";
-    if (this.entity.attributes != null && this.entity.attributes.length > 0) {
-      this.entity.attributes.forEach(a => {
-        result += "<attribute name='" + a + "'/>"
-      });
+
+    if (populateAttrib) {
+      if (this.entity.attributes != null && this.entity.attributes.length > 0) {
+        this.entity.attributes.forEach(a => {
+          result += "<attribute name='" + a + "'/>"
+        });
+      }
     }
 
     if (this.entity.condition != null) {
@@ -181,7 +186,7 @@ export class Fetchxml {
 
     if (this.root.linkedentities != null && this.root.linkedentities.length > 0) {
       this.root.linkedentities.forEach(l => {
-        result += l.toFetchXml();
+        result += l.toFetchXml(false);
       })
     }
 

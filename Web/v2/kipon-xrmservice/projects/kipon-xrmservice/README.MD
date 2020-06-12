@@ -534,6 +534,10 @@ xrmService.commit(trans).subscribe(r => {
 
 ## changelog
 
+### Version 3.4.5
+xrmcontextservice do not try populate related entity properties. It is not supported
+
+
 ### Version 3.4.4
 xrmcontextservice must omit sort. It is not supported
 
