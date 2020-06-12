@@ -185,12 +185,6 @@ export class Fetchxml {
       })
     }
 
-    if (this.sorts != null && this.sorts.length > 0) {
-      this.sorts.forEach(s => {
-        result += s.toFetchXml();
-      });
-    }
-
     result += "</entity>";
     result += "</fetch>";
 

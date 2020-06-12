@@ -1,3 +1,6 @@
+### Version 3.4.4
+xrmcontextservice must omit sort. It is not supported
+
 ### Version 3.4.3
 xrmcontextservice now has a count(fetchxml) method returning number of mathing records for the fetchxml
 
