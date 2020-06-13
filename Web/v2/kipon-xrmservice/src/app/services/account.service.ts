@@ -51,10 +51,9 @@ export class AccountService {
     fetchxml.count = 5;
     fetchxml.page = 1;
 
-    this.xrmService.count(fetchxml).toPromise().then(r => {
-      console.log("fetch count is " + r);
+    this.xrmService.count(fetchxml).subscribe(r => {
+      console.log(r);
     });
-
 
     let link = fetchxml.entity().link(this.contactProto, "primarycontactid", null, ["fullname", "firstname", "lastname"]);
 
