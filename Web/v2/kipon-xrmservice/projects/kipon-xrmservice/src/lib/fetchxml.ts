@@ -25,6 +25,7 @@ export class FetchEntity {
     var next = new Link();
     next.entity = res;
     next.to = property;
+    next.alias = property;
     this.linkedentities.push(next);
     return res;
   }
@@ -77,6 +78,22 @@ export class FetchEntity {
     return res;
   }
 
+  aliasWithAttributes(): string[] {
+    var result = [];
+    this.resolveAlias(this.linkedentities, result);
+    return result;
+  }
+
+  private resolveAlias(links: Link[], result: string[]): void {
+    if (links != null && links.length > 0) {
+      links.forEach(l => {
+        if (l.entity.attributes != null && l.entity.attributes.length > 0) {
+          result.push(l.alias);
+        }
+        this.resolveAlias(l.entity.linkedentities, result);
+      });
+    }
+  }
 }
 
 export class Link {
@@ -87,17 +104,20 @@ export class Link {
 
   entity: FetchEntity;
 
-  toFetchXml(): string;
-  toFetchXml(populateAttrib: boolean): string;
-  toFetchXml(populateAttrib: boolean = true): string {
+  toFetchXml(populateAttrib: boolean): string {
     var result: string = "";
 
     var fromString = "";
     if (this.from != null) {
-      fromString = " alias='" + this.alias + "' from='" + this.from + "' link-type='" + this.type + "'";
+      fromString = "' from='" + this.from + "' link-type='" + this.type + "'";
     }
 
-    result += "<link-entity name='" + this.entity.name + "' to='" + this.to + "'" + fromString + ">";
+    var alias = "";
+    if (this.alias != null) {
+      alias = " alias='" + this.alias + "'";
+    }
+
+    result += "<link-entity name='" + this.entity.name + "' to='" + this.to + "'" + fromString + alias + ">";
 
     if (populateAttrib) {
       if (this.entity.attributes != null && this.entity.attributes.length > 0) {
@@ -113,7 +133,7 @@ export class Link {
 
     if (this.entity.linkedentities != null && this.entity.linkedentities.length > 0) {
       this.entity.linkedentities.forEach(l => {
-        result += l.toFetchXml();
+        result += l.toFetchXml(populateAttrib);
       });
     }
     result += "</link-entity>";
@@ -238,7 +258,7 @@ export class Fetchxml {
 
     if (this.root.linkedentities != null && this.root.linkedentities.length > 0) {
       this.root.linkedentities.forEach(l => {
-        result += l.toFetchXml();
+        result += l.toFetchXml(true);
       })
     }
 

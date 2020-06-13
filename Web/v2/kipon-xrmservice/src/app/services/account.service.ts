@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { XrmQueryResult, XrmContextService, Entity, Entities, EntityReference, OptionSetValue, Condition, Operator, Comparator, Fetchxml } from 'kipon-xrmservice';
+import { map } from 'rxjs/operators';
 
 export class Account extends Entity {
   constructor() {
@@ -45,7 +46,7 @@ export class AccountService {
   }
 
   queryByXml(): Observable<XrmQueryResult<Account>> {
-    let condition: Condition = new Condition().isActive().owningUserIsCurrentUserOrHirachy();
+    let condition: Condition = new Condition().isActive();
     let fetchxml = new Fetchxml(this.localPrototype, condition);
     fetchxml.count = 5;
     fetchxml.page = 1;
@@ -54,14 +55,14 @@ export class AccountService {
       console.log("fetch count is " + r);
     });
 
-    /*
-    let contactCondition: Condition = new Condition()
-      .where("firstname", Comparator.StartsWith, "Mic");
 
-    let link = fetchxml.entity().link(this.contactProto, "primarycontactid", contactCondition);
-    */
+    let link = fetchxml.entity().link(this.contactProto, "primarycontactid", null, ["fullname","firstname","lastname"]);
     var xml = fetchxml.toFetchXml();
     console.log(xml);
-    return this.xrmService.fetch(fetchxml)
+    return this.xrmService.fetch<Account>(fetchxml).pipe(map(r => {
+      console.log("HER KOMMER FETCH XML MED CONTACT JOIN")
+      console.log(r);
+      return r;
+    }));
   }
 }

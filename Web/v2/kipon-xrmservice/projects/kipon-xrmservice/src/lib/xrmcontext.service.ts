@@ -781,7 +781,7 @@ export class XrmContextService {
     }
 
     return this.xrmService.get<T>(prototype._pluralName, id, columnDef.columns, expand).pipe(map(r => {
-      return me.resolve<T>(prototype, r, prototype._updateable);
+      return me.resolve<T>(prototype, r, prototype._updateable, null);
     }));
   }
 
@@ -871,7 +871,7 @@ export class XrmContextService {
     this.xrmService.log(url);
 
     return this.http.get(this.forceHTTPS(url), options).pipe(map(response => {
-      let result = me.resolveQueryResult<T>(prototype, response, 0, [url], 0);
+      let result = me.resolveQueryResult<T>(prototype, response, 0, [url], 0, null);
       return result;
     }));
   }
@@ -938,7 +938,7 @@ export class XrmContextService {
     this.xrmService.log(url);
 
     return this.http.get(this.forceHTTPS(url), options).pipe(map(response => {
-      let result = me.resolveQueryResult<T>(prototype, response, top, [url], 0);
+      let result = me.resolveQueryResult<T>(prototype, response, top, [url], 0, null);
       return result;
     }));
   }
@@ -973,7 +973,7 @@ export class XrmContextService {
           return instance;
         } else {
           this.resolveNewInstance(prototype, instance, response);
-          return this.resolve(prototype, response, true);
+          return this.resolve(prototype, response, true, null);
         }
       }
       return null;
@@ -1014,7 +1014,7 @@ export class XrmContextService {
       }
 
       this.xrmService.log('version 9.0 or higher update');
-      return me.resolve(prototype, response, true);
+      return me.resolve(prototype, response, true, null);
     }));
   }
 
@@ -1617,7 +1617,7 @@ export class XrmContextService {
 
   private resolveFetchResult<T extends Entity>(prototype: T, response: any, top: number, pages: string[], pageIndex: number, fetchXml: Fetchxml): XrmQueryResult<T> {
     let me = this;
-    var result = this.resolveQueryResult(prototype, response, top, pages, pageIndex);
+    var result = this.resolveQueryResult(prototype, response, top, pages, pageIndex, fetchXml.entity().aliasWithAttributes());
 
     var pageCookie = response["@Microsoft.Dynamics.CRM.fetchxmlpagingcookie"] as string;
     if (pageCookie != null && pageCookie != '') {
@@ -1684,7 +1684,7 @@ export class XrmContextService {
     return result;
   }
 
-  private resolveQueryResult<T extends Entity>(prototype: T, response: any, top: number, pages: string[], pageIndex: number): XrmQueryResult<T> {
+  private resolveQueryResult<T extends Entity>(prototype: T, response: any, top: number, pages: string[], pageIndex: number, alias: string[]): XrmQueryResult<T> {
     let me = this;
     let result = {
       context: response["@odata.context"],
@@ -1700,7 +1700,7 @@ export class XrmContextService {
 
     let vals = response["value"] as T[];
     vals.forEach(r => {
-      result.value.push(me.resolve(prototype, r, prototype._updateable));
+      result.value.push(me.resolve(prototype, r, prototype._updateable, alias));
     });
 
     let nextLink = response["@odata.nextLink"] as string;
@@ -1737,7 +1737,7 @@ export class XrmContextService {
           }
           return me.http.get(me.forceHTTPS(nextLink), options).pipe(map(r => {
             pages.push(nextLink);
-            let pr = me.resolveQueryResult<T>(prototype, r, top, pages, pageIndex + 1);
+            let pr = me.resolveQueryResult<T>(prototype, r, top, pages, pageIndex + 1, alias);
             return pr;
           }));
         }
@@ -1767,7 +1767,7 @@ export class XrmContextService {
         let lastPage = result.pages[result.pageIndex - 1];
         return me.http.get(me.forceHTTPS(lastPage), options).pipe(map(r => {
           result.pages.splice(result.pages.length - 1, 1);
-          let pr = me.resolveQueryResult<T>(prototype, r, top, result.pages, result.pageIndex - 1);
+          let pr = me.resolveQueryResult<T>(prototype, r, top, result.pages, result.pageIndex - 1, alias);
           return pr;
         }));
       }
@@ -1784,7 +1784,7 @@ export class XrmContextService {
     this.context[key] = instance;
   }
 
-  private resolve<T extends Entity>(prototype: T, instance: any, updateable: boolean): T {
+  private resolve<T extends Entity>(prototype: T, instance: any, updateable: boolean, alias: string[]): T {
     let me = this;
 
     this.xrmService.log("Result from update: ");
@@ -1875,7 +1875,7 @@ export class XrmContextService {
             if (_v != null && Array.isArray(_v)) {
               let _tmp = [];
               _v.forEach(_r => {
-                _tmp.push(me.resolve(ep.entity, _r, false));
+                _tmp.push(me.resolve(ep.entity, _r, false, alias));
               });
               result[ep.name] = _tmp;
               if (ep.value instanceof Entities) {
@@ -1892,7 +1892,7 @@ export class XrmContextService {
           } else {
             let _v = instance[ep.name];
             if (_v != null) {
-              result[ep.name] = this.resolve(ep.entity, _v, false);
+              result[ep.name] = this.resolve(ep.entity, _v, false, alias);
               result[ep.name]['_keyName'] = ep.entity._keyName;
               result[ep.name]['_pluralName'] = ep.entity._pluralName;
               result[ep.name]['_logicalName'] = ep.entity._logicalName;
@@ -1900,6 +1900,21 @@ export class XrmContextService {
           }
         }
       });
+    }
+
+    if (alias != null && alias.length > 0) {
+      alias.forEach(a => {
+        for (var p in result) {
+          if (p.startsWith(a + ".")) {
+            delete result[p];
+          }
+        }
+        for (var p in instance) {
+          if (p.startsWith(a + '.')) {
+            result[p] = instance[p];
+          }
+        }
+      })
     }
 
     if (result['onFetch'] !== 'undefined' && result["onFetch"] != null && typeof result["onFetch"] === 'function') {

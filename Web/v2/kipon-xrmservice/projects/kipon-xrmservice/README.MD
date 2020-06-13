@@ -534,6 +534,15 @@ xrmService.commit(trans).subscribe(r => {
 
 ## changelog
 
+### Version 3.4.7
+Property name is now used as alias on link in fetch xml. This is to ensure you can predict the names on the returned properties for a linked entity.
+
+
+### Version 3.4.6
+xrmcontextservice.fetch when using linked entities with attributes, the linked attributes is now synchronized when refetching same record again. Currently there
+is no formal way to extract these properties, so the have the standard pattern of json based fetchxml result on the form entity['{alias}.{property}'] ex. 
+contact['ac.name'] : 'Company name', if ac is used as alias when linking parent account to a contact fetch
+
 ### Version 3.4.5
 xrmcontextservice do not try populate related entity properties. It is not supported
 
