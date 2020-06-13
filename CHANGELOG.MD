@@ -1,4 +1,4 @@
-### Version 3.4.7
+### Version 3.4.8
 Property name is now used as alias on link in fetch xml. This is to ensure you can predict the names on the returned properties for a linked entity.
 
 ### Version 3.4.6

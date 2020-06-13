@@ -109,15 +109,14 @@ export class Link {
 
     var fromString = "";
     if (this.from != null) {
-      fromString = "' from='" + this.from + "' link-type='" + this.type + "'";
+      fromString = " alias='" + this.alias + "' from='" + this.from + "' link-type='" + this.type + "'";
     }
 
-    var alias = "";
-    if (this.alias != null) {
-      alias = " alias='" + this.alias + "'";
+    if (this.from == null && this.alias != null && this.alias != '') {
+      fromString = " alias='" + this.alias + "'";
     }
 
-    result += "<link-entity name='" + this.entity.name + "' to='" + this.to + "'" + fromString + alias + ">";
+    result += "<link-entity name='" + this.entity.name + "' to='" + this.to + "'" + fromString + ">";
 
     if (populateAttrib) {
       if (this.entity.attributes != null && this.entity.attributes.length > 0) {
