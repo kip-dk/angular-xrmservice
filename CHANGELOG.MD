@@ -1,3 +1,10 @@
+### Version 3.5.4
+count on xrmcontextservice is changed to handle "AggregateQueryRecordLimit exceeded. Cannot perform this operation." exception, and return 50000 in that case. The result
+is, that a count of 50000 is ether 50000 or more. 
+
+The error pipeline in XrmInterceptor was changed to pop the error futher up the drain, so even when you use the inspector, you can still catch the error and handle on your own
+(this was a pre-requirement to get count to work.)
+
 ### Version 3.5.0
 xrmcontextservice is no longer returning the original object served by dynamics 365, not even for the first time fetch. It is creating a new instance by { } and clones
 properties into the result.  To get the original object, you must call xrmContextService.includeOriginal(true) before you first call the the service. Then the original

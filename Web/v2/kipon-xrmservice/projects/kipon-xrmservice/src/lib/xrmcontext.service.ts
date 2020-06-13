@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest, HttpResponse, HttpErrorResponse, HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { Observable } from 'rxjs';
+import { Observable, Subscriber, throwError } from 'rxjs';
 import { map, catchError, startWith } from 'rxjs/operators'
 
 import { XrmService, XrmEntityKey, XrmQueryResult, Expand } from './xrm.service';
@@ -816,12 +816,26 @@ export class XrmContextService {
     this.xrmService.log(fetchxml);
     this.xrmService.log(url);
 
-    return this.http.get<any>(this.forceHTTPS(url), options).pipe(map(response => {
-      if (response.value && response.value.length && response.value.length == 1) {
-        return response.value[0].count;
-      }
-      return 0;
-    }));
+    return new Observable(obs => {
+      this.http.get<any>(this.forceHTTPS(url), options).toPromise()
+        .then(response => {
+          if (response.value && response.value.length && response.value.length == 1) {
+            obs.next(response.value[0].count);
+          } else {
+            obs.next(0);
+          }
+        })
+        .catch(e => {
+          if (e["error"] && e["error"]["error"] && e["error"]["error"]["code"]) {
+            var val = e["error"]["error"]["code"];
+            if (val != null && val.toString() == "0x8004e023") {
+              obs.next(50000);
+              return;
+            }
+          }
+          throwError(e);
+        });
+    });
   }
 
   fetch<T extends Entity>(xml: Fetchxml): Observable<XrmQueryResult<T>> {

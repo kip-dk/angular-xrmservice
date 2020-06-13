@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest, HttpResponse, HttpErrorResponse } from '@angular/common/http';
 
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators'
 
 import { XrmStateService } from './xrmstate.service';
@@ -27,7 +27,7 @@ export class XrmInterceptor implements HttpInterceptor {
       }),
       catchError(error  => {
         this.xrmState['remove'](me, true);
-        return error;
+        return throwError(error);
       })
     );
   }
