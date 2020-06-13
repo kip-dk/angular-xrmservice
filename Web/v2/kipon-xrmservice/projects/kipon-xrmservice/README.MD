@@ -534,6 +534,12 @@ xrmService.commit(trans).subscribe(r => {
 
 ## changelog
 
+### Version 3.5.0
+xrmcontextservice is no longer returning the original object served by dynamics 365, not even for the first time fetch. It is creating a new instance by { } and clones
+properties into the result.  To get the original object, you must call xrmContextService.includeOriginal(true) before you first call the the service. Then the original
+object will be added to each instance by the "secret" property "_original$".
+
+
 ### Version 3.4.8
 Property name is now used as alias on link in fetch xml. This is to ensure you can predict the names on the returned properties for a linked entity.
 

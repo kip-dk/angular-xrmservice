@@ -732,6 +732,7 @@ export class XrmContextService {
   private context: any = {};
   private changemanager: any = {};
   private tick: number = new Date().valueOf();
+  private includeOriginalPayload$: boolean = false;
 
   pageCookieMatch = /[-pagingcookie=\"][a-z,A-Z,0-9,%-_.~]+/g;
 
@@ -739,6 +740,10 @@ export class XrmContextService {
 
   setVersion(v: string) {
     this.xrmService.setVersion(v);
+  }
+
+  includeOroginalPayload(v: boolean): void {
+    this.includeOriginalPayload$ = v;
   }
 
   getContext(): XrmContext {
@@ -1787,11 +1792,10 @@ export class XrmContextService {
   private resolve<T extends Entity>(prototype: T, instance: any, updateable: boolean, alias: string[]): T {
     let me = this;
 
-    this.xrmService.log("Result from update: ");
     this.xrmService.log(instance);
 
     let key = prototype._pluralName + ':' + instance[prototype._keyName];
-    let result = instance;
+    let result = {} as any;
 
     if (this.context.hasOwnProperty(key)) {
       result = this.context[key];
@@ -1802,6 +1806,14 @@ export class XrmContextService {
       result["_logicalName"] = prototype._logicalName;
       result["_keyName"] = prototype._keyName;
       delete result[prototype._keyName];
+    }
+
+    if (this.includeOriginalPayload$) {
+      result["_original$"] = instance;
+    } else {
+      if (result.hasOwnProperty("_original$")) {
+        delete result["_original$"];
+      }
     }
 
     result['_updateable'] = updateable;

@@ -56,9 +56,10 @@ export class AccountService {
     });
 
 
-    let link = fetchxml.entity().link(this.contactProto, "primarycontactid", null, ["fullname","firstname","lastname"]);
-    var xml = fetchxml.toFetchXml();
-    console.log(xml);
+    let link = fetchxml.entity().link(this.contactProto, "primarycontactid", null, ["fullname", "firstname", "lastname"]);
+
+    this.xrmService.includeOroginalPayload(true);
+
     return this.xrmService.fetch<Account>(fetchxml).pipe(map(r => {
       console.log("HER KOMMER FETCH XML MED CONTACT JOIN")
       console.log(r);
