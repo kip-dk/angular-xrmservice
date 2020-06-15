@@ -1,4 +1,4 @@
-### version 3.5.5 2020-06-15
+### version 3.5.6 2020-06-15
 count() on xrm service now add distinct='true' if the query is distinct
 
 ### Version 3.5.4
