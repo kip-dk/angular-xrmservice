@@ -195,9 +195,14 @@ export class Fetchxml {
       distinct = " distinct='" + this.distinct + "'"
     }
 
+    var dist = '';
+    if (this.distinct) {
+      dist = " distinct='true'";
+    }
+
     result += "<fetch mapping='logical'" + distinct + " aggregate='true'>"
     result += "<entity name='" + this.root.name + "'>";
-    result += "<attribute name='" + this.keyname + "' aggregate='count' alias='count' />";
+    result += "<attribute name='" + this.keyname + "' aggregate='count' alias='count'"+dist+"  />";
 
     if (this.root.condition != null) {
       result += this.root.condition.toFetchXml();

@@ -1,3 +1,6 @@
+### version 3.5.5 2020-06-15
+count() on xrm service now add distinct='true' if the query is distinct
+
 ### Version 3.5.4
 count on xrmcontextservice is changed to handle "AggregateQueryRecordLimit exceeded. Cannot perform this operation." exception, and return 50000 in that case. The result
 is, that a count of 50000 is ether 50000 or more. 
