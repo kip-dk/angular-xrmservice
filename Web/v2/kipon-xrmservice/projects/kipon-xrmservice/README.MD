@@ -534,46 +534,46 @@ xrmService.commit(trans).subscribe(r => {
 
 ## changelog
 
-### version 3.5.6 2020-06-15
+### version 2.5.6 2020-06-15
 count() on xrm service now add distinct='true' if the query is distinct
 
-### Version 3.5.4
+### Version 2.5.4
 count on xrmcontextservice is changed to handle "AggregateQueryRecordLimit exceeded. Cannot perform this operation." exception, and return 50000 in that case. The result
 is, that a count of 50000 is ether 50000 or more. 
 
 The error pipeline in XrmInterceptor was changed to pop the error futher up the drain, so even when you use the inspector, you can still catch the error and handle on your own
 (this was a pre-requirement to get count to work.)
 
-### Version 3.5.0
+### Version 2.5.0
 xrmcontextservice is no longer returning the original object served by dynamics 365, not even for the first time fetch. It is creating a new instance by { } and clones
 properties into the result.  To get the original object, you must call xrmContextService.includeOriginal(true) before you first call the the service. Then the original
 object will be added to each instance by the "secret" property "_original$".
 
 
-### Version 3.4.8
+### Version 2.4.8
 Property name is now used as alias on link in fetch xml. This is to ensure you can predict the names on the returned properties for a linked entity.
 
 
-### Version 3.4.6
+### Version 2.4.6
 xrmcontextservice.fetch when using linked entities with attributes, the linked attributes is now synchronized when refetching same record again. Currently there
 is no formal way to extract these properties, so the have the standard pattern of json based fetchxml result on the form entity['{alias}.{property}'] ex. 
 contact['ac.name'] : 'Company name', if ac is used as alias when linking parent account to a contact fetch
 
-### Version 3.4.5
+### Version 2.4.5
 xrmcontextservice do not try populate related entity properties. It is not supported
 
 
-### Version 3.4.4
+### Version 2.4.4
 xrmcontextservice must omit sort. It is not supported
 
-### Version 3.4.3
+### Version 2.4.3
 xrmcontextservice now has a count(fetchxml) method returning number of mathing records for the fetchxml
 
 
-### Version 3.4.2
+### Version 2.4.2
 Condition.OwningUserIsCurrentUserOrHirachy() and Condition.CurrentUserIsMemberOfOwningTeam() allow you to filter on the ownertype on entities having ownership (not orginizational entities)
 
-### version 3.4.0
+### version 2.4.0
 Deprecated misspelled method getCurrenKey has been removed. you need to use getCurrentKey()
 
 getCurrentKey(repeatForCreateForm: boolean = false)  repeatForCreateForm will monitor change of the parent form type, and when it is changed to formtype 2 (update) from 1(create), it will refresh the key.
