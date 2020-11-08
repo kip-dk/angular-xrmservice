@@ -132,4 +132,4 @@ The service-generator folder in this project has an example on how to setup depl
 
 ## License
 
-MIT © [Kipon ApS, 2018, 2019](mailto:kip@kipon.dk)
+MIT © [Kipon ApS, 2018, 2019, 2020](mailto:kip@kipon.dk)
