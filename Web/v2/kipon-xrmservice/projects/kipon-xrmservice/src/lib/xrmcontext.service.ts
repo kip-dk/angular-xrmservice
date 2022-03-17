@@ -305,7 +305,9 @@ export enum Comparator {
   GreaterThan = 11,
   GreaterThanOrEqual = 12,
   LessThan = 13,
-  LessThanOrEQual = 14
+  LessThanOrEQual = 14,
+  Useroruserhierarchy = 100,
+  Userteams = 101
 }
 
 export class ColumnBuilder {
@@ -340,11 +342,11 @@ export class Filter {
     let _f = this.field;
 
     if (this.operator == Comparator.Equals && this.value == null) {
-      this.operator = Comparator.DoesNotContainsData;
+      // this.operator = Comparator.DoesNotContainsData;
     }
 
     if (this.operator == Comparator.NotEquals && this.value == null) {
-      this.operator = Comparator.ContainsData;
+      // this.operator = Comparator.ContainsData;
     }
 
     switch (this.operator) {
@@ -492,16 +494,7 @@ export class Filter {
     }
 
     if (_v == null) {
-      if (this.operator == Comparator.Equals) {
-        this.operator = Comparator.DoesNotContainsData;
-      }
-      if (this.operator == Comparator.NotEquals) {
-        this.operator = Comparator.ContainsData;
-      }
-
-      if (this.operator != Comparator.DoesNotContainsData && this.operator != Comparator.ContainsData) {
-        throw "null in condition value is only supported for containsdata and doesnotdontainsdata:" + this.field + "/" + (this.alias != null ? "alias:" + this.alias : "") + "/" + this.operator;
-      }
+      this.adjustOperation();
     }
 
     var op = "eq";
@@ -534,6 +527,19 @@ export class Filter {
       result += "<condition" + aliasString + " attribute='" + this.field + "' operator='" + op + "' />";
     }
     return result;
+  }
+
+  private adjustOperation() {
+    if (this.operator == Comparator.Equals) {
+      this.operator = Comparator.DoesNotContainsData;
+    } else
+      if (this.operator == Comparator.NotEquals) {
+        this.operator = Comparator.ContainsData;
+      }
+
+    if (this.operator != Comparator.DoesNotContainsData && this.operator != Comparator.ContainsData) {
+      throw "null in condition value is only supported for containsdata and doesnotdontainsdata:" + this.field + "/" + (this.alias != null ? "alias:" + this.alias : "") + "/" + this.operator;
+    }
   }
 }
 
