@@ -1,0 +1,1 @@
+ng build kipon-xrmservice

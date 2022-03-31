@@ -1,0 +1,42 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "cli": {
+    "analytics": "15b599a4-9c3a-4b20-b28e-7f7f96527d00"
+  },
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "kipon-xrmservice": {
+      "projectType": "library",
+      "root": "projects/kipon-xrmservice",
+      "sourceRoot": "projects/kipon-xrmservice/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/kipon-xrmservice/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/kipon-xrmservice/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/kipon-xrmservice/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/kipon-xrmservice/src/test.ts",
+            "tsConfig": "projects/kipon-xrmservice/tsconfig.spec.json",
+            "karmaConfig": "projects/kipon-xrmservice/karma.conf.js"
+          }
+        }
+      }
+    }
+  },
+  "defaultProject": "kipon-xrmservice"
+}

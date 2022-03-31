@@ -502,7 +502,7 @@ export class Filter {
       case Comparator.Contains: op = "like"; _v = "%" + _v + "%"; break;
       case Comparator.ContainsData: op = "not-null"; break;
       case Comparator.DoesNotContainsData: op = "null"; break;
-      case Comparator.EndsWith: op = "like"; _v = "%" + _v; null;
+      case Comparator.EndsWith: op = "like"; _v = "%" + _v; null; break;
       case Comparator.Equals: op = "eq"; break;
       case Comparator.GreaterThan: op = "gt"; break;
       case Comparator.GreaterThanOrEqual: op = "ge"; break;
@@ -1467,7 +1467,7 @@ export class XrmContextService {
 
   private mapAccess(prototype: Entity, instance: Entity): Observable<Entity> {
     if (!prototype.hasOwnProperty('access') || !(prototype['access'] instanceof XrmAccess)) {
-      return;
+      return null;
     }
 
     if (!instance.hasOwnProperty('access')) {
@@ -1475,7 +1475,7 @@ export class XrmContextService {
     } else {
       let r = instance['access'] as XrmAccess;
       if (r.resolved != null) {
-        return;
+        return null;
       }
     }
 
