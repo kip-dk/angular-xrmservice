@@ -12,7 +12,7 @@ export class XrmEntityKey {
   entityType: string;
 }
 
-export interface XrmQueryResult<T> {
+export class XrmQueryResult<T> {
   pages: string[];
   pageIndex: number;
   top: number;
@@ -20,9 +20,10 @@ export interface XrmQueryResult<T> {
   context: string;
   count: number;
   value: T[];
-  prev(): Observable<XrmQueryResult<T>>;
-  next(): Observable<XrmQueryResult<T>>;
+  prev(): Observable<XrmQueryResult<T>> { return null; }
+  next(): Observable<XrmQueryResult<T>> { return null; }
 }
+
 
 export class Expand {
   name: string;
@@ -51,8 +52,6 @@ export class Expand {
     return _ex;
   }
 }
-
-
 
 @Injectable()
 export class XrmService {

@@ -6,71 +6,46 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="a8\**" />
     <Compile Remove="kipon-xrmservice\**" />
-    <Compile Remove="poc\dist\**" />
-    <Compile Remove="poc\e2e\**" />
-    <Compile Remove="poc\node_modules\**" />
-    <Compile Remove="service-generator\e2e\**" />
-    <Compile Remove="service-generator\node_modules\**" />
+    <Compile Remove="poc\**" />
+    <Compile Remove="service-generator\**" />
+    <Compile Remove="v2\**" />
     <Compile Remove="xrmservice\dist\**" />
     <Compile Remove="xrmservice\node_modules\**" />
     <Compile Remove="xrmservice\tools\**" />
+    <Content Remove="a8\**" />
     <Content Remove="kipon-xrmservice\**" />
-    <Content Remove="poc\dist\**" />
-    <Content Remove="poc\e2e\**" />
-    <Content Remove="poc\node_modules\**" />
-    <Content Remove="service-generator\e2e\**" />
-    <Content Remove="service-generator\node_modules\**" />
+    <Content Remove="poc\**" />
+    <Content Remove="service-generator\**" />
+    <Content Remove="v2\**" />
     <Content Remove="xrmservice\dist\**" />
     <Content Remove="xrmservice\node_modules\**" />
     <Content Remove="xrmservice\tools\**" />
+    <EmbeddedResource Remove="a8\**" />
     <EmbeddedResource Remove="kipon-xrmservice\**" />
-    <EmbeddedResource Remove="poc\dist\**" />
-    <EmbeddedResource Remove="poc\e2e\**" />
-    <EmbeddedResource Remove="poc\node_modules\**" />
-    <EmbeddedResource Remove="service-generator\e2e\**" />
-    <EmbeddedResource Remove="service-generator\node_modules\**" />
+    <EmbeddedResource Remove="poc\**" />
+    <EmbeddedResource Remove="service-generator\**" />
+    <EmbeddedResource Remove="v2\**" />
     <EmbeddedResource Remove="xrmservice\dist\**" />
     <EmbeddedResource Remove="xrmservice\node_modules\**" />
     <EmbeddedResource Remove="xrmservice\tools\**" />
+    <None Remove="a8\**" />
     <None Remove="kipon-xrmservice\**" />
-    <None Remove="poc\dist\**" />
-    <None Remove="poc\e2e\**" />
-    <None Remove="poc\node_modules\**" />
-    <None Remove="service-generator\e2e\**" />
-    <None Remove="service-generator\node_modules\**" />
+    <None Remove="poc\**" />
+    <None Remove="service-generator\**" />
+    <None Remove="v2\**" />
     <None Remove="xrmservice\dist\**" />
     <None Remove="xrmservice\node_modules\**" />
     <None Remove="xrmservice\tools\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="service-generator\.angular-cli.json" />
     <Content Remove="xrmservice\bs-config.json" />
     <Content Remove="xrmservice\tslint.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="a8\atest\src\app\services\account.service.ts" />
-    <None Remove="poc\src\app\metadata.component.ts" />
-    <None Remove="poc\src\app\xrm\auth.service.ts" />
-    <None Remove="poc\src\app\xrm\xrmconfig.service.ts" />
-    <None Remove="service-generator\.editorconfig" />
-    <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\auth.service.ts" />
-    <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\fetchxml.ts" />
-    <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\kipon-xrmannotation.module.ts" />
-    <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\kipon-xrmmetadata.module.ts" />
-    <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\metadata.service.ts" />
-    <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrm.interceptor.ts" />
-    <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrm.service.ts" />
-    <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrmannotation.service.ts" />
-    <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrmconfig.service.ts" />
-    <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrmcontext.service.ts" />
-    <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrmform.service.ts" />
-    <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrmsecurity.service.ts" />
-    <None Remove="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrmstate.service.ts" />
-    <None Remove="v2\kipon-xrmservice\src\app\metadata.component.ts" />
-    <None Remove="v2\kipon-xrmservice\src\app\services\account.service.ts" />
     <None Remove="V3\kipon-xrmservice-workspace\projects\kipon-xrmservice\src\lib\auth.service.ts" />
     <None Remove="V3\kipon-xrmservice-workspace\projects\kipon-xrmservice\src\lib\fetchxml.ts" />
     <None Remove="V3\kipon-xrmservice-workspace\projects\kipon-xrmservice\src\lib\kipon-xrmannotation.module.ts" />
@@ -105,27 +80,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Include="a8\atest\src\app\services\account.service.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="poc\src\app\metadata.component.ts" />
-    <TypeScriptCompile Include="poc\src\app\xrm\auth.service.ts" />
-    <TypeScriptCompile Include="poc\src\app\xrm\xrmconfig.service.ts" />
-    <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\auth.service.ts" />
-    <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\fetchxml.ts" />
-    <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\kipon-xrmmetadata.module.ts" />
-    <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\kipon-xrmannotation.module.ts" />
-    <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\metadata.service.ts" />
-    <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrm.interceptor.ts" />
-    <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrm.service.ts" />
-    <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrmannotation.service.ts" />
-    <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrmconfig.service.ts" />
-    <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrmcontext.service.ts" />
-    <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrmform.service.ts" />
-    <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrmsecurity.service.ts" />
-    <TypeScriptCompile Include="v2\kipon-xrmservice\projects\kipon-xrmservice\src\lib\xrmstate.service.ts" />
-    <TypeScriptCompile Include="v2\kipon-xrmservice\src\app\metadata.component.ts" />
-    <TypeScriptCompile Include="v2\kipon-xrmservice\src\app\services\account.service.ts" />
     <TypeScriptCompile Include="V3\kipon-xrmservice-workspace\projects\kipon-xrmservice\src\lib\auth.service.ts" />
     <TypeScriptCompile Include="V3\kipon-xrmservice-workspace\projects\kipon-xrmservice\src\lib\fetchxml.ts" />
     <TypeScriptCompile Include="V3\kipon-xrmservice-workspace\projects\kipon-xrmservice\src\lib\kipon-xrmannotation.module.ts" />
