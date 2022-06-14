@@ -1,0 +1,26 @@
+{
+  "name": "kipon-xrmservice",
+  "version": "4.0.0",
+  "keywords": [
+    "angular",
+    "dynamics 365 CE",
+    "web api",
+    "webresource"
+  ],
+  "description": "Dynamics 365 CE web api wrapper for angular, making life easier when building angular based web resources",
+  "homepage": "https://github.com/kip-dk/angular-xrmservice",
+  "license": "MIT",
+  "author": {
+    "name": "Kjeld Ingemann Poulsen",
+    "email": "kip@kipon.dk",
+    "url": "http://www.kipon.dk"
+  },
+
+  "peerDependencies": {
+    "@angular/common": "^14.0.0",
+    "@angular/core": "^14.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  }
+}

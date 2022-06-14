@@ -5,7 +5,6 @@ import { map } from 'rxjs/operators'
 
 import { XrmService, XrmQueryResult } from './xrm.service';
 import { XrmContextService, Entity, OptionSetValue, Condition, Comparator } from './xrmcontext.service';
-import { error } from '@angular/compiler/src/util';
 
 export class LabelMeta {
   Label: string;
@@ -120,7 +119,7 @@ export class XrmMetadataService {
       let r = _r as XrmQueryResult<EntityMeta>;
       if (name != null && name != '') {
         let _s = name.toLowerCase();
-        let ma = [];
+        let ma: EntityMeta[] = [];
         // Metadata api does not support contains - therefore client site filter
         r.value.forEach(e => {
           if (e != null && e.LogicalName != null && e.LogicalName.toLowerCase().indexOf(_s) >= 0) {
@@ -256,6 +255,6 @@ export class XrmMetadataService {
   }
 
   getPicklist(entitylogicalname: string, attrblogicalname: string): Observable<PicklistAttribute> {
-    throw error("not implemented yet");
+    return null;
   }
 }
