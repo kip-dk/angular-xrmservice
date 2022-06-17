@@ -92,9 +92,40 @@ export class LookupAttribute {
   SchemaName: string;
 }
 
-
-export class PicklistAttribute {
+interface IAttributeOptionsetMetaResult {
+  value: AttributeOptionsetMeta[];
 }
+
+export class AttributeOptionsetMeta {
+  public LogicalName: string | undefined;
+  public MetadataId: string | undefined;
+  public OptionSet: OptionSetMeta | undefined;
+}
+
+class OptionSetMeta {
+  public Options: OptionSetMetaValue[] | undefined;
+
+}
+
+class OptionSetMetaValue {
+  public Value: number | undefined;
+  public Label: OptionsetLabelMeta | undefined;
+}
+
+
+class OptionsetLabelMeta {
+  public UserLocalizedLabel: OptionsetLabel | undefined;
+  public LocalizedLabels: OptionsetLabel[] | undefined;
+}
+
+
+
+class OptionsetLabel {
+  public Label: string | undefined;
+  public LanguageCode: number | undefined;
+  public MetadataId: string | undefined;
+}
+
 
 @Injectable()
 export class XrmMetadataService {
@@ -254,7 +285,17 @@ export class XrmMetadataService {
     throw 'unknown Lookup type ' + attr.AttributeType;
   }
 
-  getPicklist(entitylogicalname: string, attrblogicalname: string): Observable<PicklistAttribute> {
-    return null;
+  getPicklists(entity: EntityMeta): Observable<AttributeOptionsetMeta[]> {
+    let headers = new HttpHeaders({ 'Accept': 'application/json' });
+    headers = headers.append("OData-MaxVersion", "4.0");
+    headers = headers.append("OData-Version", "4.0");
+    headers = headers.append("Content-Type", "application/json; charset=utf-8");
+    headers = headers.append("Prefer", "odata.include-annotations=*");
+
+    let options = {
+      headers: headers
+    }
+
+    return this.http.get<IAttributeOptionsetMetaResult>(this.xrmService.getServiceUrl() + 'EntityDefinitions(LogicalName=' + entity.LogicalName + '/Attributes/Microsoft.Dynamics.CRM.PicklistAttributeMetadata?$select=LogicalName&$expand=OptionSet,GlobalOptionSet').pipe(map(r => r.value));
   }
 }
