@@ -296,6 +296,6 @@ export class XrmMetadataService {
       headers: headers
     }
 
-    return this.http.get<IAttributeOptionsetMetaResult>(this.xrmService.getServiceUrl() + 'EntityDefinitions(LogicalName=' + entity.LogicalName + '/Attributes/Microsoft.Dynamics.CRM.PicklistAttributeMetadata?$select=LogicalName&$expand=OptionSet,GlobalOptionSet').pipe(map(r => r.value));
+    return this.http.get<IAttributeOptionsetMetaResult>(this.xrmService.getServiceUrl() + 'EntityDefinitions(LogicalName=\'' + entity.LogicalName + '\')/Attributes/Microsoft.Dynamics.CRM.PicklistAttributeMetadata?$select=LogicalName&$expand=OptionSet,GlobalOptionSet').pipe(map(r => r.value));
   }
 }
