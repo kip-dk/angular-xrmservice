@@ -140,7 +140,7 @@ export class Link {
   }
 }
 
-class Fetchsort {
+export class Fetchsort {
   attribute: string;
   descending: boolean;
 

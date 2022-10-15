@@ -1421,8 +1421,8 @@ export class XrmContextService {
               if (newValue instanceof Date) {
                 let d = newValue as Date;
                 var sValue = d.toISOString();
-                if (sValue.indexOf("T00:00:00Z") > 0) {
-                  sValue = sValue.replace("T00:00:00Z", "");
+                if (sValue.indexOf("T00:00:00.000Z") > 0) {
+                  sValue = sValue.replace("T00:00:00.000Z", "");
                 }
                 upd[prop.toString()] = sValue;
               } else {
