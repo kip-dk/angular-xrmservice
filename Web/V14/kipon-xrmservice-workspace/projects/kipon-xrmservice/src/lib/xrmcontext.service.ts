@@ -1418,8 +1418,16 @@ export class XrmContextService {
             if (newValue == null) {
               upd[prop.toString()] = null;
             } else {
-              let d = newValue as Date;
-              upd[prop.toString()] = d.toISOString();
+              if (newValue instanceof Date) {
+                let d = newValue as Date;
+                var sValue = d.toISOString();
+                if (sValue.indexOf("T00:00:00Z") > 0) {
+                  sValue = sValue.replace("T00:00:00Z", "");
+                }
+                upd[prop.toString()] = sValue;
+              } else {
+                upd[prop.toString()] = newValue;
+              }
             }
             countFields++;
           }

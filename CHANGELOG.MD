@@ -1,3 +1,15 @@
+### version 4.0.3 2022-10-15
+Solved Edm.Date problem. If a Date Only field was updated thourgh the xrmcontect service it would generate a Edm.Date format not recognized on the Dynamics 365 CE server.
+This has been fixed by parsing the data as "yyyy-MM-dd" instead of "yyyy-MM-ddTMM:mm:ssZ". The way to determin that it is a date only field is NOT by metadata (yet). If the
+date parsed is at 00:00:00 time, it is assumed it is a date only.
+
+If - for whatever reason this turns out not to work, and your code or environment needs another format, you can now assign the the value to the date field to be updated on the form
+
+myentity["field_logicalname"] = "string value";
+
+### version 4.0.0 2022-07-01
+Build with angular 14. Do not upgrade to this version unless you also updated you angular project to version 14.
+
 ### version 2.5.6 2020-06-15
 count() on xrm service now add distinct='true' if the query is distinct
 
