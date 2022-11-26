@@ -1065,10 +1065,13 @@ export class XrmContextService {
       return this.put(prototype, instances[0], field, value);
     }
 
-    if (instances != null && instances.length > 0) {
+    if (instances != null && instances.length > 1) {
       let trans = new XrmTransaction();
+
+      let pvx = this.preparePutValue(prototype, field, value);
+
       instances.forEach(r => {
-        trans.put(prototype, r, field, value);
+        trans.put(prototype, r, field, pvx);
       });
       return this.commit(trans);
     }
@@ -1434,6 +1437,25 @@ export class XrmContextService {
           continue;
         }
 
+        if (typeof prototype[prop] == "number") {
+          if (typeof newValue == "string") {
+            if (newValue == "") {
+              newValue = null;
+            } else {
+              newValue = Number(newValue);
+              if (newValue == NaN) {
+                newValue = prevValue;
+              }
+            }
+          }
+
+          if (prevValue != newValue) {
+            upd[prop.toString()] = newValue;
+            countFields++;
+          }
+          continue;
+        }
+
         if (prevValue === true && newValue === true) {
           continue;
         }
@@ -1539,6 +1561,17 @@ export class XrmContextService {
       }
     }
 
+    if (typeof t == 'number' && typeof value == 'string') {
+      if (value == '') {
+        value = null;
+      } else {
+        value = Number(value);
+        if (value == NaN) {
+          value = null;
+        }
+      }
+    }
+
     if (typeof t == 'number' && typeof value == 'number') {
       if (value == null) {
         return { field: field, value: null, propertyAs: null };
@@ -1608,6 +1641,21 @@ export class XrmContextService {
             if (d != null) {
               newr[prop.toString()] = d.toISOString();
             }
+            continue;
+          }
+
+          if (typeof prototype[prop] == "number") {
+            if (typeof value == "string") {
+              if (value == "") {
+                continue;
+              }
+              value = Number(value);
+              if (value == NaN) {
+                continue; 
+              }
+            }
+
+            newr[prop.toString()] = value;
             continue;
           }
 
