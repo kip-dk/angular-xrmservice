@@ -1,34 +1,55 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable()
 export class XrmStateService {
-    constructor() { }
+  private statechanged$: BehaviorSubject<boolean>;
 
-    private runnings = [];
+  constructor() {
+    this.statechanged$ = new BehaviorSubject<boolean>(false);
+  }
 
-    private _running: boolean = false;
-    public get running() { return this._running };
+  public statechanged(): BehaviorSubject<boolean> {
+    return this.statechanged$;
+  }
 
-    private _success: number = 0;
-    public get success() { return this._success };
+  private runnings = [];
 
-    private _error: number = 0;
-    public get error() { return this._error };
+  private _running: boolean = false;
 
-    private add(x: number): void {
-        this.runnings.push(x);
-        this._running = true;
+
+  /**
+   * @deprecated You should subscribe to statechanged() instead of targeting this property directly
+   */
+  public get running() { return this._running };
+
+  private _success: number = 0;
+  public get success() { return this._success };
+
+  private _error: number = 0;
+  public get error() { return this._error };
+
+  private add(x: number): void {
+    this.runnings.push(x);
+    this._running = true;
+  }
+
+  private remove(x: number, error: boolean): void {
+    let pos = this.runnings.indexOf(x);
+    this.runnings.splice(pos, 1);
+
+    var current = this._running;
+
+    this._running = this.runnings.length > 0;
+
+    if (current != this._running) {
+      this.statechanged$.next(this._running);
     }
 
-    private remove(x: number, error: boolean): void {
-        let pos = this.runnings.indexOf(x);
-        this.runnings.splice(pos, 1);
-        this._running = this.runnings.length > 0;
-
-        if (error) {
-            this._error++;
-        } else {
-            this._success++;
-        }
+    if (error) {
+      this._error++;
+    } else {
+      this._success++;
     }
+  }
 }
