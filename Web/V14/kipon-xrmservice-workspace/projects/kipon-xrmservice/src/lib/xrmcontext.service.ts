@@ -1483,6 +1483,23 @@ export class XrmContextService {
     return null;
   }
 
+  /*
+   * return an object that has been adjusted to patterns used in a webapi POST method. This is convinient in
+   * combination with actions that uses parameters of type Entity, so the entity ex.
+   */
+
+  getCreatePayload(prototype: Entity, instance: Entity): any {
+    return this.prepareNewInstance(prototype, instance);
+  }
+
+  /* 
+   * return an object that has been adjused to pattern used in webapi PATCH method, for entity update. Only fields
+   * that has actually changed will be present in the return instance
+   */
+  getUpdatePayload(prototype: Entity, instance: Entity): any {
+    return this.prepareUpdate(prototype, instance);
+  }
+
   private resolveAccess(prototype: Entity, instance: Entity) {
     var user = this.getContext().getUserId();
     if (user == null || user == '') {
