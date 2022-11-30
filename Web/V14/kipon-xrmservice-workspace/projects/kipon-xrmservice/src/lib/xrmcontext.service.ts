@@ -1500,6 +1500,23 @@ export class XrmContextService {
     return this.prepareUpdate(prototype, instance);
   }
 
+  getEntityCollectionPayload(prototype: Entity, instances: Entity[]): any[] {
+    let result = [];
+
+    instances.forEach(e => {
+      let next = this.prepareNewInstance(prototype, e);
+
+      if (e.id != null && e.id != '') {
+        next[prototype._keyName] = e.id;
+      }
+
+      next["@odata.type"] = "Microsoft.Dynamics.CRM." + prototype._logicalName;
+      result.push(next);
+    });
+
+    return result;
+  }
+
   private resolveAccess(prototype: Entity, instance: Entity) {
     var user = this.getContext().getUserId();
     if (user == null || user == '') {
