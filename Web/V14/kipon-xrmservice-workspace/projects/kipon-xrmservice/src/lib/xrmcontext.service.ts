@@ -8,6 +8,8 @@ import { XrmService, XrmEntityKey, XrmQueryResult, Expand } from './xrm.service'
 import { XrmContext } from './xrmform.service';
 import { Fetchxml } from './fetchxml';
 
+const XRMCONTEXTSERVICE_EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
+
 export interface ToFunctionPropertyValue {
   functionPropertyValueAsString(): string;
 }
@@ -1017,9 +1019,11 @@ export class XrmContextService {
     throw "You must parse a prototype and at least one instance to be created";
   }
 
-  update<T extends Entity>(prototype: T, instance: T): Observable<T> {
+  update<T extends Entity>(prototype: T, instance: T): Observable<T>
+  update<T extends Entity>(prototype: T, instance: T, deleteReferenceAsEmptyGuid: boolean): Observable<T>
+  update<T extends Entity>(prototype: T, instance: T, deleteReferenceAsEmptyGuid: boolean = false): Observable<T> {
     let me = this;
-    let upd = this.prepareUpdate(prototype, instance);
+    let upd = this.prepareUpdate(prototype, instance, deleteReferenceAsEmptyGuid);
 
     if (upd == null) {
       upd = {};
@@ -1202,7 +1206,7 @@ export class XrmContextService {
         }
 
         if (r.type == "update") {
-          let nextU = this.prepareUpdate(r.prototype, r.instance);
+          let nextU = this.prepareUpdate(r.prototype, r.instance, false);
           if (nextU != null) {
             let fields = "?$select=" + this.columnBuilder(r.prototype).columns;
 
@@ -1352,7 +1356,7 @@ export class XrmContextService {
     return this.mapAccess(prototype, instance);
   }
 
-  private prepareUpdate(prototype: Entity, instance: Entity): any {
+  private prepareUpdate(prototype: Entity, instance: Entity, deletedReferenceAsEmptyGuid: boolean): any {
     let me = this;
     let upd = {
     }
@@ -1376,11 +1380,16 @@ export class XrmContextService {
         if (instance[prop] instanceof EntityReference) {
           if (instance[prop].associatednavigationproperty != null && instance[prop].associatednavigationproperty != '' && instance[prop]['pluralName'] != null && instance[prop]['pluralName'] != '') {
             if (!EntityReference.same(prevValue, newValue)) {
+              if (deletedReferenceAsEmptyGuid && newValue != null && (newValue["id"] == null || newValue["id"] == '')) {
+                newValue["id"] = XRMCONTEXTSERVICE_EMPTY_GUID;
+              }
+
               if (newValue != null && newValue["id"] != null && newValue["id"] != '') {
                 let x = newValue["id"] as string;
                 x = x.replace('{', '').replace('}', '');
                 upd[instance[prop]['associatednavigationpropertyname']()] = '/' + instance[prop]['pluralName'] + '(' + x + ')';
               } else {
+                // this does not work, navigation properties can only be removed with SDK deleted method
                 upd["_" + instance[prop]['logicalname'].toLowerCase() + "_value"] = null;
               }
               countFields++;
@@ -1496,8 +1505,10 @@ export class XrmContextService {
    * return an object that has been adjused to pattern used in webapi PATCH method, for entity update. Only fields
    * that has actually changed will be present in the return instance
    */
-  getUpdatePayload(prototype: Entity, instance: Entity): any {
-    return this.prepareUpdate(prototype, instance);
+  getUpdatePayload(prototype: Entity, instance: Entity): any
+  getUpdatePayload(prototype: Entity, instance: Entity, deletedReferenceAsEmptyGuid: boolean): any
+  getUpdatePayload(prototype: Entity, instance: Entity, deletedReferenceAsEmptyGuid: boolean = false): any {
+    return this.prepareUpdate(prototype, instance, deletedReferenceAsEmptyGuid);
   }
 
   getEntityCollectionPayload(prototype: Entity, instances: Entity[]): any[] {
