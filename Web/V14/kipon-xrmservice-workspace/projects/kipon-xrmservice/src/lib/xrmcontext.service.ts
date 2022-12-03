@@ -1109,6 +1109,10 @@ export class XrmContextService {
     throw 'you must parse at least one instance in the instances array';
   }
 
+  markChangesCommitted(prototype: Entity, instance: Entity): void {
+    this.updateCM(prototype, instance);
+  }
+
   /* marked private becase the api is not well tested yet, to avoi */
   func(name: string, data: any): Observable<any>;
   func(name: string, data: any, entity: Entity): Observable<any>;
