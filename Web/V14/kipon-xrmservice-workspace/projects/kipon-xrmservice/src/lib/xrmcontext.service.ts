@@ -1430,7 +1430,18 @@ export class XrmContextService {
         }
 
         if (prototype[prop] instanceof Date) {
+          if (prevValue instanceof Date && newValue instanceof Date) {
+            var d1 = (prevValue as Date).toISOString();
+            var d2 = (newValue as Date).toISOString();
+
+            if (d1 == d2) {
+              continue;
+            }
+          }
+
           if (prevValue != newValue) {
+
+            this.xrmService.log('pre-value-update-date:[' + prevValue + ']/[' + newValue + ']' );
             if (newValue == null) {
               upd[prop.toString()] = null;
             } else {
