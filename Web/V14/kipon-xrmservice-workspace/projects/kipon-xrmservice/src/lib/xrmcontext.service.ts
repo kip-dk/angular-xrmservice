@@ -1511,6 +1511,12 @@ export class XrmContextService {
     return this.prepareUpdate(prototype, instance, deletedReferenceAsEmptyGuid);
   }
 
+  hasChanges(prototype: Entity, instance: Entity): boolean
+  hasChanges(prototype: Entity, instance: Entity, deletedReferenceAsEmptyGuid: boolean): boolean
+  hasChanges(prototype: Entity, instance: Entity, deletedReferenceAsEmptyGuid: boolean = false): boolean {
+    return this.prepareUpdate(prototype, instance, deletedReferenceAsEmptyGuid) != null;
+  }
+
   getEntityCollectionPayload(prototype: Entity, instances: Entity[]): any[] {
     let result = [];
 
