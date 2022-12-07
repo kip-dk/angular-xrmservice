@@ -1404,6 +1404,10 @@ export class XrmContextService {
 
         if (prototype[prop] instanceof EntityReference) {
           if (!EntityReference.same(prevValue, newValue)) {
+            if ((newValue == null || newValue["id"] == null || newValue["id"] == "") && deletedReferenceAsEmptyGuid) {
+              newValue["id"] = XRMCONTEXTSERVICE_EMPTY_GUID;
+            }
+
             if (newValue != null && newValue["id"] != null && newValue["id"] != '') {
               let x = newValue["id"] as string;
               x = x.replace('{', '').replace('}', '');
@@ -1523,7 +1527,14 @@ export class XrmContextService {
   getUpdatePayload(prototype: Entity, instance: Entity): any
   getUpdatePayload(prototype: Entity, instance: Entity, deletedReferenceAsEmptyGuid: boolean): any
   getUpdatePayload(prototype: Entity, instance: Entity, deletedReferenceAsEmptyGuid: boolean = false): any {
-    return this.prepareUpdate(prototype, instance, deletedReferenceAsEmptyGuid);
+    var next = this.prepareUpdate(prototype, instance, deletedReferenceAsEmptyGuid);
+
+    if (next != null) {
+      next[prototype._keyName] = instance.id;
+      next["@odata.type"] = "Microsoft.Dynamics.CRM." + prototype._logicalName;
+    }
+
+    return next;
   }
 
   hasChanges(prototype: Entity, instance: Entity): boolean
